@@ -6,7 +6,7 @@ cd ~
 mkdir -p /etc/vpsscript/.tmp
 
 
-checkketnoi=$(curl -o /dev/null --silent --head --write-out '%{http_code}' "https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/version" )
+checkketnoi=$(curl -o /dev/null --silent --head --write-out '%{http_code}' "https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/version" )
 #echo $checkketnoi
 if [[ "$checkketnoi" == "000" ]]; then
 clear
@@ -42,7 +42,7 @@ rm -rf /etc/vpsscript/.tmp/vpsscript-update-*
 
 
 ## Bat dau thuc hien update OKVIP-VPSSCRIPT
-wget --no-check-certificate -q https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/vpsscript/vpsscript-update-run -O /etc/vpsscript/.tmp/vpsscript-update-run
+wget --no-check-certificate -q https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/vpsscript/vpsscript-update-run -O /etc/vpsscript/.tmp/vpsscript-update-run
 chmod +x /etc/vpsscript/.tmp/vpsscript-update-run
 bash /etc/vpsscript/.tmp/vpsscript-update-run
 

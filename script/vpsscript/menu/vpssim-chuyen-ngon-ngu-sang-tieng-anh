@@ -45,7 +45,7 @@ rm -rf /etc/vpsscript/menu.zip
 cd
 download_main_menu () {
 #wget -q --no-check-certificate https://vpsscript.com/script/vpsscript/vpsscript -O /bin/vpsscript && chmod +x /bin/vpsscript
-wget -q --no-check-certificate https://github.com/raymonditweb/vpsscripts/raw/master/script/vpsscript/vpsscript -O /bin/vpsscript && chmod +x /bin/vpsscript
+wget -q --no-check-certificate https://github.com/raymonditweb/okvip-vpsscript/raw/master/script/vpsscript/vpsscript -O /bin/vpsscript && chmod +x /bin/vpsscript
 }
 download_main_menu
 checkvpsscript_mainmenu=`cat /bin/vpsscript`
@@ -53,7 +53,7 @@ if [ -z "$checkvpsscript_mainmenu" ]; then
 download_main_menu
 fi
 #wget -q --no-check-certificate https://vpsscript.com/script/vpsscript/motd -O /etc/motd
-wget -q --no-check-certificate https://github.com/raymonditweb/vpsscripts/raw/master/script/vpsscript/motd -O /etc/motd
+wget -q --no-check-certificate https://github.com/raymonditweb/okvip-vpsscript/raw/master/script/vpsscript/motd -O /etc/motd
 find /etc/vpsscript/menu -type f -exec chmod 755 {} \;
 clear 
 echo "========================================================================= "

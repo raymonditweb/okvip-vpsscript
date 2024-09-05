@@ -17,5 +17,5 @@ mariadbpass="$DATABASE_PASS"
 END
 rm -rf /tmp/vpsscript-mysqlrootpass
 #wget --no-check-certificate -q https://vpsscript.echbay.com/script/vpsscript/mysql_secure_installation.bak -O /bin/mysql_secure_installation
-#wget --no-check-certificate -q https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/vpsscript/mysql_secure_installation_bak -O /bin/mysql_secure_installation
+#wget --no-check-certificate -q https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/vpsscript/mysql_secure_installation_bak -O /bin/mysql_secure_installation
 yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/mysql_secure_installation_bak /bin/mysql_secure_installation && chmod +x /bin/mysql_secure_installation

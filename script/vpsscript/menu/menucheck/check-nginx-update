@@ -14,7 +14,7 @@ fileTime=$(date -r /tmp/00-all-nginx-version.txt +%d)
 if [ ! "$fileTime" == "$curTime" ]; then
 rm -rf /tmp/00-all-nginx-version.txt
 #wget -q https://vpsscript.echbay.com/script/vpsscript/00-all-nginx-version.txt -O /tmp/00-all-nginx-version.txt
-wget --no-check-certificate -q https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/vpsscript/00-all-nginx-version.txt -O /tmp/00-all-nginx-version.txt
+wget --no-check-certificate -q https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/vpsscript/00-all-nginx-version.txt -O /tmp/00-all-nginx-version.txt
 touch /tmp/00-all-nginx-version.txt
 Nginx1=`cat /etc/vpsscript/nginx.version`
 checksize=$(du -sb /tmp/00-all-nginx-version.txt | awk 'NR==1 {print $1}')

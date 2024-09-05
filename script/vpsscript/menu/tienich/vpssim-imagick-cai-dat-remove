@@ -63,7 +63,7 @@ else
 echo "extension=imagick.so" > /etc/php.d/imagick.ini
 fi
 #wget --no-check-certificate -q https://vpsscript.com/script/vpsscript/check-imagick.php.zip -O /home/$mainsite/private_html/check-imagick.php
-wget --no-check-certificate -q https://github.com/raymonditweb/vpsscripts/raw/master/script/vpsscript/check-imagick.php.zip -O /home/$mainsite/private_html/check-imagick.php
+wget --no-check-certificate -q https://github.com/raymonditweb/okvip-vpsscript/raw/master/script/vpsscript/check-imagick.php.zip -O /home/$mainsite/private_html/check-imagick.php
 /etc/vpsscript/menu/vpsscript-re-config-cac-ham-php-disable-php.ini
 if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "6" ]; then 
 service php-fpm restart

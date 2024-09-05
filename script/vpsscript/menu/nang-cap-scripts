@@ -6,7 +6,7 @@ clear
 echo "========================================================================="
 echo "Xin loi, chung toi khong the biet phien ban hien tai cua ban"
 echo "-------------------------------------------------------------------------"
-echo "Hay chac rang ban chay script offical tu website https://github.com/raymonditweb/vpsscripts"
+echo "Hay chac rang ban chay script offical tu website https://github.com/raymonditweb/okvip-vpsscript"
 vpsscript
 exit
 fi
@@ -14,7 +14,7 @@ fi
 maximumsize=10
 rm -rf /etc/vpsscript/vpsscript.newversion
 cd /etc/vpsscript
-timeout 30 wget --no-check-certificate https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/version -O /etc/vpsscript/vpsscript.newversion
+timeout 30 wget --no-check-certificate https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/version -O /etc/vpsscript/vpsscript.newversion
 
 cd
 if [ -f /etc/vpsscript/vpsscript.newversion ]; then
@@ -53,7 +53,7 @@ rm -rf /etc/vpsscript/vpsscript.newversion
 echo "========================================================================="
 echo "Ban dang su dung phien ban moi nhat cua OKVIP-VPSSCRIPT - Phien ban: $LOCALVER"
 echo "-------------------------------------------------------------------------"
-echo "Xem OKVIP-VPSSCRIPT update Log tai: https://github.com/raymonditweb/vpsscripts"
+echo "Xem OKVIP-VPSSCRIPT update Log tai: https://github.com/raymonditweb/okvip-vpsscript"
 
 echo -n "Ban van muon cap nhat lai OKVIP-VPSSCRIPT chu? [y/N] "
 read vanCapNhat
@@ -73,7 +73,7 @@ fi
 fi
 
 printf "=========================================================================\n"
-printf "Xem OKVIP-VPSSCRIPT update Log tai: https://github.com/raymonditweb/vpsscripts\n"
+printf "Xem OKVIP-VPSSCRIPT update Log tai: https://github.com/raymonditweb/okvip-vpsscript\n"
 printf "=========================================================================\n"
 printf "Da phat hien update cho OKVIP-VPSSCRIPT\n"
 echo "-------------------------------------------------------------------------"
@@ -94,7 +94,7 @@ echo "Chuan bi update OKVIP-VPSSCRIPT..... "
 sleep 1
 
 rm -rf /etc/vpsscript/vpsscript-update
-wget --no-check-certificate https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/vpsscript/vpsscript-update -O /etc/vpsscript/vpsscript-update
+wget --no-check-certificate https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/vpsscript/vpsscript-update -O /etc/vpsscript/vpsscript-update
 chmod +x /etc/vpsscript/vpsscript-update
 bash /etc/vpsscript/vpsscript-update
 

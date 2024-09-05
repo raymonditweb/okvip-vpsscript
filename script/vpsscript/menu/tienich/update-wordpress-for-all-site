@@ -12,8 +12,8 @@ fi
 #
 cd ~
 cd /etc/vpsscript/menu/tienich
-curl -sO https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/vpsscript/menu/tienich/update-wordpress-for-all-site-action.sh
-curl -sO https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/templates/wordpress/.htaccess
+curl -sO https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/vpsscript/menu/tienich/update-wordpress-for-all-site-action.sh
+curl -sO https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/templates/wordpress/.htaccess
 cd ~
 
 #

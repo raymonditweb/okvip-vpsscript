@@ -5,7 +5,7 @@ OKVIP-VPSSCRIPT là bản chỉnh sửa lại từ vpsscript-3.8.1, hỗ trợ c
 ### Lệnh Cài Đặt OKVIP-VPSSCRIPT:
 
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/install )
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/install )
 ```
 
 #### OS Hỗ trợ: `CentOS 7` `CentOS 8` `CentOS 9` `AlmaLinux 8` `AlmaLinux 9` (Without SELinux):
@@ -13,19 +13,19 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/vpsscripts/master
 ### Lệnh Cài Đặt yum-cron (auto update system):
 
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/yum-cron-setup )
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/yum-cron-setup )
 ```
 
 ### Find and update plugin and Wordpress core for Wordpress website:
 
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/vpsscript/menu/tienich/update-wordpress-for-all-site )
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/vpsscript/menu/tienich/update-wordpress-for-all-site )
 ```
 
 ### Find and Scan malware for Wordpress website:
 
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/vpsscript/menu/tienich/scan-wordpress-malware.sh )
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/vpsscript/menu/tienich/scan-wordpress-malware.sh )
 ```
 
 ---
@@ -128,7 +128,7 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/vpsscripts/master
 
 #### Ngoài việc sử dụng OKVIP-VPSSCRIPT làm VPS chạy website thông thường, giờ đây bạn cũng có thể sử dụng để làm VPS chạy Varnish Cache rất tiện dụng. Hiện tại mình đang chạy thành công trên Varnish 4.1, bản 6.xx mới hơn chút xíu nhưng mình chưa thử nghiệm ngon lành, nên khuyên dùng vẫn là Varnish 4.1
 
-#### Mã thực thi: https://github.com/raymonditweb/vpsscripts/tree/master/script/vpsscript/menu/varnish
+#### Mã thực thi: https://github.com/raymonditweb/okvip-vpsscript/tree/master/script/vpsscript/menu/varnish
 
 > Cách sử dụng: Trong vpsscript menu -> 25) Tien ich - Addons -> 23) Varnish Cache -> Chọn phiên bản Varnish mà bạn muốn cài đặt
 
@@ -142,7 +142,7 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/vpsscripts/master
 
 #### Cập nhật OpenSSL lên bản mới nhất và build nginx từ bản này: https://linuxscriptshub.com/update-openssl-1-1-0-CentOS-6-9-7-0/
 
-#### Mã thực thi: https://github.com/raymonditweb/vpsscripts/blob/master/script/vpsscript/menu/nang-cap-openssl
+#### Mã thực thi: https://github.com/raymonditweb/okvip-vpsscript/blob/master/script/vpsscript/menu/nang-cap-openssl
 
 > Cách sử dụng: Trong vpsscript menu -> 26) Update System -> 7) Thay phien phien ban OpenSSL
 
@@ -152,7 +152,7 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/vpsscripts/master
 
 > 2020/09/01
 
-#### Nguồn cài đặt: https://github.com/raymonditweb/vpsscripts/blob/master/script/vpsscript/nginx-setup.conf
+#### Nguồn cài đặt: https://github.com/raymonditweb/okvip-vpsscript/blob/master/script/vpsscript/nginx-setup.conf
 
 - Cài đặt nginx-1.18.0, đây là phiên bản ổn định và mới nhất của nginx tính đến thời điểm hiện tại, kết hợp với OpenSSL-1.1.1i thay cho bản openssl cũ của vpsscript, phiên bản này mới hỗ trợ đầy đủ HTTP/2.
   - Phiên bản nginx được xem và cập nhật tại: http://nginx.org/en/download.html . Mặc định mình chỉ chọn phiên bản Stable version, các bản Mainline là đang phát triển nên không chọn.
@@ -194,7 +194,7 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/vpsscripts/master
 
 ### Cách cài đặt:
 
-#### Cũng được mình thay đổi bằng cách cài đặt từ https://github.com/raymonditweb/vpsscripts thay vì download từ nhiều nguồn khác nhau như vpsscript. Thêm nữa khi up code lên github thì cũng có cái nhìn trực quan hơn, mọi người sẽ dễ dàng tham khảo và góp ý các thay đổi hơn cho đúng chuẩn mã nguồn mở.
+#### Cũng được mình thay đổi bằng cách cài đặt từ https://github.com/raymonditweb/okvip-vpsscript thay vì download từ nhiều nguồn khác nhau như vpsscript. Thêm nữa khi up code lên github thì cũng có cái nhìn trực quan hơn, mọi người sẽ dễ dàng tham khảo và góp ý các thay đổi hơn cho đúng chuẩn mã nguồn mở.
 
 ### Liên hệ:
 

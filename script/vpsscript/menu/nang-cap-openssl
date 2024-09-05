@@ -35,7 +35,7 @@ fi
 # copy code tu file install sang
 if [ "$okResetGit" = "y" ]; then
 cd ~
-wget --no-check-certificate -q https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/vpsscript/menu/git-clone
+wget --no-check-certificate -q https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/vpsscript/menu/git-clone
 chmod +x /root/git-clone
 bash /root/git-clone
 fi
