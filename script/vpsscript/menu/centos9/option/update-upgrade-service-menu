@@ -3,7 +3,7 @@
 prompt="Vui long chon/ Please choose (0-Thoat):" 
 options=( "Update OKVIP-VPSSCRIPT" "Update system" )
 printf "=========================================================================\n"
-printf "                vpsscript - Quan Ly VPS/Server by WebGiaRe.org \n"
+printf "                vpsscript - Quan Ly VPS/Server by okvip.com \n"
 printf "=========================================================================\n"
 printf "                        Update / Upgrade Service \n"
 printf "=========================================================================\n"

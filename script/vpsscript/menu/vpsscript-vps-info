@@ -3,7 +3,7 @@
 /etc/vpsscript/menu/vpsscript-befor-vps-info
 clear
 printf "=========================================================================\n"
-printf "               vpsscript - Quan Ly VPS/Server by WebGiaRe.org \n"
+printf "               vpsscript - Quan Ly VPS/Server by okvip.com \n"
 printf "=========================================================================\n"
 printf "                            Server Status \n"
 printf "=========================================================================\n"

@@ -14,4 +14,4 @@ Disallow: /images/
 
 Allow: /*.js$
 Allow: /*.css$
-# Sitemap: https://webgiare.org/sitemap
+# Sitemap: https://okvip.com/sitemap

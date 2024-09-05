@@ -6,7 +6,7 @@ options=( "Update System" "Update OKVIP-VPSSCRIPT" "Update Nginx" "Change phpMyA
 "Reset code form git" "List soft version" "Nginx quiche" "Auto update system")
 #"Pull code form git" "Reset code form git" "List soft version" "Nginx quiche" "Auto update system")
 printf "=========================================================================\n"
-printf "                vpsscript - Quan Ly VPS/Server by WebGiaRe.org \n"
+printf "                vpsscript - Quan Ly VPS/Server by okvip.com \n"
 printf "=========================================================================\n"
 printf "                        Update / Upgrade Service \n"
 printf "=========================================================================\n"
