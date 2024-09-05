@@ -3,21 +3,22 @@
 
 
 #
-prompt="Select nginx version: "
-options=("Mainline version (Recommendations)" "Stable version")
-echo "=========================================================================="
-echo "Select nginx version "
-echo "=========================================================================="
-PS3="$prompt"
-select opt in "${options[@]}"; do 
-case "$REPLY" in
-#1) nginxselecttype="mainline"; break;;
-2) nginxselecttype="stable"; break;;
-*) nginxselecttype="mainline"; break;;
-esac  
-done
+#prompt="Select nginx version: "
+#options=("Mainline version (Recommendations)" "Stable version")
+#echo "=========================================================================="
+#echo "Select nginx version "
+#echo "=========================================================================="
+#PS3="$prompt"
+#select opt in "${options[@]}"; do 
+#case "$REPLY" in
+##1) nginxselecttype="mainline"; break;;
+#2) nginxselecttype="stable"; break;;
+#*) nginxselecttype="mainline"; break;;
+#esac  
+#done
 
 #
+nginxselecttype="mainline"
 nginxtype="mainline"
 if [ "$nginxselecttype" = "stable" ]; then
 nginxtype=$nginxselecttype

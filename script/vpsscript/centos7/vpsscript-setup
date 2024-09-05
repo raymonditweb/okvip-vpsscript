@@ -47,21 +47,22 @@ echo "==========================================================================
 
 
 #
-prompt="Select nginx version: "
-options=("Mainline version (Recommendations)" "Stable version")
-echo "=========================================================================="
-echo "Select nginx version "
-echo "=========================================================================="
-PS3="$prompt"
-select opt in "${options[@]}"; do 
-case "$REPLY" in
-#1) nginxselecttype="mainline"; break;;
-2) nginxselecttype="stable"; break;;
-*) nginxselecttype="mainline"; break;;
-esac  
-done
+#prompt="Select nginx version: "
+#options=("Mainline version (Recommendations)" "Stable version")
+#echo "=========================================================================="
+#echo "Select nginx version "
+#echo "=========================================================================="
+#PS3="$prompt"
+#select opt in "${options[@]}"; do 
+#case "$REPLY" in
+##1) nginxselecttype="mainline"; break;;
+#2) nginxselecttype="stable"; break;;
+#*) nginxselecttype="mainline"; break;;
+#esac  
+#done
 
 #
+nginxselecttype="mainline"
 nginxtype="mainline"
 if [ "$nginxselecttype" = "stable" ]; then
 nginxtype=$nginxselecttype
@@ -74,21 +75,23 @@ nginxtype="$nginxtype"
 END
 
 
-prompt="Nhap lua chon cua ban: "
-options=("MariaDB 10.3 (Recommendations)" "MariaDB 10.4" "MariaDB 10.5")
-echo "=========================================================================="
-echo "Lua Chon Cai Dat Phien Ban MariaDB  "
-echo "=========================================================================="
-PS3="$prompt"
-select opt in "${options[@]}"; do 
-case "$REPLY" in
-1) mariadbversion="10.3"; break;;
-2) mariadbversion="10.4"; break;;
-3) mariadbversion="10.5"; break;;
-*) mariadbversion="10.3"; break;;
-#*) echo "Ban nhap sai ! Ban vui long chon so trong danh sach";continue;;
-esac  
-done
+#prompt="Nhap lua chon cua ban: "
+#options=("MariaDB 10.3 (Recommendations)" "MariaDB 10.4" "MariaDB 10.5")
+#echo "=========================================================================="
+#echo "Lua Chon Cai Dat Phien Ban MariaDB  "
+#echo "=========================================================================="
+#PS3="$prompt"
+#select opt in "${options[@]}"; do 
+#case "$REPLY" in
+#1) mariadbversion="10.3"; break;;
+#2) mariadbversion="10.4"; break;;
+#3) mariadbversion="10.5"; break;;
+#*) mariadbversion="10.3"; break;;
+##*) echo "Ban nhap sai ! Ban vui long chon so trong danh sach";continue;;
+#esac  
+#done
+
+mariadbversion="10.3"
 
 if [ "$mariadbversion" = "10.4" ]; then
 phienbanmariadb=10.4
@@ -210,17 +213,18 @@ echo "PHP Version: "$phpmacdinh
 echo "--------------------------------------------------------------------------"
 echo "OKVIP-VPSSCRIPT Version: $vpsscript_version"
 echo "=========================================================================="
-prompt="Nhap lua chon cua ban (Please select): "
-options=( "Dong Y (I agree)" "Khong Dong Y (disagree)")
-PS3="$prompt"
-select opt in "${options[@]}"; do 
-    case "$REPLY" in
-    1) xacnhanthongtin="dongy"; break;;
-    2) xacnhanthongtin="khongdongy"; break;;
-    *) echo "Ban nhap sai ! Ban vui long chon so trong danh sach";continue;;
-    esac  
-done
+#prompt="Nhap lua chon cua ban (Please select): "
+#options=( "Dong Y (I agree)" "Khong Dong Y (disagree)")
+#PS3="$prompt"
+#select opt in "${options[@]}"; do 
+    #case "$REPLY" in
+    #1) xacnhanthongtin="dongy"; break;;
+    #2) xacnhanthongtin="khongdongy"; break;;
+    #*) echo "Ban nhap sai ! Ban vui long chon so trong danh sach";continue;;
+    #esac  
+#done
 
+xacnhanthongtin="dongy"
 if [ "$xacnhanthongtin" = "dongy" ]; then
 echo "--------------------------------------------------------------------------"
 echo "Chuan Bi Cai Dat OKVIP-VPSSCRIPT ..."
