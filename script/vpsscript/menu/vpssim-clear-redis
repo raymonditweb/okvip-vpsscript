@@ -1,0 +1,19 @@
+#!/bin/bash 
+. /home/vpsscript.conf
+if [ ! "$(redis-cli ping)" = "PONG" ]; then
+clear
+echo "========================================================================="
+echo "Redis dang stop"
+echo "-------------------------------------------------------------------------"
+echo "Ban phai bat Redis len bang lenh [ service redis start ]"
+/etc/vpsscript/menu/vpsscript-redis-menu
+exit
+fi
+echo "-------------------------------------------------------------------------"
+echo "Please wait ..." 
+sleep 1
+( echo "flushall" ) | redis-cli
+clear
+echo "========================================================================="
+echo "Clear Redis Cache thanh cong"
+/etc/vpsscript/menu/vpsscript-redis-menu

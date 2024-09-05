@@ -1,0 +1,43 @@
+#!/bin/bash
+
+#
+cd ~
+if [ ! -d /etc/vpsscript/menu/tienich ]; then
+echo "Create dir /etc/vpsscript/menu/tienich"
+mkdir -p /etc/vpsscript/menu/tienich
+chmod 755 /etc/vpsscript/menu/tienich
+chown -R root:root /etc/vpsscript/menu/tienich
+fi
+
+#
+cd ~
+cd /etc/vpsscript/menu/tienich
+curl -sO https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/vpsscript/menu/tienich/update-wordpress-for-all-site-action.sh
+curl -sO https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/templates/wordpress/.htaccess
+cd ~
+
+#
+f="/etc/vpsscript/menu/tienich/update-wordpress-for-all-site-action.sh"
+#
+if [ ! -f $f ]; then
+echo "File not found! "$f
+exit
+fi
+
+# b
+chmod +x /etc/vpsscript/menu/tienich/update-wordpress-for-all-site-action.sh
+
+# Xóa tất cả các khoảng trắng ở đầu mỗi dòng.
+sed -i -e 's/^[ \t]*//' $f
+
+# Xóa tất cả các khoảng trắng ở cuối mỗi dòng.
+sed -i -e 's/ *$//' $f
+
+# Xóa các dòng trống
+sed -i -e '/^$/d' $f
+
+#
+sed -i 's/\r//' $f
+
+#
+bash /etc/vpsscript/menu/tienich/update-wordpress-for-all-site-action.sh

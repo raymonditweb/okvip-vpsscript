@@ -1,0 +1,9 @@
+#!/bin/bash 
+
+. /home/vpsscript.conf
+clear
+echo "========================================================================="
+echo "Your VPS  Virtualization:"
+echo "-------------------------------------------------------------------------"
+virt-what
+/etc/vpsscript/menu/vpsscript-tien-ich

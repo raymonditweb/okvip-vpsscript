@@ -1,0 +1,116 @@
+#!/bin/bash 
+. /home/vpsscript.conf
+
+#
+from_action=$1
+
+#
+cd ~
+
+# kiểm tra và cài đặt FTP trước khi tạo website -> để còn tạo tài khoản FTP cho domain
+/etc/vpsscript/menu/centos9/inc/ftpserver-menu-before "from_add_website"
+
+#
+/etc/vpsscript/menu/centos9/inc/list-website-tren-vps-before
+
+#
+echo "========================================================================="
+echo "Su dung chuc nang nay de them website vao server"
+echo "-------------------------------------------------------------------------"
+echo -n "Nhap ten mien/ Enter your domain [ENTER]: " 
+read website
+website=`echo $website | tr '[A-Z]' '[a-z]'`
+
+if [ "$website" = "" ]; then
+clear
+/etc/vpsscript/menu/centos9/option/them-website-menu
+exit
+fi
+
+kiemtradomain3="^([[:alnum:]]([[:alnum:]\-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,12}$";
+if [[ ! "$website" =~ $kiemtradomain3 ]]; then
+website=`echo $website | tr '[A-Z]' '[a-z]'`
+clear
+echo "========================================================================="
+echo "$website khong dung dinh dang duoc ho tro/ Domain format error!!"
+echo "-------------------------------------------------------------------------"
+echo "Vui long thu lai/ Please try again!"
+/etc/vpsscript/menu/centos9/option/them-website
+exit
+fi
+
+if [ -f /etc/nginx/conf.d/$website.conf ]; then
+clear
+echo "========================================================================="
+echo "Ten mien da ton tai/ Domain exist! "$website
+/etc/vpsscript/menu/centos9/option/them-website
+exit
+fi
+
+#
+mkdir -p "/home/$website/public_html"
+mkdir -p "/home/$website/logs"
+chmod 777 "/home/$website/logs"
+
+#
+yes | cp /etc/vpsscript/menu/centos9/tmp/index.php "/home/$website/public_html/"
+yes | cp /etc/vpsscript/menu/centos9/tmp/robots.txt "/home/$website/public_html/"
+
+#
+chown -R nginx:nginx "/home/$website/public_html/"
+find "/home/$website/public_html/" -type d -exec chmod g+s {} \;
+
+#
+/etc/vpsscript/menu/centos9/inc/add-vhost-after $website
+
+#
+if [ ! -d /etc/vpsscript/errorpage_html ]; then
+	if [ -d /opt/okvip_vpsscript/script/vpsscript/errorpage_html ]; then
+		mkdir -p /etc/vpsscript/errorpage_html ; chmod 755 /etc/vpsscript/errorpage_html
+		yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/errorpage_html/. /etc/vpsscript/errorpage_html/
+	fi
+fi
+
+mkdir -p /home/$website/errorpage_html && cp -r /etc/vpsscript/errorpage_html/*.html /home/$website/errorpage_html
+
+
+# nếu là thêm wordpress website -> mặc định là sẽ thêm database
+if [ "$from_action" = "wordpress" ] || [ "$from_action" = "demo" ] || [ "$from_action" = "database" ]; then
+response="y"
+else
+# còn không sẽ hỏi người dùng có thêm website hay không
+echo "-------------------------------------------------------------------------"
+echo -n "Ban co muon vpsscript tao Database moi cho $website ? [y/N] " 
+read response
+fi
+
+
+#
+if [ "$response" = "y" ] || [ "$response" = "Y" ] ; then
+/etc/vpsscript/menu/centos9/inc/add-database $website "create_tmp"
+fi
+
+
+# thêm tài khoản FTP
+/etc/vpsscript/menu/centos9/option/tao-ftp-user-cho-domain $website "create_tmp"
+
+
+# download code wordpress
+if [ "$from_action" = "wordpress" ]; then
+/etc/vpsscript/menu/centos9/inc/download-wordpress $website
+elif [ "$from_action" = "demo" ]; then
+/etc/vpsscript/menu/centos9/inc/download-wordpress $website "install_demo"
+fi
+
+
+# in ra thông tin sau khi cài đặt code
+/etc/vpsscript/menu/centos9/inc/them-website-after $website
+
+
+# dọn dẹp
+rm -f /tmp/vpsscript-*
+
+
+#
+/etc/vpsscript/menu/centos9/option/them-website-menu
+exit

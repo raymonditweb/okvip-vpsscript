@@ -1,0 +1,7 @@
+#!/bin/bash 
+. /home/vpsscript.conf
+if [ ! -f /etc/csf/csf.conf ]; then
+/etc/vpsscript/menu/CSF-Fiwall/vpsscript-cai-dat-csf-csf
+else
+/etc/vpsscript/menu/CSF-Fiwall/vpsscript-update-csf-firewall
+fi

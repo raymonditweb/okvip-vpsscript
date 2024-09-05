@@ -1,0 +1,17 @@
+#!/bin/sh
+. /home/vpsscript.conf
+if [ ! -f /etc/vpsscript/uploadsite ]; then
+clear
+echo "========================================================================="
+echo "Ban chua cai dat File Manager cho Server !"
+/etc/vpsscript/menu/vpsscript-web-upload-menu
+exit
+fi
+echo "Please wait..."; sleep 1
+uploadsite=$(cat /etc/vpsscript/uploadsite)
+clear
+echo "========================================================================="
+echo "Domain cai dat File Manager cho Server: "
+echo "-------------------------------------------------------------------------"
+echo "http://$uploadsite "
+/etc/vpsscript/menu/vpsscript-web-upload-menu

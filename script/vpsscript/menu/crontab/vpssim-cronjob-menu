@@ -1,0 +1,32 @@
+#!/bin/sh
+prompt="Nhap lua chon cua ban (0-Thoat):"
+options=("Them Crontab" "Xoa 1 Crontab" "Xoa Tat Ca Crontab" "List Crontab")
+printf "=========================================================================\n"
+printf "                OKVIP-VPSSCRIPT - Quan Ly VPS/ Server by EchBay.com \n"
+printf "=========================================================================\n"
+printf "                              Quan Ly Cronjob \n"
+echo "========================================================================="
+if [ ! -f /var/spool/cron/root ]; then
+printf "                           Crontab running: 0 \n"
+else
+printf "                           Crontab running: $(wc -l /var/spool/cron/root | awk '{print $1}') \n"
+fi
+printf "=========================================================================\n"
+
+PS3="$prompt"
+select opt in "${options[@]}" ; do 
+
+    case "$REPLY" in
+
+    1 ) /etc/vpsscript/menu/crontab/vpsscript-them-cronjob;;
+    2 ) /etc/vpsscript/menu/crontab/vpsscript-xoa-mot-crontab;;
+    3 ) /etc/vpsscript/menu/crontab/vpsscript-befor-xoa-het-cronjob;;
+    4 ) /etc/vpsscript/menu/crontab/vpsscript-crontab-hien-tai;;
+    #5 ) clear && /bin/vpsscript;;
+    0 ) clear && /bin/vpsscript;;
+    
+    *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu";continue;;
+
+    esac
+done
+

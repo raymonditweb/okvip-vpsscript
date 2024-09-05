@@ -1,0 +1,29 @@
+#!/bin/bash
+
+echo "=========================================================================="
+echo "chomod 755 menu... "
+echo "=========================================================================="
+
+find /etc/vpsscript/menu -type f -exec chmod 755 {} \;
+#find /etc/vpsscript/menu/checkddos -type f -exec chmod 755 {} \;
+#find /etc/vpsscript/menu/crontab -type f -exec chmod 755 {} \;
+#find /etc/vpsscript/menu/CSF-Fiwall -type f -exec chmod 755 {} \;
+#find /etc/vpsscript/menu/database-example -type f -exec chmod 755 {} \;
+#find /etc/vpsscript/menu/downloadlog -type f -exec chmod 755 {} \;
+#find /etc/vpsscript/menu/memcache -type f -exec chmod 755 {} \;
+#find /etc/vpsscript/menu/menucheck -type f -exec chmod 755 {} \;
+#find /etc/vpsscript/menu/nang-cap-mariaDB -type f -exec chmod 755 {} \;
+#find /etc/vpsscript/menu/nangcap-php -type f -exec chmod 755 {} \;
+#find /etc/vpsscript/menu/opcache -type f -exec chmod 755 {} \;
+#find /etc/vpsscript/menu/pagespeed -type f -exec chmod 755 {} \;
+#find /etc/vpsscript/menu/swap -type f -exec chmod 755 {} \;
+#find /etc/vpsscript/menu/tienich -type f -exec chmod 755 {} \;
+
+#for d in /opt/okvip_vpsscript/script/vpsscript/menu/*
+for d in /etc/vpsscript/menu/*
+do
+	if [ -d $d ]; then
+		echo $d
+		find $d -type f -exec chmod 755 {} \;
+	fi
+done

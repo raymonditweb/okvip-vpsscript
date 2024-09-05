@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#
+yum -y update
+yum -y upgrade
+
+#
+/etc/vpsscript/menu/centos9/option/update-upgrade-service-menu
+exit

@@ -1,0 +1,29 @@
+#!/bin/bash
+. /home/vpsscript.conf
+. /opt/okvip_vpsscript/script/vpsscript/nginx-setup.conf
+
+#
+cd /usr/local/vpsscript
+
+if [ -f /opt/okvip_vpsscript/script/vpsscript/module-nginx/${opensslversion}.tar.gz ]; then
+yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/module-nginx/${opensslversion}.tar.gz ${opensslversion}.tar.gz
+else
+wget -q --no-check-certificate https://www.openssl.org/source/${opensslversion}.tar.gz
+fi
+tar -xzf ${opensslversion}.tar.gz
+rm -rf ${opensslversion}.tar.gz
+
+cd ~
+cd /usr/local/vpsscript/${opensslversion}
+#exit
+
+./config
+make
+sudo make install
+sudo ln -s /usr/local/lib64/libssl.so.1.1 /usr/lib64/
+sudo ln -s /usr/local/lib64/libcrypto.so.1.1 /usr/lib64/
+sudo ln -s /usr/local/bin/openssl /usr/bin/openssl_latest
+openssl_latest version
+cd /usr/bin/
+mv -f openssl openssl_old
+mv -f openssl_latest openssl

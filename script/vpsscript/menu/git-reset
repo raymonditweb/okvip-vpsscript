@@ -1,0 +1,19 @@
+#!/bin/sh
+
+echo "-------------------------------------------------------------------------"
+echo "Ok ! please wait check reset code from git..."
+
+cd ~
+if [ -d /opt/okvip_vpsscript ]; then
+rm -rf /opt/okvip_vpsscript/*
+rm -rf /opt/okvip_vpsscript
+sleep 5
+fi
+
+/etc/vpsscript/menu/git-clone
+sleep 1
+
+clear
+echo "========================================================================="
+echo "Done! Reset code from git..."
+/etc/vpsscript/menu/vpsscript-update-upgrade-service-menu

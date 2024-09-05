@@ -1,0 +1,8 @@
+#!/bin/sh
+. /home/vpsscript.conf
+if [ -f /etc/cron.d/vpsscript-auto-start-mysql.cron ]; then
+/etc/vpsscript/menu/tienich/vpsscript-tat-auto-start-mysql
+else
+/etc/vpsscript/menu/tienich/vpsscript-bat-auto-start-mysql
+fi
+

@@ -1,0 +1,49 @@
+#!/bin/bash
+. /home/vpsscript.conf
+
+cd ~
+
+mkdir -p /etc/vpsscript/.tmp
+
+
+checkketnoi=$(curl -o /dev/null --silent --head --write-out '%{http_code}' "https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/version" )
+#echo $checkketnoi
+if [[ "$checkketnoi" == "000" ]]; then
+clear
+echo "========================================================================="
+echo "Co loi xay ra trong qua trinh update"
+echo "-------------------------------------------------------------------------"
+echo "Ban vui long thu lai !"
+vpsscript
+exit
+fi
+
+#
+install_yum_cron_update(){
+yum -y remove yum-updatesd
+yum -y install yum-cron
+
+current_os_version=$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))
+if [ "$current_os_version" == "6" ]; then
+service yum-cron start
+chkconfig yum-cron on
+else
+sudo systemctl enable yum-cron
+sudo systemctl start yum-cron
+systemctl restart yum-cron
+fi
+#cd /etc/yum
+cat /var/log/cron | grep yum-daily
+cat /var/log/yum.log | grep Updated
+}
+
+#
+rm -rf /etc/vpsscript/.tmp/vpsscript-update-*
+
+
+## Bat dau thuc hien update OKVIP-VPSSCRIPT
+wget --no-check-certificate -q https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/vpsscript/vpsscript-update-run -O /etc/vpsscript/.tmp/vpsscript-update-run
+chmod +x /etc/vpsscript/.tmp/vpsscript-update-run
+bash /etc/vpsscript/.tmp/vpsscript-update-run
+
+

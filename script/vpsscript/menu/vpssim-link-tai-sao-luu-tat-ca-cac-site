@@ -1,0 +1,24 @@
+#!/bin/bash
+. /home/vpsscript.conf
+if [ -f /home/$mainsite/private_html/backup/home/*.zip ]; then
+find /home/$mainsite/private_html/backup/$website/ -name '*.zip' -type f -exec basename {} \;  > /etc/vpsscript/linkbackup
+filename=`cat /etc/vpsscript/linkbackup`
+echo "-------------------------------------------------------------------------"
+echo "Please wait..."
+sleep 1
+clear
+echo "========================================================================="
+echo "Tim thay file backup cua thu muc Home"
+echo "-------------------------------------------------------------------------"
+echo "Link download backup: "
+echo "-------------------------------------------------------------------------"
+echo "http://$serverip:$priport/backup/home/$filename"
+/etc/vpsscript/menu/vpsscript-sao-luu
+rm -rf /etc/vpsscript/linkbackup
+else
+clear
+echo "========================================================================="
+echo "Ban chua tao file backup code folder Home !"
+/etc/vpsscript/menu/vpsscript-sao-luu
+exit
+fi

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+#
+echo "========================================================================="
+echo "Danh sach domain pointer tren server/ List domain pointer in Server"
+echo "-------------------------------------------------------------------------"
+
+#
+rm -rf /tmp/domain_number*
+
+#
+stt=0
+has_domain=""
+
+#
+for get_f in /etc/nginx/conf.d/*.conf
+do
+	if [ -f $get_f ]; then
+		website=$(basename $get_f .conf)
+		#echo $website
+		#website=$(echo "$website" | cut -f 1 -d '.conf')
+		if [ ! "$website" = "vpsscript.demo" ] && [ ! "$website" = "php-fpm" ]; then
+			# tên miền phụ sẽ không có thư mục code
+			if [ ! -d "/home/$website" ]; then
+				echo $stt". "$website
+				
+				# lưu domain vào để người dùng có bấm số chọn thì sẽ lấy được luôn domain để xử lý
+				echo "$website" > "/tmp/domain_number$stt.txt"
+
+				#
+				let "stt+=1"
+				has_domain="yes"
+			fi
+		fi
+	fi
+done
+
+#
+if [ "$has_domain" = "" ]; then
+echo "Khong co domain nao duoc tim thay"
+fi
+
+#
+echo "-------------------------------------------------------------------------"

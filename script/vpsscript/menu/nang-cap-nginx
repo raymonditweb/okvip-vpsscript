@@ -1,0 +1,141 @@
+#!/bin/bash
+. /home/vpsscript.conf
+
+
+#
+prompt="Select nginx version: "
+options=("Mainline version (Recommendations)" "Stable version")
+echo "=========================================================================="
+echo "Select nginx version "
+echo "=========================================================================="
+PS3="$prompt"
+select opt in "${options[@]}"; do 
+case "$REPLY" in
+#1) nginxselecttype="mainline"; break;;
+2) nginxselecttype="stable"; break;;
+*) nginxselecttype="mainline"; break;;
+esac  
+done
+
+#
+nginxtype="mainline"
+if [ "$nginxselecttype" = "stable" ]; then
+nginxtype=$nginxselecttype
+fi
+
+cat > "/tmp/removelinenginxtype" <<END
+sed --in-place '/nginxtype=/d' /home/vpsscript.conf
+END
+chmod +x /tmp/removelinenginxtype
+/tmp/removelinenginxtype 
+cat >> "/home/vpsscript.conf" <<END
+nginxtype="$nginxtype"
+END
+
+
+# them lenh kiem tra neu co git roi thi thoi khong tai lai nua
+okResetGit="y"
+if [ -d /opt/okvip_vpsscript ]; then
+echo "========================================================================="
+echo "========================================================================="
+echo "========================================================================="
+echo -n "Ban co muon cap nhat lai git code moi khong? [y/N] "
+read resetGit
+if [ "$resetGit" = "y" ]; then
+okResetGit="y"
+echo "Ok ok! Chuan bi cap nhat lai code tu github..."
+sleep 3
+else
+okResetGit="n"
+fi
+fi
+
+if [ "$okResetGit" = "y" ]; then
+# copy code tu file install sang
+cd ~
+wget --no-check-certificate -q https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/vpsscript/menu/git-clone
+chmod +x /root/git-clone
+bash /root/git-clone
+fi
+
+#
+cd ~
+cd /tmp
+rm -rf 00-all-nginx-version.txt
+yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/00-all-nginx-version.txt 00-all-nginx-version.txt
+
+#
+cd ~
+nginx -V
+
+
+#
+if [ "$nginxtype" = "stable" ]; then
+
+. /opt/okvip_vpsscript/script/vpsscript/nginx-setup.conf
+echo "========================================================================="
+echo "NEW nginx version: "${Nginx_VERSION}
+echo "========================================================================="
+
+# neu truoc do hoi nguoi dung ve viec cap nhat git, nguoi dung chon y roi thi o buoc nay dat y luon, do phai hoi lai
+if [ "$okResetGit" = "y" ]; then
+selectNginxVersion="y"
+else
+echo -n "Ban that su muon thay doi sang phien ban "${Nginx_VERSION}" ? [y/N] "
+read selectNginxVersion
+fi
+
+else
+
+Nginx_VERSION="Mainline version"
+echo "Nginx Version: "$Nginx_VERSION
+selectNginxVersion="y"
+
+fi
+
+
+#
+if [ "$selectNginxVersion" = "y" ]; then
+echo "Ok ! please wait install nginx-"${Nginx_VERSION}" ...."
+sleep 1
+else
+/etc/vpsscript/menu/vpsscript-update-upgrade-service-menu
+exit
+fi
+
+
+echo "OS Version: "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))
+if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "6" ]; then
+/opt/okvip_vpsscript/script/vpsscript/menu/nginx-setup6
+elif [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "7" ]; then
+/opt/okvip_vpsscript/script/vpsscript/menu/nginx-setup7
+else
+/opt/okvip_vpsscript/script/vpsscript/menu/nginx-setup8
+fi
+
+cd ~
+
+check_spdy_http2 () {
+if [ ! "$(grep spdy /etc/nginx/conf.d/*.conf)" == "" ]; then 
+sed -i 's/spdy/http2/g' /etc/nginx/conf.d/*.conf
+fi
+}
+check_spdy_http2
+
+#if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "7" ]; then 
+if [ ! "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "6" ]; then 
+systemctl restart nginx.service
+else
+service nginx restart
+fi
+
+#rm -rf /opt/okvip_vpsscript/*
+#rm -rf /opt/okvip_vpsscript
+sleep 1
+
+clear
+echo "========================================================================="
+nginx -V
+echo "Cai dat Nginx phien ban $Nginx_VERSION thanh cong !"
+/etc/vpsscript/menu/vpsscript-update-upgrade-service-menu
+

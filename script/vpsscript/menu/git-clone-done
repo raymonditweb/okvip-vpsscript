@@ -1,0 +1,5 @@
+#!/bin/bash
+
+yes | cp -rf /opt/okvip_vpsscript/version /opt/okvip_vpsscript/script/vpsscript/vpsscript.newversion
+rm -rf /root/git-clone*
+rm -rf /root/install*

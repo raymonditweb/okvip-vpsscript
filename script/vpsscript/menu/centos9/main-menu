@@ -1,0 +1,53 @@
+#!/bin/sh 
+. /home/vpsscript.conf
+
+#
+if [ ! -f /etc/cron.d/vpsscript.code.cron ]; then
+touch /etc/cron.d/vpsscript.code.cron
+fi
+
+# Check vpsscript Update
+/etc/vpsscript/menu/menucheck/check-vpsscript-update
+# Check nginx Update
+#/etc/vpsscript/menu/menucheck/check-nginx-update
+/etc/vpsscript/menu/menucheck/check-phpmyadmin-update
+#/etc/vpsscript/menu/menucheck/check-csf-on
+# kiem tra dung luong dia con lai
+#/etc/vpsscript/menu/menucheck/check-disk-usage
+
+
+rm -rf /tmp/*ip*
+rm -rf /tmp/showthongbao 
+
+
+#find /etc/vpsscript/menu -type f -exec chmod 755 {} \;
+prompt="Nhap lua chon cua ban (0-Backspace):"
+options=( "Account Manager" "Advanced Features" "Extra Features" "Security/ Firewall" "Cache" "Update System" "Site Summary / Statistics" "Help" )
+
+echo "========================================================================="
+echo "                          OKVIP-VPSSCRIPT Menu                             "
+echo "========================================================================="
+# menu này dành cho centos 8, 9 -> chưa hoàn thiện lắm
+echo "                Phien ban thu nghiem cho CentOS 8 & 9                    "
+echo "========================================================================="
+
+#
+PS3="$prompt"
+select opt in "${options[@]}"; do 
+
+    case "$REPLY" in
+
+	1) clear && /etc/vpsscript/menu/centos9/option/account-manager-menu;;
+    2) clear && /etc/vpsscript/menu/centos9/option/advanced-features-menu;;
+    3) clear && /etc/vpsscript/menu/centos9/option/extra-features-menu;;
+    4) clear && /etc/vpsscript/menu/centos9/option/security-firewall-menu;;
+    5) clear && /etc/vpsscript/menu/centos9/option/cache-menu;;
+    6) clear && /etc/vpsscript/menu/centos9/option/update-upgrade-service-menu;;
+    7) clear && /etc/vpsscript/menu/centos9/option/site-summary-statistics;;
+    8) clear && /etc/vpsscript/menu/centos9/option/help;;
+	0) clear && cat /etc/motd && killall -g vpsscript;; 
+    *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu !";continue;;
+
+    esac
+done
+ 

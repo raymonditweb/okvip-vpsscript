@@ -1,0 +1,128 @@
+#!/bin/bash
+
+. /opt/okvip_vpsscript/script/vpsscript/nginx-setup.conf
+echo $moduledir
+echo $opensslversion
+echo $withopensslopt
+echo $zlibversion
+echo $pcreVersionInstall
+echo $Nginx_VERSION
+#exit
+echo "Install after 3s"
+sleep 3
+
+
+/opt/okvip_vpsscript/script/vpsscript/menu/nginx-setup-download
+
+
+# module for centos6 + google page speed
+urlForDownloadNginxModule="https://vpsscript.echbay.com/script/vpsscript/module-nginx/"
+
+
+install_devtoolset_gcc () {
+sudo yum -y install gcc-c++ pcre-devel zlib-devel
+
+#sudo rpm --import https://linux.web.cern.ch/linux/scientific6/docs/repository/cern/slc6X/i386/RPM-GPG-KEY-cern
+#sudo rpm --import ${urlForDownloadNginxModule}RPM-GPG-KEY-cern
+sudo rpm --import /opt/okvip_vpsscript/script/vpsscript/module-nginx/RPM-GPG-KEY-cern
+
+#sudo wget -O /etc/yum.repos.d/slc6-devtoolset.repo https://linux.web.cern.ch/linux/scientific6/docs/repository/cern/devtoolset/slc6-devtoolset.repo
+#sudo wget -O /etc/yum.repos.d/slc6-devtoolset.repo ${urlForDownloadNginxModule}slc6-devtoolset.repo
+yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/module-nginx/slc6-devtoolset.repo /etc/yum.repos.d/slc6-devtoolset.repo
+
+sudo yum -y install devtoolset-2-gcc-c++ devtoolset-2-binutils
+}
+install_devtoolset_gcc
+
+if [ ! -d /opt/rh/devtoolset-2/root/usr/bin ]; then
+	echo "Khong xac dinh duoc thu muc: /opt/rh/devtoolset-2/root/usr/bin (lan 1)"
+	sleep 30
+	install_devtoolset_gcc
+
+	if [ ! -d /opt/rh/devtoolset-2/root/usr/bin ]; then
+		echo "Khong xac dinh duoc thu muc: /opt/rh/devtoolset-2/root/usr/bin (lan 2)"
+		sleep 60
+		install_devtoolset_gcc
+
+		if [ ! -d /opt/rh/devtoolset-2/root/usr/bin ]; then
+			echo "Khong xac dinh duoc thu muc: /opt/rh/devtoolset-2/root/usr/bin (lan 3 - THOAT)"
+			echo "Co the do mang hien tai khong on dinh, vui long thu cai dat lai sau"
+			exit
+		fi
+	fi
+fi
+
+#
+PS_NGX_EXTRA_FLAGS="--with-cc=/opt/rh/devtoolset-2/root/usr/bin/gcc"
+
+
+
+cd
+cd /usr/local/vpsscript
+#cai dat nginx
+wget -q http://nginx.org/download/nginx-${Nginx_VERSION}.tar.gz
+tar -xzf nginx-${Nginx_VERSION}.tar.gz
+rm -rf /usr/local/vpsscript/nginx-${Nginx_VERSION}.tar.gz
+cd /usr/local/vpsscript/nginx-${Nginx_VERSION}
+#sed -i 's/"Server: nginx"/"Server: Nginx-vpsscript"/g' /usr/local/vpsscript/nginx-${Nginx_VERSION}/src/http/ngx_http_header_filter_module.c
+#sed -i 's/"Server: "/"Server: Nginx-vpsscript"/g' /usr/local/vpsscript/nginx-${Nginx_VERSION}/src/http/ngx_http_header_filter_module.c
+./configure --prefix=/usr/share/nginx \
+--sbin-path=/usr/sbin/nginx \
+--group=nginx --user=nginx \
+--pid-path=/var/run/nginx.pid \
+--conf-path=/etc/nginx/nginx.conf \
+--with-http_v2_module \
+--with-http_ssl_module \
+--with-ipv6 \
+--with-http_flv_module \
+--with-http_mp4_module \
+--with-http_random_index_module \
+--with-http_secure_link_module \
+--with-http_stub_status_module \
+--with-http_sub_module \
+--with-http_xslt_module \
+--with-http_addition_module \
+--with-http_dav_module \
+--with-http_geoip_module \
+--with-http_image_filter_module \
+--with-http_perl_module \
+--with-mail \
+--with-mail_ssl_module \
+--with-http_gunzip_module \
+--with-http_gzip_static_module \
+--with-file-aio \
+--with-pcre=$moduledir/${pcreVersionInstall} \
+--with-pcre-jit \
+--with-google_perftools_module \
+--with-debug \
+--with-openssl=$moduledir/${opensslversion} \
+--with-zlib=$moduledir/${zlibversion} \
+--with-http_realip_module \
+--with-http_stub_status_module \
+--with-cc=/opt/rh/devtoolset-2/root/usr/bin/gcc \
+--add-module=$moduledir/ngx_http_concat \
+--add-module=$moduledir/ngx_cache_purge-master \
+--add-module=$moduledir/ngx_devel_kit-master \
+--add-module=$moduledir/set-misc-nginx-module-master \
+--add-module=$moduledir/srcache-nginx-module-master \
+--add-module=$moduledir/ngx_http_substitutions_filter_module-master \
+--add-module=$moduledir/headers-more-nginx-module-master \
+--add-module=$moduledir/redis2-nginx-module-master \
+--add-module=$moduledir/echo-nginx-module-master \
+--add-module=$moduledir/memc-nginx-module-master \
+--add-module=$moduledir/${ngx_http_redis}
+
+#
+# cac module bi loi khi cai voi nginx
+#--with-openssl-opt="enable-ec_nistp_64_gcc_128" \
+#--with-openssl-opt="enable-tls1_3" \
+#--add-module=$moduledir/ngx_brotli-master \
+#--with-openssl-opt=$withopensslopt \
+#
+
+#
+make
+make install
+
+
+

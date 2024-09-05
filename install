@@ -1,0 +1,122 @@
+#!/bin/sh
+
+#
+cd ~
+if [ -d /opt/okvip_vpsscript ]; then
+rm -rf /opt/okvip_vpsscript/*
+rm -rf /opt/okvip_vpsscript
+#sleep 2
+fi
+
+
+#
+clear
+echo "=========================================================================="
+echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+echo ". . . . . . . . . . . . OKVIP-VPSSCRIPT install. . . . . . . . . . . . . ."
+echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+echo "=========================================================================="
+
+
+
+#
+sudo yum -y install epel-release wget nano
+
+#
+cd ~
+wget --no-check-certificate https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/vpsscript/menu/git-clone
+chmod +x /root/git-clone
+bash /root/git-clone
+
+# before install
+if [ ! -f /tmp/vpsscript.conf ]; then
+cd ~
+cd /opt/okvip_vpsscript
+chmod +x install-before
+bash install-before
+cd ~
+fi
+
+
+
+#
+#nano /etc/selinux/config
+
+# check SELinux status
+selinuxenabled
+if [ $? -ne 0 ]; then 
+selinux_on_off="DISABLED"
+else
+selinux_on_off="ENABLED"
+fi
+echo "=========================================================================="
+echo "SELinux status: "$selinux_on_off
+
+# if SELinux enable -> disable SELinux
+if [ "$selinux_on_off" = "ENABLED" ]; then
+    if [ -f /etc/selinux/config ]; then
+        clear
+        echo "=========================================================================="
+        echo "Warning! php-fpm not install if SELinux enable"
+
+        # neu truoc do da thu disable SELinux nhung khong thanh cong
+        if [ -f /tmp/okvip_vpsscript_disable_selinux ]; then
+            echo "Please disable SELinux and re-instal..."
+            echo "Using command:"
+            echo "nano /etc/selinux/config"
+            echo "find and replace:"
+            echo "SELINUX="$(getenforce)
+            echo "to:"
+            echo "SELINUX=disabled"
+            exit
+        else
+            echo "Auto disable SELinux in your VPS"
+        fi
+
+        #sudo chmod 777 /etc/selinux/config
+        sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+        sed -i 's/SELINUX=permissive/SELINUX=disabled/g' /etc/selinux/config
+        #sudo chmod 644 /etc/selinux/config
+
+        #
+        echo "OKVIP-VPSSCRIPT disable SELinux" > /tmp/okvip_vpsscript_disable_selinux
+
+        # check after change
+        check_selinux_disable=$(grep SELINUX=disabled /etc/selinux/config)
+        echo $check_selinux_disable
+
+        # if change OK
+        if [ ! "$check_selinux_disable" = "" ]; then
+            echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+            echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+            echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+            echo "Auto disable SELinux in your VPS"
+            #echo "Your Server/ VPS will been reboot. . ."
+            #echo "Please login and re-install after Server/ VPS reboot"
+            echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+            echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+            echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+            echo "=========================================================================="
+            #sleep 5
+            #reboot
+        else
+            echo "Auto disble SELinux not working! Please disable SELinux and try again..."
+        fi
+        echo "=========================================================================="
+        #exit
+    fi
+fi
+
+#
+rm -rf /tmp/okvip_vpsscript_disable_selinux
+
+
+#
+cd ~
+cd /opt/okvip_vpsscript
+chmod +x setup
+bash setup

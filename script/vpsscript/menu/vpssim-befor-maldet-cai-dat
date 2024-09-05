@@ -1,0 +1,7 @@
+#!/bin/bash 
+. /home/vpsscript.conf
+if [ ! -f /usr/local/maldetect/conf.maldet ]; then
+/etc/vpsscript/menu/vpsscript-cai-dat-maldet-with-clamav
+else
+/etc/vpsscript/menu/vpsscript-remove-maldet-with-clamav
+fi

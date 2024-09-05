@@ -1,0 +1,121 @@
+#!/bin/bash
+
+# https://www.vultr.com/docs/how-to-install-nginx-from-source-on-centos-8
+
+. /opt/okvip_vpsscript/script/vpsscript/nginx-setup.conf
+echo $moduledir
+echo $opensslversion
+echo $withopensslopt
+echo $zlibversion
+echo $pcreVersionInstall
+echo $Nginx_VERSION
+echo "Nginx-Setup8"
+#exit
+echo "Install after 3s"
+sleep 3
+
+
+/opt/okvip_vpsscript/script/vpsscript/menu/nginx-setup-download
+
+
+cd
+cd /usr/local/vpsscript
+#cai dat  nginx
+wget -q http://nginx.org/download/nginx-${Nginx_VERSION}.tar.gz
+tar -xzf nginx-${Nginx_VERSION}.tar.gz
+rm -rf /usr/local/vpsscript/nginx-${Nginx_VERSION}.tar.gz 
+cd /usr/local/vpsscript/nginx-${Nginx_VERSION}
+#sed -i 's/"Server: nginx"/"Server: Nginx-vpsscript"/g' /usr/local/vpsscript/nginx-${Nginx_VERSION}/src/http/ngx_http_header_filter_module.c
+#sed -i 's/"Server: "/"Server: Nginx-vpsscript"/g' /usr/local/vpsscript/nginx-${Nginx_VERSION}/src/http/ngx_http_header_filter_module.c
+
+# tao cac thu muc cau hinh cua nginx neu chua co
+mkdir -p /var/lib/nginx/tmp
+
+# cai dat cac phan mem con thieu
+sudo dnf -y install perl perl-devel perl-ExtUtils-Embed libxslt libxslt-devel libxml2 libxml2-devel gd gd-devel GeoIP GeoIP-devel gperftools-devel
+
+#
+sudo ./configure \
+--prefix=/usr/share/nginx \
+--sbin-path=/usr/sbin/nginx \
+--pid-path=/var/run/nginx.pid \
+--lock-path=/var/run/nginx.lock \
+--conf-path=/etc/nginx/nginx.conf \
+--modules-path=/usr/lib64/nginx/modules \
+--error-log-path=/var/log/nginx/error.log \
+--http-log-path=/var/log/nginx/access.log \
+--http-client-body-temp-path=/var/lib/nginx/tmp/client_body \
+--http-proxy-temp-path=/var/lib/nginx/tmp/proxy \
+--http-fastcgi-temp-path=/var/lib/nginx/tmp/fastcgi \
+--http-uwsgi-temp-path=/var/lib/nginx/tmp/uwsgi \
+--http-scgi-temp-path=/var/lib/nginx/tmp/scgi \
+--user=nginx \
+--group=nginx \
+--with-pcre=$moduledir/${pcreVersionInstall} \
+--with-pcre-jit \
+--with-zlib=$moduledir/${zlibversion} \
+--with-openssl=$moduledir/${opensslversion} \
+--with-ipv6 \
+--with-http_ssl_module \
+--with-http_v2_module \
+--with-threads \
+--with-file-aio \
+--with-http_degradation_module \
+--with-http_stub_status_module \
+--with-http_perl_module=dynamic \
+--with-http_auth_request_module \
+--with-http_geoip_module \
+--with-http_realip_module \
+--with-http_secure_link_module \
+--with-cpp_test_module \
+--with-debug \
+--with-google_perftools_module \
+--with-mail \
+--with-mail_ssl_module \
+--with-http_mp4_module \
+--with-http_flv_module \
+--with-stream \
+--with-stream_ssl_module \
+--with-stream_ssl_preread_module \
+--with-http_dav_module \
+--with-http_image_filter_module \
+--with-http_gunzip_module \
+--with-http_gzip_static_module \
+--with-http_addition_module \
+--with-http_random_index_module \
+--with-http_slice_module \
+--with-http_sub_module \
+--with-http_xslt_module \
+--with-select_module \
+--with-poll_module \
+--add-module=$moduledir/ngx_http_concat \
+--add-module=$moduledir/ngx_cache_purge-master \
+--add-module=$moduledir/ngx_devel_kit-master \
+--add-module=$moduledir/ngx_http_substitutions_filter_module-master \
+--add-module=$moduledir/redis2-nginx-module-master \
+--add-module=$moduledir/echo-nginx-module-master \
+--add-module=$moduledir/memc-nginx-module-master \
+--add-module=$moduledir/${ngx_http_redis}
+
+#
+# cac module bi loi khi cai voi nginx
+#--with-openssl-opt="enable-ec_nistp_64_gcc_128" \
+#--with-openssl-opt="enable-tls1_3" \
+#--add-module=$moduledir/ngx_brotli-master \
+#--with-openssl-opt=$withopensslopt \
+#--add-module=$moduledir/srcache-nginx-module-master \
+#--add-module=$moduledir/headers-more-nginx-module-master \
+
+# vultr
+#--modules-path=/etc/nginx/modules \
+#--prefix=/etc/nginx \
+
+# loi khi cai tren centos8
+#--add-module=$moduledir/set-misc-nginx-module-master \
+
+# /usr/local/vpsscript/srcache-nginx-module-master/config: line 30: [: !=: unary operator expected
+#--add-module=$moduledir/srcache-nginx-module-master \
+
+#
+make
+make install

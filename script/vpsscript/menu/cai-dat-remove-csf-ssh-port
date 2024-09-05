@@ -1,0 +1,15 @@
+#!/bin/bash
+. /home/vpsscript.conf
+if [ -f /etc/csf/csf.conf ]; then
+clear
+echo "========================================================================="
+echo "Phat hien CSF Firewall dang duoc cai dat tren VPS "
+echo "-------------------------------------------------------------------------"
+echo "vpsscript se remove CSF sau do cai dat lai CSF de cap nhat port SSH moi"
+sleep 8
+yes | cp -rf /etc/csf/csf.conf /etc/vpsscript/csf.conf_bak
+cd /etc/csf
+sh uninstall.sh
+cd
+/etc/vpsscript/menu/cai-csf-firewall-cai-dat-CSF-FIREWALL
+fi

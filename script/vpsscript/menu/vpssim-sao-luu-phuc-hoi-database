@@ -1,0 +1,28 @@
+#!/bin/sh
+prompt="Nhap lua chon cua ban (0-Thoat):"
+options=( "Thoat")
+printf "=========================================================================\n"
+printf "               vpsscript - Manage VPS/ Server by EchBay.com \n"
+printf "=========================================================================\n"
+printf "                      Backup & Restore Database\n"
+printf "=========================================================================\n"
+
+PS3="$prompt"
+select opt in "${options[@]}" ; do 
+
+    case "$REPLY" in
+
+    1 ) /etc/vpsscript/menu/vpsscript-sao-luu-data;;
+    2 ) /etc/vpsscript/menu/vpsscript-lan-luot-sao-luu-het-tat-ca-database;;
+    3 ) /etc/vpsscript/menu/vpsscript-phuc-hoi-database-chon-dinh-dang;;
+    4 ) /etc/vpsscript/menu/vpsscript-lay-link-sao-luu-database-backup-menu;;
+    #5 ) /etc/vpsscript/menu/vpsscript-list-database-tren-vps;; "Danh Sach Database Tren Server"
+    5 ) clear && /etc/vpsscript/menu/vpsscript-them-xoa-database;;
+    0 ) clear && /etc/vpsscript/menu/vpsscript-them-xoa-database;;
+
+    
+    *) echo "Ban nhap sai, vui long nhap theo danh sach";continue;;
+
+    esac
+
+done

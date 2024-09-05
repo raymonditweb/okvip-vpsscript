@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ ! -d /usr/local/vpsscript/ngx_brotli ]; then
+#mkdir -p /usr/local/vpsscript/ngx_brotli
+git clone https://github.com/google/ngx_brotli.git
+cd ngx_brotli
+git submodule update --init --recursive
+else
+cd ~ ; cd /usr/local/vpsscript/ngx_brotli && git pull ; cd ~
+fi

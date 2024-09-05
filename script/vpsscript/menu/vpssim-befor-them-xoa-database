@@ -1,0 +1,68 @@
+#!/bin/sh
+. /home/vpsscript.conf
+if [ ! -d /home/$mainsite/private_html/backup/AllDB ]; then
+mkdir -p /home/$mainsite/private_html/backup/AllDB
+fi
+if [ ! -f /home/DBinfo.txt ]; then
+echo "========================================================================="  > /home/DBinfo.txt
+echo "THONG TIN DATABASE TREN VPS"  >> /home/DBinfo.txt
+echo "========================================================================="  >> /home/DBinfo.txt
+echo "" >> /home/DBinfo.txt
+echo "" >> /home/DBinfo.txt
+fi
+
+
+if [ -f /var/lib/mysql/vpsscriptCheckDB/db.opt ]; then
+rm -rf /var/lib/mysql/vpsscriptCheckDB
+fi
+ cat > "/tmp/config.temp" <<END
+CREATE DATABASE vpsscriptCheckDB COLLATE utf8_general_ci;
+END
+mysql -u root -p$mariadbpass < /tmp/config.temp
+rm -f /tmp/config.temp
+
+if [ ! -f /var/lib/mysql/vpsscriptCheckDB/db.opt ]; then
+clear
+echo "========================================================================"
+echo "MySQL service is Down"
+echo "------------------------------------------------------------------------"
+echo "vpsscript trying to start it"
+echo "------------------------------------------------------------------------"
+echo "Please wait ..."
+sleep 5
+rm -rf /var/lib/mysql/ib_logfile0
+rm -rf /var/lib/mysql/ib_logfile1
+cat > "/tmp/startmysql" <<END
+systemctl start mariadb.service
+service mysql start
+END
+chmod +x /tmp/startmysql
+/tmp/startmysql
+rm -rf /tmp/startmysql
+clear
+echo "========================================================================"
+echo "Check MySQL service once again !"
+echo "------------------------------------------------------------------------"
+echo "Please wait ..."
+sleep 5
+cat > "/tmp/config.temp" <<END
+CREATE DATABASE vpsscriptCheckDB COLLATE utf8_general_ci;
+END
+mysql -u root -p$mariadbpass < /tmp/config.temp
+rm -f /tmp/config.temp
+	if [ ! -f /var/lib/mysql/vpsscriptCheckDB/db.opt ]; then
+	clear
+	echo "========================================================================="
+	echo "Sorry, MySQL service dang stopped. vpsscript khong the bat MySQL len duoc!"
+	vpsscript
+	else
+	rm -rf /var/lib/mysql/vpsscriptCheckDB
+	clear
+	/etc/vpsscript/menu/vpsscript-them-xoa-database
+	fi
+else
+rm -rf /var/lib/mysql/vpsscriptCheckDB
+clear
+/etc/vpsscript/menu/vpsscript-them-xoa-database
+fi
+

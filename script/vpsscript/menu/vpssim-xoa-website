@@ -1,0 +1,286 @@
+#!/bin/bash
+
+. /home/vpsscript.conf
+rm -rf /tmp/checktmp
+echo "Check /tmp by vpsscript" > /tmp/checktmp
+if [ ! -f /tmp/checktmp ]; then
+clear
+echo "========================================================================="
+echo "Your Server has a problem with /tmp "
+echo "-------------------------------------------------------------------------"
+echo "Please fix it before use this function"
+vpsscript
+exit
+fi
+
+rm -rf /tmp/checktmp
+check_folder_protect_config()
+{
+if [ -d /etc/nginx/pwprotect/$website ]; then
+cd /etc/nginx/pwprotect/$website
+rm -rf * .??*
+cd
+rm -rf /etc/nginx/pwprotect/$website
+fi
+}
+
+check_ftp_account()
+{
+if [ ! -f /etc/vpsscript/FTP-Account.info ]; then
+echo "=========================================================================" > /etc/vpsscript/FTP-Account.info
+echo "Please Do Not Delete This File " >> /etc/vpsscript/FTP-Account.info
+echo "-------------------------------------------------------------------------" >> /etc/vpsscript/FTP-Account.info
+echo "If you delete this file, vpsscript will not run !" >> /etc/vpsscript/FTP-Account.info
+echo "-------------------------------------------------------------------------" >> /etc/vpsscript/FTP-Account.info
+echo "All FTP User for all domain on VPS list below:" >> /etc/vpsscript/FTP-Account.info
+echo "=========================================================================" >> /etc/vpsscript/FTP-Account.info
+echo "" >> /etc/vpsscript/FTP-Account.info
+fi
+if [ -f /etc/pure-ftpd/pureftpd.passwd ]; then
+if [ ! "$(grep /home/$website/ /etc/pure-ftpd/pureftpd.passwd)" == "" ];then  
+rm -rf /tmp/abcd
+cat > "/tmp/abcd" <<END	
+sed -i '/\/home\/$website/d' /etc/pure-ftpd/pureftpd.passwd
+END
+chmod +x /tmp/abcd
+/tmp/abcd
+rm -rf /tmp/abcd
+pure-pw mkdb
+fi
+fi
+if [ ! "$(grep /home/$website/ /etc/vpsscript/FTP-Account.info)" == "" ];then 
+echo "========================================================================="
+echo "Phat hien tai khoan FTP: $(grep /home/$website/ /etc/vpsscript/FTP-Account.info | awk 'NR==1 {print $7}') cua $website  "
+echo "-------------------------------------------------------------------------"
+echo "vpsscript se remove tai khoan FTP: $(grep /home/$website/ /etc/vpsscript/FTP-Account.info | awk 'NR==1 {print $7}')"
+echo "-------------------------------------------------------------------------"
+echo "Please wait ...."
+sleep 6
+rm -rf /tmp/abcde
+cat > "/tmp/abcde" <<END	
+sed -i '/\/home\/$website/d' /etc/vpsscript/FTP-Account.info
+END
+chmod +x /tmp/abcde
+/tmp/abcde
+rm -rf /tmp/abcde
+fi
+}
+
+echo "========================================================================="
+echo "Su dung chuc nang nay de remove website khoi server"
+echo "-------------------------------------------------------------------------"
+echo "Sau khi remove, du lieu website bi xoa va khong the phuc hoi."
+echo "-------------------------------------------------------------------------"
+echo -n "Nhap ten website [ENTER]: " 
+read website
+website=`echo $website | tr '[A-Z]' '[a-z]'`
+if [ "$website" = "" ]; then
+clear
+echo "========================================================================="
+echo "Ban nhap sai, vui long nhap lai!"
+vpsscript
+exit
+fi
+
+
+
+
+if [ "$website" = "$mainsite" ]; then
+clear
+echo "========================================================================="
+echo "Ban dang muon remove domain quan ly !!!!"
+echo "-------------------------------------------------------------------------"
+echo "Domain quan ly khong the xoa khoi website !"
+vpsscript
+exit
+fi
+
+if [ -f /etc/vpsscript/uploadsite ]; then
+rm -rf /tmp/uploadsite
+cp -r /etc/vpsscript/uploadsite /tmp/uploadsite
+uploadsite=$(cat /etc/vpsscript/uploadsite)
+if [ "$website" = "$uploadsite" ]; then
+/etc/vpsscript/menu/vpsscript-xoa-domain-file-manager-upload
+fi
+fi
+
+if [ -f /etc/vpsscript/netdatasite.info ]; then
+netdatasite=$(cat /etc/vpsscript/netdatasite.info)
+if [ "$website" = "$netdatasite" ]; then
+clear
+echo "========================================================================="
+echo "Ban khong the xoa Domain Netdata"
+vpsscript
+fi
+fi
+
+if [ -f /etc/vpsscript/net2ftpsite.info ]; then
+rm -rf /tmp/net2ftpsite.info
+cp -r /etc/vpsscript/net2ftpsite.info /tmp/net2ftpsite.info
+net2ftpsite=$(cat /etc/vpsscript/net2ftpsite.info)
+if [ "$website" = "$net2ftpsite" ]; then
+/etc/vpsscript/menu/vpsscript-xoa-website-net2ftp-vpsscript-main
+fi
+fi
+
+
+
+kiemtradomain3="^([[:alnum:]]([[:alnum:]\-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,14}$";
+if [[ ! "$website" =~ $kiemtradomain3 ]]; then
+	website=`echo $website | tr '[A-Z]' '[a-z]'`
+clear
+echo "========================================================================="
+echo "$website co le khong phai la domain !!"
+echo "-------------------------------------------------------------------------"
+echo "Ban vui long thu lai  !"
+vpsscript
+exit
+fi
+
+if [ ! -f /etc/nginx/conf.d/$website.conf ]; then
+clear
+echo "========================================================================="
+echo "$website Khong ton tai tren he thong !"
+vpsscript
+exit
+fi
+
+
+if [ -f /home/$website/public_html/wp-config.php ]; then
+rm -rf /tmp/removewebsite.txt
+echo "$website" > /tmp/removewebsite.txt
+/etc/vpsscript/menu/vpsscript-xoa-website-wordpress
+fi
+
+
+if [ -f /home/$website/public_html/config.php ]; then
+if [ -d /home/$website/public_html/phpbb ]; then
+rm -rf /tmp/removewebsite.txt
+echo "$website" > /tmp/removewebsite.txt
+/etc/vpsscript/menu/vpsscript-xoa-website-phpbb-forum
+fi
+fi
+
+if [ -d /home/$website/public_html/administrator ]; then
+if [ -f /home/$website/public_html/configuration.php ]; then
+rm -rf /tmp/removewebsite.txt
+echo "$website" > /tmp/removewebsite.txt
+/etc/vpsscript/menu/vpsscript-xoa-website-joomla
+fi
+fi
+
+if [ -f /home/$website/public_html/Settings.php ]; then
+if [ -f /home/$website/public_html/Sources/Themes.php ]; then
+rm -rf /tmp/removewebsite.txt
+echo "$website" > /tmp/removewebsite.txt
+/etc/vpsscript/menu/vpsscript-xoa-website-smf-forum
+fi
+fi
+
+if [ -f /home/$website/public_html/inc/config.php ]; then
+if [ -f /home/$website/public_html/inc/mybb_group.php ]; then
+rm -rf /tmp/removewebsite.txt
+echo "$website" > /tmp/removewebsite.txt
+/etc/vpsscript/menu/vpsscript-xoa-website-mybb-forum
+fi
+fi
+
+if [ -f /home/$website/public_html/config.php ]; then
+if [ ! "$(grep DIR_CACHE /home/$website/public_html/config.php)" == "" ]; then
+if [ ! "$(grep DIR_LOGS /home/$website/public_html/config.php)" == "" ]; then
+rm -rf /tmp/removewebsite.txt
+echo "$website" > /tmp/removewebsite.txt
+/etc/vpsscript/menu/vpsscript-xoa-website-opencart
+fi
+fi
+fi
+
+echo "-------------------------------------------------------------------------"
+echo "Tim thay $website "
+echo "-------------------------------------------------------------------------"
+read -r -p "Ban chac chan muon remove $website ra khoi VPS ? [y/N] " response
+case $response in
+    [yY][eE][sS]|[yY]) 
+    echo "-------------------------------------------------------------------------"
+    echo "Please wait....";sleep 1
+rm -rf /home/$website
+rm -f /etc/nginx/conf.d/$website.conf
+rm -R /etc/nginx/pwprotect/$website 
+### Remove website from Zend Opcache BlackList
+if [ ! -f /etc/vpsscript/opcache.blacklist ]; then
+cat > "/etc/vpsscript/opcache.blacklist" <<END
+END
+fi
+if [ ! "$(grep /home/$website /etc/vpsscript/opcache.blacklist)" == "" ]; then
+echo "-------------------------------------------------------------------------"
+echo "Phat hien $website trong Zend Opcache Blacklist"
+echo "-------------------------------------------------------------------------"
+echo "vpsscript se xoa $website trong blacklist nay"
+echo "-------------------------------------------------------------------------"
+echo "Please wait ...."
+sleep 6
+rm -rf /tmp/zendcacheblacklist
+cat > "/tmp/zendcacheblacklist" <<END
+sed --in-place '\/home\/$website/d' /etc/vpsscript/opcache.blacklist
+END
+chmod +x /tmp/zendcacheblacklist
+/tmp/zendcacheblacklist
+rm -rf /tmp/zendcacheblacklist
+fi
+check_ftp_account
+check_and_delete_auto_backup_website()
+{
+	if [  -f /bin/vpsscript-backupcode-$website ]; then
+	if [ ! "$(grep vpsscript-backupcode-$website /etc/cron.d/vpsscript.code.cron)" == "" ]; then
+echo "========================================================================="
+echo "Phat hien $website dang bat auto backup code"
+echo "-------------------------------------------------------------------------"
+echo "vpsscript se tat che do auto backup code khi remove khoi server"
+echo "-------------------------------------------------------------------------"
+echo "Please wait ...."
+sleep 5
+	rm -rf /bin/vpsscript-backupcode-$website
+	cat > "/tmp/removebackupcode" <<END
+sed -i '/vpsscript-backupcode-$website/d' /etc/cron.d/vpsscript.code.cron
+END
+chmod +x /tmp/removebackupcode
+/tmp/removebackupcode 
+rm -rf /tmp/removebackupcode
+service crond restart
+	fi
+	fi
+}
+check_and_delete_auto_backup_website
+if [ -f /root/.acme.sh/$website/$website.conf ]; then
+rm -rf /root/.acme.sh/$website
+rm -rf /etc/nginx/auth-acme/$website
+rm -rf /etc/vpsscript/Backup.Vhost.SSL/$website
+fi
+############ 
+check_folder_protect_config ### Check Config Protect Folder & Files
+if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "6" ]; then 
+service nginx reload
+else 
+systemctl reload nginx
+fi 
+clear
+echo "========================================================================="
+echo "Xoa $website khoi Server thanh cong."
+vpsscript
+        ;;
+    *)
+clear
+echo "========================================================================="
+echo "Ban khong xoa $website khoi Server "
+vpsscript
+        ;;
+esac
+else
+clear
+echo "========================================================================="
+echo "Khong tim thay $website tren Server."
+echo "-------------------------------------------------------------------------"
+echo "Ban vui long thu lai"
+vpsscript
+exit
+fi

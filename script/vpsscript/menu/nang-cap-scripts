@@ -1,0 +1,121 @@
+#!/bin/bash
+. /home/vpsscript.conf
+
+if [ ! -f /etc/vpsscript/vpsscript.version ]; then
+clear
+echo "========================================================================="
+echo "Xin loi, chung toi khong the biet phien ban hien tai cua ban"
+echo "-------------------------------------------------------------------------"
+echo "Hay chac rang ban chay script offical tu website https://github.com/raymonditweb/vpsscripts"
+vpsscript
+exit
+fi
+
+maximumsize=10
+rm -rf /etc/vpsscript/vpsscript.newversion
+cd /etc/vpsscript
+timeout 30 wget --no-check-certificate https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/version -O /etc/vpsscript/vpsscript.newversion
+
+cd
+if [ -f /etc/vpsscript/vpsscript.newversion ]; then
+checksizeversion=$(du -sb /etc/vpsscript/vpsscript.newversion | awk 'NR==1 {print $1}')
+if [ "$checksizeversion" == "0" ];then
+rm -rf /etc/vpsscript/vpsscript.newversion
+fi
+if [ $checksizeversion -gt $maximumsize ]; then
+rm -rf /etc/vpsscript/vpsscript.newversion
+fi
+fi
+
+if [ ! -f /etc/vpsscript/vpsscript.newversion ]; then
+clear
+printf "=========================================================================\n"
+echo "Khong the kiem tra phien ban update OKVIP-VPSSCRIPT"
+echo "-------------------------------------------------------------------------"
+echo "Ban vui long thu lai"
+if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "7" ]; then
+/etc/vpsscript/menu/vpsscript-update-upgrade-service-menu
+else
+/etc/vpsscript/menu/centos9/option/update-upgrade-service-menu
+fi
+exit
+
+else
+LOCALVER=`cat /etc/vpsscript/vpsscript.version`
+REMOVER=`cat /etc/vpsscript/vpsscript.newversion`
+fi
+
+
+chuaCoBanMoi="n"
+if [ "$LOCALVER" == "$REMOVER" ]; then
+clear
+rm -rf /etc/vpsscript/vpsscript.newversion
+echo "========================================================================="
+echo "Ban dang su dung phien ban moi nhat cua OKVIP-VPSSCRIPT - Phien ban: $LOCALVER"
+echo "-------------------------------------------------------------------------"
+echo "Xem OKVIP-VPSSCRIPT update Log tai: https://github.com/raymonditweb/vpsscripts"
+
+echo -n "Ban van muon cap nhat lai OKVIP-VPSSCRIPT chu? [y/N] "
+read vanCapNhat
+if [ "$vanCapNhat" = "y" ]; then
+echo "OK sir! tien trinh cap nhat se duoc tiep tuc..."
+sleep 3
+chuaCoBanMoi="y"
+else
+if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "7" ]; then
+/etc/vpsscript/menu/vpsscript-update-upgrade-service-menu
+else
+/etc/vpsscript/menu/centos9/option/update-upgrade-service-menu
+fi
+exit
+
+fi
+fi
+
+printf "=========================================================================\n"
+printf "Xem OKVIP-VPSSCRIPT update Log tai: https://github.com/raymonditweb/vpsscripts\n"
+printf "=========================================================================\n"
+printf "Da phat hien update cho OKVIP-VPSSCRIPT\n"
+echo "-------------------------------------------------------------------------"
+printf "Phien ban ban dang su dung: $LOCALVER\n"
+echo "-------------------------------------------------------------------------"
+printf "Phien ban ban moi nhat tai thoi diem hien tai: $REMOVER\n"
+printf "=========================================================================\n"
+
+if [ "$chuaCoBanMoi" = "y" ]; then
+response="y"
+else
+read -r -p "Ban chac chan muon update OKVIP-VPSSCRIPT ? [y/N] " response
+fi
+
+if [ "$response" = "y" ] || [ "$response" = "Y" ]; then
+echo "-------------------------------------------------------------------------" 
+echo "Chuan bi update OKVIP-VPSSCRIPT..... "
+sleep 1
+
+rm -rf /etc/vpsscript/vpsscript-update
+wget --no-check-certificate https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/vpsscript/vpsscript-update -O /etc/vpsscript/vpsscript-update
+chmod +x /etc/vpsscript/vpsscript-update
+bash /etc/vpsscript/vpsscript-update
+
+else
+
+clear
+printf "=========================================================================\n"
+echo "Ban da huy bo update OKVIP-VPSSCRIPT"
+if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "7" ]; then
+/etc/vpsscript/menu/vpsscript-update-upgrade-service-menu
+else
+/etc/vpsscript/menu/centos9/option/update-upgrade-service-menu
+fi
+exit
+
+fi
+
+#
+if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "7" ]; then
+clear && /etc/vpsscript/menu/vpsscript-update-upgrade-service-menu
+else
+clear && /etc/vpsscript/menu/centos9/option/update-upgrade-service-menu
+fi
+exit

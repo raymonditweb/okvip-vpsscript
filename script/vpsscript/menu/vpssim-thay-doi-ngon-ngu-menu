@@ -1,0 +1,52 @@
+#!/bin/sh
+. /home/vpsscript.conf
+rm -rf /tmp/vpsscript.newversion*
+cd /tmp
+timeout 3 wget -q https://hostingaz.vn/script/vpsscript/vpsscript.newversion
+cd
+LOCALVER=`cat /etc/vpsscript/vpsscript.version`
+ if [ ! -f /tmp/vpsscript.newversion ]; then 
+ clear
+printf "=========================================================================\n"
+echo "vpsscript Khong the kiem tra phien ban vpsscript hien tai"
+echo "-------------------------------------------------------------------------"
+echo "(vpsscript cant not check current version)"
+/etc/vpsscript/menu/vpsscript-update-upgrade-service-menu
+ exit
+ fi
+if [ -f /tmp/vpsscript.newversion ]; then
+REMOVER=`cat /tmp/vpsscript.newversion`
+if [ ! "$LOCALVER" == "$REMOVER" ]; then
+clear
+printf "=========================================================================\n"
+echo "Ban phai update OKVIP-VPSSCRIPT len phien ban moi nhat de su dung chuc nang nay"
+echo "-------------------------------------------------------------------------"
+echo "(You must update OKVIP-VPSSCRIPT to latest version to use this function)"
+/etc/vpsscript/menu/vpsscript-update-upgrade-service-menu
+fi
+fi
+if [ "$(grep vpsscript.COM /bin/vpsscript)" != "" ]; then
+options=("EngLish (Current)" "VietNamese" "Exit")
+else
+options=("EngLish" "VietNamese (Current)" "Exit")
+fi
+prompt="Nhap lua chon cua ban:" 
+printf "=========================================================================\n"
+printf "                vpsscript - Quan Ly VPS/ Server by EchBay.com \n"             
+printf "=========================================================================\n"
+printf "                       Lua Chon Ngon Ngu Cho vpsscript                                \n"
+printf "=========================================================================\n"
+PS3="$prompt"
+select opt in "${options[@]}" ; do 
+
+    case "$REPLY" in
+
+    1) /etc/vpsscript/menu/vpsscript-chuyen-ngon-ngu-sang-tieng-anh;;
+    2) /etc/vpsscript/menu/vpsscript-chuyen-ngon-ngu-sang-tieng-viet;;
+    3) clear && /etc/vpsscript/menu/vpsscript-update-upgrade-service-menu;; 
+    0) clear && /etc/vpsscript/menu/vpsscript-update-upgrade-service-menu;; 
+    *) echo "You typed wrong, Please type in the ordinal number on the list";continue;;
+
+    esac
+done
+ 

@@ -1,0 +1,31 @@
+#!/bin/bash
+
+prompt="Nhap lua chon cua ban (0-Thoat):"
+options=("Swap 512 MB" "Swap 1 GB" "Swap 2 GB" "Swap 3 GB" "Swap 4 GB" "Swap 6 GB" "Xoa Swap" )
+printf "=========================================================================\n"
+printf "                vpsscript - Quan Ly VPS/ Server by EchBay.com \n"
+printf "=========================================================================\n"
+printf "                   Chuc nang nay khong ho tro VPS OpenVZ\n"
+printf "=========================================================================\n"
+printf "                             Tao & Xoa Swap\n"
+printf "=========================================================================\n"
+PS3="$prompt"
+select opt in "${options[@]}" "Thoat"; do 
+
+    case "$REPLY" in
+
+    1 ) /etc/vpsscript/menu/swap/vpsscript-create-swap-512;;
+    2 ) /etc/vpsscript/menu/swap/vpsscript-create-swap-1024;;
+    3 ) /etc/vpsscript/menu/swap/vpsscript-create-swap-2048;;
+    4 ) /etc/vpsscript/menu/swap/vpsscript-create-swap-3072;;
+    5 ) /etc/vpsscript/menu/swap/vpsscript-create-swap-4096;;
+    6 ) /etc/vpsscript/menu/swap/vpsscript-create-swap-6144;;
+    7 ) /etc/vpsscript/menu/swap/vpsscript-xoa-swap-vps;;
+        
+$(( ${#options[@]}+1 )) ) echo "BYE!";  clear && /bin/vpsscript;;
+0 ) echo "BYE!";  clear && /bin/vpsscript;;
+     *) echo "Ban nhap sai, vui long nhap cac so trong list tren";continue;;
+
+    esac
+
+done

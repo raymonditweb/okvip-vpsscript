@@ -1,0 +1,95 @@
+#!/bin/bash
+. /home/vpsscript.conf
+if [ -f /etc/pure-ftpd/pure-ftpd.conf ]; then
+    clear
+    echo "========================================================================= "
+    echo "FTP server da duoc cai dat tren server. "
+
+    #
+    if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "7" ]; then
+    /etc/vpsscript/menu/vpsscript-ftpserver-menu
+    else
+    /etc/vpsscript/menu/centos9/option/ftpserver-menu
+    fi
+    exit
+fi
+
+#
+from_add_website=$1
+
+#
+clear
+echo "========================================================================= "
+echo "Chuan bi cai dat FTP Server... "
+#sleep 3
+yum -y install pure-ftpd
+
+# Chinh lai cau hinh
+yes | cp /etc/vpsscript/menu/centos9/tmp/pure-ftpd.conf "/etc/pure-ftpd/"
+
+if [ ! "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "7" ]; then
+echo "Remove UseFtpUsers in CentOS 8++"
+sed -i -e "/UseFtpUsers/d" /etc/pure-ftpd/pure-ftpd.conf
+fi
+
+openssl req -x509 -nodes -days 7200 -newkey rsa:2048 -keyout /etc/pki/pure-ftpd/pure-ftpd.pem -out /etc/pki/pure-ftpd/pure-ftpd.pem -subj "/C=US/ST=vpsscript FTP/L=vpsscript FTP/O=vpsscript FTP/CN=vpsscript FTP"
+
+#
+mkdir -p /etc/ssl/private
+if [ -f /etc/ssl/private/pure-ftpd.pem ]; then
+    yes | cp -rf /etc/pki/pure-ftpd/pure-ftpd.pem /etc/ssl/private/pure-ftpd.pem
+fi
+
+if [ ! -f /etc/vpsscript/pure-ftpd.pem ]; then
+    if [ -f /etc/pki/pure-ftpd/pure-ftpd.pem ]; then
+    yes | cp -rf /etc/pki/pure-ftpd/pure-ftpd.pem /etc/vpsscript/pure-ftpd.pem
+    fi
+fi
+
+#
+if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "6" ]; then 
+chkconfig pure-ftpd on
+#service pure-ftpd start
+service pure-ftpd restart
+else
+systemctl enable pure-ftpd 
+#systemctl start pure-ftpd 
+systemctl restart pure-ftpd 
+fi
+
+#
+iptables -I INPUT 2 -p tcp --dport 30000:50000 -j ACCEPT
+iptables -I INPUT 2 -p udp --dport 30000:50000 -j ACCEPT
+iptables -I INPUT 2 -p tcp --dport 21 -j ACCEPT
+iptables -I INPUT 2 -p udp --dport 21 -j ACCEPT
+service iptables save
+#chown -R nginx:nginx /home
+
+if [ -f /etc/csf/csf.conf ]; then
+clear
+echo "-------------------------------------------------------------------------"
+echo "Phat hien CSF FireWall dang duoc cai dat tren VPS"
+echo "-------------------------------------------------------------------------"
+echo "vpsscript se khoi dong lai CSF Firewall ...."
+echo "-------------------------------------------------------------------------"
+echo "Please wait ...."
+#sleep 5
+/etc/vpsscript/menu/CSF-Fiwall/vpsscript-re-start-khoi-dong-lai-csf-lfd
+fi
+
+clear
+#
+if [ ! "$from_add_website" = "" ]; then
+echo "========================================================================= "
+echo "Cai dat FTP server thanh cong"
+
+#
+if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "7" ]; then
+/etc/vpsscript/menu/vpsscript-ftpserver-menu
+else
+/etc/vpsscript/menu/centos9/option/ftpserver-menu
+fi
+
+#
+exit
+fi

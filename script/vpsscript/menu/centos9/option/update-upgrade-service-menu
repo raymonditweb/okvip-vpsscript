@@ -1,0 +1,27 @@
+#!/bin/bash
+
+prompt="Vui long chon/ Please choose (0-Thoat):" 
+options=( "Update OKVIP-VPSSCRIPT" "Update system" )
+printf "=========================================================================\n"
+printf "                vpsscript - Quan Ly VPS/Server by WebGiaRe.org \n"
+printf "=========================================================================\n"
+printf "                        Update / Upgrade Service \n"
+printf "=========================================================================\n"
+
+
+PS3="$prompt"
+select opt in "${options[@]}" ; do 
+ 
+    case "$REPLY" in
+
+	1) clear && /etc/vpsscript/menu/nang-cap-scripts;;
+    2) clear && /etc/vpsscript/menu/centos9/option/update-system;;
+	0) clear && vpsscript;;
+	*) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu !";continue;;
+
+    esac
+
+done
+
+#
+exit

@@ -1,0 +1,108 @@
+#!/bin/bash
+
+
+#
+/etc/vpsscript/menu/centos9/inc/list-website-tren-vps-before
+
+#
+echo "========================================================================="
+# echo "Chon ten mien chinh/ Choose primary domain:"
+# echo "-------------------------------------------------------------------------"
+
+domain_number=$1
+if [ "$domain_number" = "" ]; then
+echo -n "Chon ten mien chinh/ Choose primary domain [ENTER]: " 
+read website
+else
+website=$domain_number
+# echo $website
+# exit
+fi
+website=`echo $website | tr '[A-Z]' '[a-z]'`
+
+#
+if [ "$website" = "" ]; then
+clear
+/etc/vpsscript/menu/centos9/option/them-website-menu
+exit
+fi
+
+# xem số này có chứa thông tin tên miền tương ứng không
+if [ -f "/tmp/domain_number$website.txt" ]; then
+# có thì lấy tên miền trong file
+website=`cat /tmp/domain_number$website.txt`
+echo "Ten mien chinh/ Primary domain: "$website
+else
+clear
+echo "========================================================================="
+echo "Vui long chon lai/ Please choose again!"
+echo "-------------------------------------------------------------------------"
+/etc/vpsscript/menu/centos9/option/domain-pointers
+exit
+fi
+
+# kiểm tra xem có website này không
+if [ ! -f /etc/nginx/conf.d/$website.conf ]; then
+clear
+echo "========================================================================="
+echo "Ten mien chinh khong ton tai/ Primary domain not exist (vHost)! "$website
+/etc/vpsscript/menu/centos9/option/domain-pointers
+exit
+fi
+
+# kiểm tra xem có website này không
+if [ ! -d /home/$website ]; then
+clear
+echo "========================================================================="
+echo "Ten mien chinh khong ton tai/ Primary domain not exist (folder)! "$website
+/etc/vpsscript/menu/centos9/option/domain-pointers
+exit
+fi
+
+#
+domain_pointer=$2
+if [ "$domain_pointer" = "" ]; then
+echo -n "Nhap ten mien phu/ Enter pointer domain [ENTER]: " 
+read pointer
+else
+pointer=$domain_pointer
+# echo $pointer
+# exit
+fi
+pointer=`echo $pointer | tr '[A-Z]' '[a-z]'`
+
+#
+if [ "$pointer" = "" ]; then
+clear
+/etc/vpsscript/menu/centos9/option/them-website-menu
+exit
+fi
+
+# kiểm tra xem có website này không
+if [ -f /etc/nginx/conf.d/$pointer.conf ]; then
+clear
+echo "========================================================================="
+echo "Ten mien da ton tai/ Domain exist (vHost)! "$pointer
+/etc/vpsscript/menu/centos9/option/domain-pointers
+exit
+fi
+
+# kiểm tra xem có website này không
+if [ -d /home/$pointer ]; then
+clear
+echo "========================================================================="
+echo "Ten mien da duoc su dung/ Domain is primary (folder)! "$pointer
+/etc/vpsscript/menu/centos9/option/domain-pointers
+exit
+fi
+
+#
+/etc/vpsscript/menu/centos9/inc/add-vhost-after $pointer $website
+
+#
+if [ "$domain_pointer" = "" ]; then
+/etc/vpsscript/menu/centos9/option/them-website-menu
+else
+echo "Domain pointer added: "$domain_pointer
+fi
+exit

@@ -1,0 +1,28 @@
+#!/bin/bash
+
+sleep 2
+sudo yum -y install epel-release
+sudo yum -y install varnish
+
+/etc/vpsscript/menu/varnish/disk-cache-varnish
+
+current_os_version=$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))
+
+if [ "$current_os_version" == "6" ]; then
+service varnish start
+chkconfig varnish on
+service varnish restart
+else
+systemctl start varnish.service
+systemctl enable varnish.service
+systemctl restart varnish.service
+fi
+
+#
+yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/conf-webserver/vpsscript.demo-varnish.txt /etc/nginx/conf.d/vpsscript.demo.conf
+service nginx restart
+
+#
+varnishd -V
+
+/etc/vpsscript/menu/varnish/install-varnish

@@ -1,0 +1,70 @@
+#!/bin/sh 
+. /home/vpsscript.conf
+
+
+# Check vpsscript Update
+/etc/vpsscript/menu/menucheck/check-vpsscript-update
+# Check nginx Update
+/etc/vpsscript/menu/menucheck/check-nginx-update
+/etc/vpsscript/menu/menucheck/check-phpmyadmin-update
+#/etc/vpsscript/menu/menucheck/check-csf-on
+# kiem tra dung luong dia con lai
+/etc/vpsscript/menu/menucheck/check-disk-usage
+
+
+rm -rf /tmp/*ip*
+rm -rf /tmp/showthongbao 
+
+
+#find /etc/vpsscript/menu -type f -exec chmod 755 {} \;
+prompt="Nhap lua chon cua ban (0-Thoat):"
+options=("Them Website & Code" "Xoa website" "Backup & Restore Code" "Quan Ly Database" "Quan Ly phpMyAdmin" "Quan Ly Zend OPcache" "Quan Ly Memcached" "Quan Ly Redis Cache" "Quan Ly FTP Server" "Quan Ly Swap" "Quan Ly Cronjob"  "Quan Ly File Log" "Config Cau Hinh PHP" "Wordpress Blog Tools" "Quan Ly CSF Firewall" "Quan Ly IPtables Firewall" "Quan Ly BitTorrent Sync" "Quan Ly VPS Backup" "Linux Malware Detect" "Cai Dat File Manager" "Cai Dat Net2FTP" "Cai Dat NetData" "Cai Dat SSL (Let's Enctypt)" "Check & Block IP DOS" "Tien ich - Addons" "Update System" "Clear All Caches" "User & Password Mac Dinh" "Server Status")
+
+echo "========================================================================="
+echo "      OKVIP-VPSSCRIPT - Quan Ly VPS/Server by WebGiaRe.org ($(cat /etc/vpsscript/vpsscript.version))                "
+echo "========================================================================="
+echo "                          OKVIP-VPSSCRIPT Menu                             "
+echo "========================================================================="
+
+PS3="$prompt"
+select opt in "${options[@]}" ; do 
+
+    case "$REPLY" in
+
+	1) clear && /etc/vpsscript/menu/vpsscript-befor-them-website-menu;;
+    2) /etc/vpsscript/menu/vpsscript-befor-xoa-website;;
+    3) clear && /etc/vpsscript/menu/vpsscript-sao-luu;;
+    4) clear && /etc/vpsscript/menu/vpsscript-befor-them-xoa-database;;
+    5) clear && /etc/vpsscript/menu/vpsscript-phpmyadmin-menu;;
+    6) clear && /etc/vpsscript/menu/opcache/vpsscript-before-opcache;;
+    7) clear && /etc/vpsscript/menu/memcache/vpsscript-before-memcache-menu;;
+    8) clear && /etc/vpsscript/menu/vpsscript-redis-befor-menu;;
+    9) clear && /etc/vpsscript/menu/vpsscript-ftpserver-menu;;
+    10) clear && /etc/vpsscript/menu/swap/vpsscript-them-xoa-swap-vps-menu;;
+    11) clear && /etc/vpsscript/menu/crontab/vpsscript-cronjob-menu;;
+    12) clear && /etc/vpsscript/menu/vpsscript-eroor-menu;;
+    13) clear && /etc/vpsscript/menu/vpsscript-befor-vpsscript-config-php.ini-menu;;
+    14) clear && /etc/vpsscript/menu/vpsscript-wordpress-tools-menu;;
+    #14) clear && /etc/vpsscript/menu/pagespeed/before-vpsscript-pagespeed-menu;;"Nginx Pagespeed Manage" 
+    15) /etc/vpsscript/menu/CSF-Fiwall/vpsscript-csf-firewall-before-menu;;
+    16) clear && /etc/vpsscript/menu/vpsscript-iptables-firewall-manager-menu;;
+    17) clear && /etc/vpsscript/menu/vpsscript-bitsync-menu;;
+    18) clear && /etc/vpsscript/menu/vpsscript-befor-rsync;;
+    19) clear && /etc/vpsscript/menu/vpsscript-maldet-menu;;
+    20) clear && /etc/vpsscript/menu/vpsscript-web-upload-menu;;
+    21) clear && /etc/vpsscript/menu/vpsscript-net2ftp-menu;;
+    22) clear && /etc/vpsscript/menu/vpsscript-netdata-menu;;
+    23) clear && /etc/vpsscript/menu/vpsscript-letsencrypt-menu;;
+    24) clear && /etc/vpsscript/menu/vpsscript-kiem-tra-ddos;;
+    25) clear && /etc/vpsscript/menu/vpsscript-tien-ich;;
+    26) clear && /etc/vpsscript/menu/vpsscript-update-upgrade-service-menu;;
+    27) /etc/vpsscript/menu/vpsscript-clear-cache-xoa-cache-server;;
+    28) /etc/vpsscript/menu/dat-mat-khau-bao-ve-folder-mac-dinh;;
+    29) clear && /etc/vpsscript/menu/vpsscript-vps-info;;
+	#30) clear && cat /etc/motd && killall -g vpsscript;; 
+	0) clear && cat /etc/motd && killall -g vpsscript;; 
+    *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu !";continue;;
+
+    esac
+done
+ 

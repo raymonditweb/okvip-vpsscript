@@ -1,0 +1,58 @@
+#!/bin/bash
+. /home/vpsscript.conf
+
+#
+website=$1
+primarydomain=$2
+
+#
+if [ ! "$website" = "" ]; then
+
+echo "vHost for domain: "$website
+
+cat > "/tmp/vpsscriptSetConfigFile" <<END
+#!/bin/bash 
+END
+
+    # có ssl thì sử dụng vhost ssl
+    if [ -d /etc/letsencrypt/live/$website ]; then
+    yes | cp /etc/vpsscript/menu/centos9/tmp/domain_ssl_vhost.conf "/etc/nginx/conf.d/$website.conf"
+
+    # không có file pem thì xóa đoạn ssl.conf đi
+    if [ ! -f /etc/letsencrypt/ssl-dhparams.pem ]; then
+cat >> "/tmp/vpsscriptSetConfigFile" <<END
+sed -i '/ssl\.conf/d' /etc/nginx/conf.d/$website.conf
+END
+    fi
+
+    else
+    yes | cp /etc/vpsscript/menu/centos9/tmp/domain_vhost.conf "/etc/nginx/conf.d/$website.conf"
+    fi
+
+    # thay domain trong file vhost
+if [ ! "$primarydomain" = "" ]; then
+
+echo "vHost for domain: "$primarydomain
+
+# pointer tới cùng thư mục với tên miền chính
+cat >> "/tmp/vpsscriptSetConfigFile" <<END
+sed -i 's/home\/\%website\%/home\/$primarydomain/g' /etc/nginx/conf.d/$website.conf
+END
+
+fi
+
+#
+cat >> "/tmp/vpsscriptSetConfigFile" <<END
+sed -i 's/\%website\%/$website/g' /etc/nginx/conf.d/$website.conf
+END
+
+#
+chmod +x /tmp/vpsscriptSetConfigFile
+sh /tmp/vpsscriptSetConfigFile
+rm -rf /tmp/vpsscriptSetConfigFile
+
+#
+systemctl reload nginx
+
+fi
+

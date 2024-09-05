@@ -1,0 +1,19 @@
+#!/bin/sh
+
+echo "Install git..."
+sudo yum -y install git > /dev/null 2>&1
+
+# update code
+if [ -d /opt/okvip_vpsscript ]; then
+cd ~ ; cd /opt/okvip_vpsscript && git pull origin master ; cd ~
+#git pull origin master
+#git pull origin
+fi
+
+cd ~
+
+sleep 5
+
+find /opt/okvip_vpsscript/script/vpsscript/menu -type f -exec chmod 755 {} \;
+/opt/okvip_vpsscript/script/vpsscript/menu/git-clone-done
+

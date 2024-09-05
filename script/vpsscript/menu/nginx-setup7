@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ -f /home/vpsscript.conf ]; then
+. /home/vpsscript.conf
+else
+nginxtype="mainline"
+fi
+
+if [ "$nginxtype" = "stable" ]; then
+# install nginx stable version
+/opt/okvip_vpsscript/script/vpsscript/menu/nginx-setup7-stable
+else
+# install nginx mainline version
+/opt/okvip_vpsscript/script/vpsscript/menu/nginx-setup7-mainline
+fi

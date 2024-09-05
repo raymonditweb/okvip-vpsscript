@@ -1,0 +1,43 @@
+#!/bin/bash
+prompt="Lua chon cua ban (0-Thoat):" 
+#options=( "Update System" "Update vpsscript" "Change Nginx Version" "Change phpMyAdmin Version" "Upgrade MariaDB to 10.0 Version" "Change PHP Version" "Change vpsscript Language" "Thoat")
+#options=( "Update System" "Update vpsscript" "Update Nginx" "Change phpMyAdmin Version" "Change PHP Version" "Change vpsscript Language" "Update OpenSSL version" "Reset code form git" "List soft version")
+options=( "Update System" "Update OKVIP-VPSSCRIPT" "Update Nginx" "Change phpMyAdmin Version" "Change PHP Version" "Update OpenSSL version" \
+"Reset code form git" "List soft version" "Nginx quiche" "Auto update system")
+#"Pull code form git" "Reset code form git" "List soft version" "Nginx quiche" "Auto update system")
+printf "=========================================================================\n"
+printf "                vpsscript - Quan Ly VPS/Server by WebGiaRe.org \n"
+printf "=========================================================================\n"
+printf "                        Update / Upgrade Service \n"
+printf "=========================================================================\n"
+
+
+PS3="$prompt"
+select opt in "${options[@]}" ; do 
+ 
+    case "$REPLY" in
+
+
+	1) /etc/vpsscript/menu/update-he-thong;;
+	2) /etc/vpsscript/menu/nang-cap-scripts;;
+	3) /etc/vpsscript/menu/nang-cap-nginx;;
+#	3) /etc/vpsscript/menu/vpsscript-befor-nang-cap-nginx;;
+	4) /etc/vpsscript/menu/vpsscript-nang-cap-phpmyadmin;;
+#	5) /etc/vpsscript/menu/nang-cap-mariaDB/vpsscript-before-nang-cap-mariadb;;
+	5) clear && /etc/vpsscript/menu/nangcap-php/vpsscript-updown-php;;
+#	6) clear && /etc/vpsscript/menu/vpsscript-thay-doi-ngon-ngu-menu;;
+	6) clear && /etc/vpsscript/menu/nang-cap-openssl;;
+	#7) clear && /etc/vpsscript/menu/git-pull;;
+	7) clear && /etc/vpsscript/menu/git-reset;;
+	8) clear && /etc/vpsscript/menu/list-all-soft-version;;
+	9) clear && /etc/vpsscript/menu/nginx-quiche;;
+	10) clear && /etc/vpsscript/menu/auto-update-system;;
+	0) clear && vpsscript;;
+        *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu !";continue;;
+
+    esac
+
+done
+
+
+

@@ -1,0 +1,19 @@
+#!/bin/bash
+. /home/vpsscript.conf
+if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "6" ]; then 
+echo "-------------------------------------------------------------------------"
+echo "Please wait....";sleep 1
+chkconfig memcached off
+service memcached stop
+fi
+#if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "7" ]; then
+if [ ! "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "6" ]; then 
+echo "-------------------------------------------------------------------------" 
+echo "Please wait....";sleep 1
+systemctl disable memcached.service
+systemctl stop  memcached.service
+fi
+clear
+echo "========================================================================= "
+echo "Stop memcached thanh cong !"
+/etc/vpsscript/menu/memcache/vpsscript-before-memcache-menu

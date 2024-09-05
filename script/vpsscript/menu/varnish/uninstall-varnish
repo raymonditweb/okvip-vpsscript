@@ -1,0 +1,57 @@
+#!/bin/bash
+. /home/vpsscript.conf
+
+# https://docs.google.com/spreadsheets/d/1BkuZk-1O97__eq4AobMDkm1nK8HNQ5AzHnYrxMLbBS0/edit?usp=sharing
+
+remove_varnish_repo () {
+rpm -e reponame
+rm -rf /etc/yum.repos.d/varnishcache_varnish*
+}
+
+echo "========================================================================="
+
+if [ -f /etc/vpsscript/varnish.version ];then
+printf "                   Phien ban Varnish hien tai: $(cat /etc/vpsscript/varnish.version) \n"
+else
+printf "                  Varnish Cache chua duoc cai dat\n"
+printf "          Hoac khong duoc cai dat thong qua OKVIP-VPSSCRIPT \n"
+fi
+
+echo "-------------------------------------------------------------------------"
+varnishd -V
+echo "========================================================================="
+echo "Remove repo: rpm -e [reponame]"
+echo "Remove repo file: rm -rf /etc/yum.repos.d/varnishcache_varnish*"
+echo "========================================================================="
+
+echo -n "Ban co muon go bo Varnish Cache khong? [y/N] "
+read goBoVarnish
+
+if [ "$goBoVarnish" = "y" ]; then
+clear
+echo "Ok ok! Chuan bi go bo Varnish Cache..."
+sleep 2
+rpm -qa | grep -i varnish
+yum -y erase varnish
+rm -rf /etc/yum.repos.d/varnishcache_varnish*
+rpm -qa | grep -i varnish
+rm -rf /etc/vpsscript/varnish*
+#
+yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/conf-webserver/vpsscript.demo.txt /etc/nginx/conf.d/vpsscript.demo.conf
+# config
+svport=$priport
+cat > "/tmp/vpsscriptSetConfigFile" <<END
+#!/bin/bash 
+sed -i 's/tmp_listen_svport/listen $svport/g' /etc/nginx/conf.d/vpsscript.demo.conf
+END
+chmod +x /tmp/vpsscriptSetConfigFile
+sh /tmp/vpsscriptSetConfigFile
+rm -rf /tmp/vpsscriptSetConfigFile
+service nginx restart
+else
+echo "Huy bo thao tac: go bo Varnish Cache..."
+sleep 2
+clear
+fi
+
+/etc/vpsscript/menu/varnish/install-varnish

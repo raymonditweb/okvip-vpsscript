@@ -1,0 +1,27 @@
+#!/bin/bash
+. /home/vpsscript.conf
+
+#
+echo "=========================================================================="
+echo "Install phpMyAdmin..."
+#sleep 2
+
+#
+cd ~
+
+#
+mkdir -p /home/vpsscript.demo
+mkdir -p /home/vpsscript.demo/private_html/phpmyadmin
+rm -rf /home/vpsscript.demo/private_html/phpmyadmin/*
+# tao thu muc cho phpmyadmin dung lam cache
+mkdir -p /home/vpsscript.demo/private_html/phpmyadmin/tmp
+chmod 777 /home/vpsscript.demo/private_html/phpmyadmin/tmp
+cd /home/vpsscript.demo/private_html/phpmyadmin/
+
+#
+wget --no-check-certificate https://files.phpmyadmin.net/phpMyAdmin/${phpmyadmin_version}/phpMyAdmin-${phpmyadmin_version}-all-languages.zip
+unzip -q phpMyAdmin-*.zip
+yes | cp -rf phpMyAdmin-*/* .
+rm -rf phpMyAdmin-*
+randomblow=`date |md5sum |cut -c '1-32'`;
+sed -e "s|cfg\['blowfish_secret'\] = ''|cfg['blowfish_secret'] = '$randomblow'|" config.sample.inc.php > config.inc.php

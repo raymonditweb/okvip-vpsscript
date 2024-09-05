@@ -1,0 +1,87 @@
+#!/bin/sh
+. /home/vpsscript.conf
+if [ -f /etc/php.d/opcache.bak ]; then
+if [ -f	/etc/php.d/*opcache.ini ]; then
+rm -rf /etc/php.d/*opcache.ini
+fi 
+fi
+if [ -f /etc/php.d/opcache.ini ]; then
+find /etc/php.d -name '*opcache.ini' > /tmp/vpsscriptcheckopcache.tmp
+checkopcache=$(cat /tmp/vpsscriptcheckopcache.tmp | wc -l)
+if [ ! "$checkopcache" == "1" ]; then
+rm -rf /tmp/vpsscriptopcache
+mkdir -p /tmp/vpsscriptopcache
+cp -r /etc/php.d/opcache.ini /tmp/vpsscriptopcache
+rm -rf /etc/php.d/*opcache.ini
+cp -r /tmp/vpsscriptopcache/opcache.ini /etc/php.d
+rm -rf /tmp/vpsscriptopcache
+rm -rf /tmp/vpsscriptcheckopcache.tmp
+fi 
+fi
+if [ ! -f /etc/vpsscript/opcache.blacklist ]; then
+cat > "/etc/vpsscript/opcache.blacklist" <<END
+/home/$mainsite/
+/home/*/public_html/wp-content/plugins/backwpup/*
+/home/*/public_html/wp-content/plugins/duplicator/*
+/home/*/public_html/wp-content/plugins/updraftplus/*
+END
+fi
+
+zen_opcache_run () {
+	if [ -f /etc/php.d/opcache.ini ]; then
+if [ "$(grep opcache.blacklist /etc/php.d/opcache.ini)" == "" ]; then
+echo "opcache.blacklist_filename=/etc/vpsscript/opcache.blacklist" >> /etc/php.d/opcache.ini
+fi 
+/etc/vpsscript/menu/opcache/vpsscript-dang-bat-opcache-menu
+fi
+if [ -f /etc/php.d/opcache.bak ]; then
+if [ "$(grep opcache.blacklist /etc/php.d/opcache.bak)" == "" ]; then
+echo "opcache.blacklist_filename=/etc/vpsscript/opcache.blacklist" >> /etc/php.d/opcache.bak
+fi 
+/etc/vpsscript/menu/opcache/vpsscript-dang-tat-opcache-menu
+fi
+clear
+echo "========================================================================="
+echo "vpsscript can not find zend opcache in your system"
+vpsscript
+}
+
+if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "6" ]; then 
+	if [ "$(/sbin/service php-fpm status | awk 'NR==1 {print $5}')" == "running..." ]; then
+zen_opcache_run
+	else
+service php-fpm start
+			if [ "$(/sbin/service php-fpm status | awk 'NR==1 {print $5}')" == "running..." ]; then
+zen_opcache_run
+		else
+	clear
+	echo "========================================================================="
+	#echo "Sorry, PHP-FPM stopped. Start it before use this function!"
+	echo "Sorry, PHP-FPM dang stopped. Hay bat len truoc khi dung chuc nang nay!"
+	vpsscript
+		fi
+fi
+fi
+
+#if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "7" ]; then 
+if [ ! "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "6" ]; then 
+	if [ "`systemctl is-active php-fpm.service`" == "active" ]; then
+zen_opcache_run
+	else
+systemctl start php-fpm.service
+	if [ "`systemctl is-active php-fpm.service`" == "active" ]; then
+zen_opcache_run
+		else
+	clear
+	echo "========================================================================="
+	#echo "Sorry, PHP-FPM stopped. Start it before use this function!"
+	echo "Sorry, PHP-FPM dang stopped. Hay bat len truoc khi dung chuc nang nay!"
+	vpsscript
+		fi
+fi
+fi
+
+
+
+
+

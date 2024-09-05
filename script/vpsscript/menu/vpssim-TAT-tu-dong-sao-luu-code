@@ -1,0 +1,36 @@
+#!/bin/sh
+
+. /home/vpsscript.conf
+website=$(cat /tmp/websiteautobackup)
+websiteTO=`echo $website | tr '[a-z]' '[A-Z]'`
+echo "-------------------------------------------------------------------------"
+echo "Hien $websiteTO dang BAT che do tu dong backup"
+echo "-------------------------------------------------------------------------"
+read -r -p "Ban muon TAT che do Auto backup cho $website  ? [y/N] " response
+case $response in
+    [yY][eE][sS]|[yY]) 
+    echo "-------------------------------------------------------------------------"
+    echo "Please wait ..."
+sleep 1
+rm -rf /bin/vpsscript-backupcode-$website
+if [ -f /etc/cron.d/vpsscript.code.cron ]; then
+cat > "/tmp/removebackupcode" <<END
+sed -i '/vpsscript-backupcode-$website/d' /etc/cron.d/vpsscript.code.cron
+END
+chmod +x /tmp/removebackupcode
+/tmp/removebackupcode 
+rm -rf /tmp/removebackupcode
+service crond restart
+fi
+clear
+echo "========================================================================="
+echo "TAT che do Auto backup cho $website thanh cong."
+/etc/vpsscript/menu/vpsscript-sao-luu
+        ;;
+    *)
+        clear
+echo "========================================================================= "
+echo "Huy TAT Auto Backup cho $website"
+/etc/vpsscript/menu/vpsscript-sao-luu
+        ;;
+esac

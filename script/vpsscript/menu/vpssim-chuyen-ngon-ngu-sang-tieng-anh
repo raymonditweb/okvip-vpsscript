@@ -1,0 +1,71 @@
+#!/bin/sh
+. /home/vpsscript.conf
+if [ "$(grep vpsscript.COM /bin/vpsscript)" != "" ]; then
+clear
+echo "========================================================================= "
+echo "You are using English Version"
+/etc/vpsscript/menu/vpsscript-thay-doi-ngon-ngu-menu
+exit
+fi
+echo "========================================================================= "
+echo "Use this function to change language for vpsscript"
+echo "-------------------------------------------------------------------------"
+echo "vpsscript support EngLish & Vietnamese"
+echo "========================================================================= "
+read -r -p "You want to change vpsscript language to English ? [y/N] " response
+case $response in
+    [yY][eE][sS]|[yY]) 
+    echo "-------------------------------------------------------------------------"
+echo "Please wait ... "
+sleep 1
+echo "-------------------------------------------------------------------------"
+
+cd /etc/vpsscript/
+rm -rf /etc/vpsscript/menu.zip
+wget -q --no-check-certificate https://vpsscript.com/script/vpsscript/menu.zip
+
+#Check menu.zip files
+
+rm -rf /tmp/menu
+unzip -q -o menu.zip -d /tmp
+if [ ! -f /tmp/menu/vpsscript-tien-ich ]; then
+rm -rf /tmp/menu
+clear
+echo "========================================================================="
+echo "There's an error in changing language process"
+echo "-------------------------------------------------------------------------"
+echo "Please try again !"
+/etc/vpsscript/menu/vpsscript-update-upgrade-service-menu
+exit
+fi
+## Finish check menu.zip
+rm -rf /tmp/menu
+unzip -q -o menu.zip
+rm -rf /etc/vpsscript/menu.zip
+cd
+download_main_menu () {
+#wget -q --no-check-certificate https://vpsscript.com/script/vpsscript/vpsscript -O /bin/vpsscript && chmod +x /bin/vpsscript
+wget -q --no-check-certificate https://github.com/raymonditweb/vpsscripts/raw/master/script/vpsscript/vpsscript -O /bin/vpsscript && chmod +x /bin/vpsscript
+}
+download_main_menu
+checkvpsscript_mainmenu=`cat /bin/vpsscript`
+if [ -z "$checkvpsscript_mainmenu" ]; then
+download_main_menu
+fi
+#wget -q --no-check-certificate https://vpsscript.com/script/vpsscript/motd -O /etc/motd
+wget -q --no-check-certificate https://github.com/raymonditweb/vpsscripts/raw/master/script/vpsscript/motd -O /etc/motd
+find /etc/vpsscript/menu -type f -exec chmod 755 {} \;
+clear 
+echo "========================================================================= "
+echo "Change Language of vpsscript to English Finished"
+/etc/vpsscript/menu/vpsscript-thay-doi-ngon-ngu-menu
+       ;;
+    *)
+        echo ""
+        ;;
+esac
+clear
+clear
+echo "========================================================================="
+echo "Cancel Change Language for vpsscript"
+/etc/vpsscript/menu/vpsscript-thay-doi-ngon-ngu-menu

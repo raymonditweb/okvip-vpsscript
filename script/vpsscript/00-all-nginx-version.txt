@@ -1,0 +1,8 @@
+All Nginx Versions for OKVIP-VPSSCRIPT Server ! http://nginx.org/en/download.html
+|1.24.0|
+|1.22.1|
+|1.22.0|
+|1.20.2|
+|1.20.1|
+|1.18.0|
+|1.11.4|

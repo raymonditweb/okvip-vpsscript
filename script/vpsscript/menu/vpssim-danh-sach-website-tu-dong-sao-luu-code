@@ -1,0 +1,63 @@
+#!/bin/sh
+. /home/vpsscript.conf
+echo "-------------------------------------------------------------------------"
+echo "Please wait ..."
+sleep 1
+rm -rf /tmp/vpsscript-websitelist
+ls /etc/nginx/conf.d > /tmp/vpsscript-websitelist
+sed -i 's/\.conf//g' /tmp/vpsscript-websitelist 
+rm -rf /tmp/checkautobackupvpsscript
+mkdir -p /tmp/checkautobackupvpsscript
+checkautobackup=$(cat /tmp/vpsscript-websitelist)
+rm -rf /tmp/chitietbackupauto
+randomcode=`date |md5sum |cut -c '1-12'`
+for websitecheck in $checkautobackup 
+do
+if [ -f /bin/vpsscript-backupcode-$websitecheck ]; then
+ if [ -f /etc/cron.d/vpsscript.code.cron ]; then
+     if [ ! "$(grep vpsscript-backupcode-$websitecheck /etc/cron.d/vpsscript.code.cron)" == "" ]; then
+     touch /tmp/checkautobackupvpsscript/$websitecheck
+     if [ ! -f /tmp/chitietbackupauto ]; then
+     touch /tmp/chitietbackupauto
+     fi
+	if [ "$(grep vpsscript /tmp/chitietbackupauto)" == "" ]; then
+	echo "=========================================================================" >> /tmp/chitietbackupauto
+	echo "Link Download Backup Cho Website - Created by vpsscript" >> /tmp/chitietbackupauto
+	echo "=========================================================================" >> /tmp/chitietbackupauto
+	echo "Luu Y:" >> /tmp/chitietbackupauto
+	echo "-------------------------------------------------------------------------" >> /tmp/chitietbackupauto
+	echo "Cac Link Download Backup Cua Website Chi Kha Dung Khi Website Tren Server" >> /tmp/chitietbackupauto
+	echo "-------------------------------------------------------------------------" >> /tmp/chitietbackupauto
+	echo "Duoc Backup Thanh Cong. " >> /tmp/chitietbackupauto
+	fi
+pathname=$(grep "\/home\/$mainsite\/private_html\/backup\/$websitecheck" /bin/vpsscript-backupcode-$websitecheck | awk 'NR==6 {print $3}')
+filename=$(basename $pathname)
+echo "=========================================================================" >> /tmp/chitietbackupauto
+echo "Website $websitecheck:" >> /tmp/chitietbackupauto
+echo "-------------------------------------------------------------------------" >> /tmp/chitietbackupauto
+echo "http://$serverip:$priport/backup/$websitecheck/$filename" >> /tmp/chitietbackupauto
+echo "-------------------------------------------------------------------------" >> /tmp/chitietbackupauto
+echo "" >> /tmp/chitietbackupauto    
+     fi
+ fi
+fi  
+done
+if [  "$(ls -1 /tmp/checkautobackupvpsscript | wc -l)" == "0" ]; then
+clear
+echo "========================================================================="
+echo "Hien tai khong co website nao duoc BAT tu dong backup"
+else
+rm -rf /home/$mainsite/private_html/linkAUTOBackupWeb*
+mv /tmp/chitietbackupauto /home/$mainsite/private_html/linkAUTOBackupWeb-$randomcode.txt
+clear
+echo "========================================================================="
+echo "Hien tai co $(ls -1 /tmp/checkautobackupvpsscript | wc -l) website dang bat Auto Backup code"
+echo "-------------------------------------------------------------------------"
+ls /tmp/checkautobackupvpsscript  | pr -2 -t
+echo "========================================================================="
+echo "List Link Download File Backup:"
+echo "-------------------------------------------------------------------------"
+echo "http://$serverip:$priport/linkAUTOBackupWeb-$randomcode.txt"
+fi
+rm -rf /tmp/*vpsscript*
+/etc/vpsscript/menu/vpsscript-sao-luu

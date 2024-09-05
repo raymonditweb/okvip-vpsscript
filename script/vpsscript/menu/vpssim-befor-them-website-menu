@@ -1,0 +1,12 @@
+#!/bin/sh
+. /home/vpsscript.conf
+if [ ! -f /home/DBinfo.txt ]; then
+echo "========================================================================="  > /home/DBinfo.txt
+echo "THONG TIN DATABASE TREN VPS"  >> /home/DBinfo.txt
+echo "========================================================================="  >> /home/DBinfo.txt
+echo "" >> /home/DBinfo.txt
+echo "" >> /home/DBinfo.txt
+fi
+
+# centos 6, 7
+/etc/vpsscript/menu/vpsscript-them-website-menu

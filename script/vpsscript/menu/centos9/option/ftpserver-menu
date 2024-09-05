@@ -1,0 +1,38 @@
+#!/bin/bash
+. /home/vpsscript.conf
+
+# kiểm tra và cài đặt FTP nếu chưa có
+/etc/vpsscript/menu/centos9/inc/ftpserver-menu-before
+
+#
+if [ ! -f /etc/pure-ftpd/pureftpd.passwd ]; then
+touch /etc/pure-ftpd/pureftpd.passwd
+fi
+
+#
+prompt="Lua chon cua ban (0-Backspace):"
+options=("Create FTP account" "Reset FTP password" "View FTP password" )
+printf "=========================================================================\n"
+printf "                vpsscript - Quan Ly VPS/ Server by EchBay.com \n"
+printf "=========================================================================\n"
+printf "                            Quan Ly FTP Server \n"
+printf "=========================================================================\n"
+echo ""
+
+#
+PS3="$prompt"
+select opt in "${options[@]}"; do 
+
+    case "$REPLY" in
+        1) /etc/vpsscript/menu/centos9/option/tao-ftp-user-cho-domain;;
+        2) /etc/vpsscript/menu/centos9/option/reset-ftp-password;;
+        3) /etc/vpsscript/menu/centos9/option/view-userftp-password;;
+        0) clear && /etc/vpsscript/menu/centos9/option/account-manager-menu;;
+        *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu !";continue;;
+
+    esac
+
+done
+
+#
+exit

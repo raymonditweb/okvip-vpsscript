@@ -1,0 +1,49 @@
+#!/bin/bash
+if [ -f /swapfile ]; then
+echo "========================================================================="
+echo "Chuc nang nay chi ho tro xoa Swap do vpsscript tao ra truoc do"
+echo "-------------------------------------------------------------------------"
+echo "Voi Swap co san tren he thong, vpsscript khong the can thiep duoc"
+echo "========================================================================="
+read -r -p "Ban muon xoa swap tren server? [y/N] " response
+case $response in
+    [yY][eE][sS]|[yY]) 
+echo "-------------------------------------------------------------------------"
+echo "Please wait ..."
+sleep 1
+swapoff /swapfile
+rm -rf /swapfile
+clear
+echo "========================================================================= "
+echo "Ban xoa swap thanh cong.  "
+echo "-------------------------------------------------------------------------"
+echo "Bay gio ban co the tao swap moi! "
+if [ -f /etc/vpsscript/menu/swap/vpsscript-them-xoa-swap-vps-menu ]; then
+/etc/vpsscript/menu/swap/vpsscript-them-xoa-swap-vps-menu
+fi
+
+;;
+    *)
+       clear
+echo "========================================================================= "
+echo "Ban huy bo xoa SWAP."
+if [ -f /etc/vpsscript/menu/swap/vpsscript-them-xoa-swap-vps-menu ]; then
+/etc/vpsscript/menu/swap/vpsscript-them-xoa-swap-vps-menu
+fi
+        ;;
+esac
+clear
+if [ -f /etc/vpsscript/menu/swap/vpsscript-them-xoa-swap-vps-menu ]; then
+/etc/vpsscript/menu/swap/vpsscript-them-xoa-swap-vps-menu
+fi
+else
+clear
+echo "========================================================================= "
+echo "Ban chua tao swap tren VPS !"
+echo "-------------------------------------------------------------------------"
+echo "Hoac VPS khong ho tro ban tao them SWAP."
+if [ -f /etc/vpsscript/menu/swap/vpsscript-them-xoa-swap-vps-menu ]; then
+/etc/vpsscript/menu/swap/vpsscript-them-xoa-swap-vps-menu
+fi
+exit
+fi

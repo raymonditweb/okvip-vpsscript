@@ -1,0 +1,36 @@
+#!/bin/bash
+if [ ! -f /etc/cron.d/vpsscript.code.cron ]; then
+touch /etc/cron.d/vpsscript.code.cron
+fi
+prompt="Lua chon cua ban (0-Thoat):"
+options=( "Them Website" "Them Park & Redirect Domain" "Them website + Wordpress (Auto Setup)" "Them website + Forum Code (Auto Setup)" "Them Website + Opencart (Auto Setup)" "Them website + Wordpress (Download Code)" "Them Website + Joomla (Download Code)" "Them Website + Drupal (Download Code)" "List Website Tren Server")
+printf "=========================================================================\n"
+printf "                vpsscript - Quan Ly VPS/ Server by EchBay.com \n"
+printf "=========================================================================\n"
+printf "                          Them Website Vao Server\n"
+printf "=========================================================================\n"
+
+PS3="$prompt"
+select opt in "${options[@]}" ; do 
+
+    case "$REPLY" in
+
+    1) /etc/vpsscript/menu/vpsscript-them-website;;
+    2) /etc/vpsscript/menu/vpsscript-them-redirect-park-domain-menu;;
+    3) /etc/vpsscript/menu/vpsscript-them-website-auto-setup-wordpress-menu;;
+	4) /etc/vpsscript/menu/vpsscript-them-website-forum-code-menu;;
+    5) /etc/vpsscript/menu/vpsscript-them-website-auto-setup-opencart-menu;;
+    6) /etc/vpsscript/menu/vpsscript-them-website-wp;;
+    7) /etc/vpsscript/menu/vpsscript-them-website-joomla;;
+    8) /etc/vpsscript/menu/vpsscript-them-website-drupal;;
+    9) /etc/vpsscript/menu/vpsscript-list-website-tren-vps;; 
+    10) clear && vpsscript;;
+    0) clear && vpsscript;;
+        *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu !";continue;;
+
+    esac
+
+done
+
+
+

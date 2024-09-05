@@ -1,0 +1,26 @@
+#!/bin/sh
+prompt="Lua chon cua ban (0-Thoat):"
+options=("Full Backup Database" "Link download backup file" "Restore Databases" )
+printf "=========================================================================\n"
+printf "               vpsscript - Quan Ly VPS/ Server by EchBay.com \n"
+printf "=========================================================================\n"
+printf "                     Backup & Restore Full Database\n"
+printf "=========================================================================\n"
+
+PS3="$prompt"
+select opt in "${options[@]}" ; do 
+
+    case "$REPLY" in
+
+    1 ) /etc/vpsscript/menu/vpsscript-befor-sao-luu-tat-ca-database;;
+    2 ) /etc/vpsscript/menu/vpsscript-link-sao-luu-all-database;;
+    3 ) /etc/vpsscript/menu/vpsscript-befor-phuc-hoi-tat-ca-database;;
+    4 ) clear && /etc/vpsscript/menu/vpsscript-them-xoa-database;;
+    0 ) clear && /etc/vpsscript/menu/vpsscript-them-xoa-database;;
+
+    
+    *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu !";continue;;
+
+    esac
+
+done

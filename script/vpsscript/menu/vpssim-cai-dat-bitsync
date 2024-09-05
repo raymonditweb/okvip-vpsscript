@@ -1,0 +1,147 @@
+#!/bin/sh
+. /home/vpsscript.conf
+prompt="Lua chon cua ban: "
+options=( "2.0" "1.4")
+echo "========================================================================="
+echo "Su dung chuc nang nay de cai dat BitTorrent Sync cho Server"
+echo "-------------------------------------------------------------------------"
+echo "Lua Chon Phien Ban BitTorrent Sync"
+echo "-------------------------------------------------------------------------"
+PS3="$prompt"
+select opt in "${options[@]}"; do 
+
+    case "$REPLY" in
+    1) luachonphienban="phienban20"; break;;
+    2) luachonphienban="phienban14"; break;;
+    *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu";continue;;
+    esac  
+done
+echo "========================================================================="
+echo "Cai Dat BitTorrent Sync Port."
+echo "-------------------------------------------------------------------------"
+echo "BTSync Port khong duoc trung voi SSH port, phpMyAdmin Port va phai la so"
+echo "-------------------------------------------------------------------------"
+echo "tu nhien nam trong khoang (30000 - 50000)."
+echo "-------------------------------------------------------------------------"
+echo -n "Nhap vao port btsync ban muon su dung [ENTER]: " 
+read btsyncport
+if [ "$btsyncport" = "" ]; then
+clear
+echo "========================================================================="
+echo "Ban nhap sai, vui long nhap lai"
+/etc/vpsscript/menu/vpsscript-bitsync-menu
+exit
+fi
+if [ "$priport" = "$btsyncport" ]; then
+clear
+echo "========================================================================="
+echo "Port ban nhap giong phpmyadmin port."
+echo "-------------------------------------------------------------------------"
+echo "Ban hay lam lai  !"
+/etc/vpsscript/menu/vpsscript-bitsync-menu
+exit
+fi
+if [[ ! ${btsyncport} =~ ^[0-9]+$ ]] ;then 
+clear
+echo "========================================================================="
+echo "Port ban nhap: ${btsyncport} khong phai la so tu nhien."
+echo "-------------------------------------------------------------------------"
+echo "Ban hay lam lai !" 
+/etc/vpsscript/menu/vpsscript-bitsync-menu
+exit
+fi
+if ! [[ $btsyncport -ge 30000 && $btsyncport -le 50000  ]] ; then  
+clear
+echo "========================================================================="
+echo "$btsyncport khong dung!"
+echo "-------------------------------------------------------------------------"
+echo "Port cho BTsync phai la so tu nhien nam trong khoang (30000 - 50000)."
+echo "-------------------------------------------------------------------------"
+echo "Ban hay lam lai !"
+/etc/vpsscript/menu/vpsscript-bitsync-menu
+exit
+fi  
+
+random=`date |md5sum |cut -c '1-5'`
+username=vpsscript-$random
+password=`date |md5sum |cut -c '6-20'`
+rm -rf /etc/vpsscript/btsync.info
+rm -rf /etc/btsync-vpsscript
+mkdir -p /etc/btsync-vpsscript
+mkdir -p /etc/btsync-vpsscript/.sync
+mkdir -p /etc/btsync-vpsscript/.btsync
+
+rm -rf /etc/vpsscript/btsync.info
+    cat > "/etc/vpsscript/btsync.info" <<END
+username = $username
+password = $password
+btport = $btsyncport
+END
+
+if [ "$luachonphienban" = "phienban20" ]; then
+echo "-------------------------------------------------------------------------"
+echo "Sometimes, it can take some minutes to finish. Please wait..." && sleep 1
+#wget -q https://vpsscript.com/script/vpsscript/BTsync/2.0/$(uname -m)/btsync -O /usr/bin/btsync && chmod +x /usr/bin/btsync
+wget -q https://github.com/itvn9online/OKVIP-VPSSCRIPT-software/raw/master/BTsync/2.0/$(uname -m)/btsync -O /usr/bin/btsync && chmod +x /usr/bin/btsync
+cat > "/etc/btsync-vpsscript/sync.conf" <<END
+{ 
+  "device_name": "vpsscript",
+  "listening_port" : 0,
+  "storage_path" : "/etc/btsync-vpsscript/.sync",
+  "check_for_updates" : false, 
+  "use_upnp" : true,
+  "download_limit" : 0,                       
+  "upload_limit" : 0, 
+  "webui" :
+  {
+    "listen" : "0.0.0.0:$btsyncport",
+    "login" : "$username",
+    "password" : "$password"
+  }
+}
+END
+else 
+echo "-------------------------------------------------------------------------"
+echo "Sometimes, it can take some minutes to finish. Please wait..." && sleep 1
+#wget -q https://vpsscript.com/script/vpsscript/BTsync/1.4/$(uname -m)/btsync -O /usr/bin/btsync && chmod +x /usr/bin/btsync
+wget -q https://github.com/itvn9online/OKVIP-VPSSCRIPT-software/raw/master/BTsync/1.4/$(uname -m)/btsync -O /usr/bin/btsync && chmod +x /usr/bin/btsync
+cat > "/etc/btsync-vpsscript/sync.conf" <<END
+{ 
+  "device_name": "vpsscript",
+  "listening_port" : 0,
+  "storage_path" : "/etc/btsync-vpsscript/.btsync",
+  "check_for_updates" : false, 
+  "use_upnp" : true,
+  "download_limit" : 0,                       
+  "upload_limit" : 0, 
+  "webui" :
+  {
+    "listen" : "0.0.0.0:$btsyncport",
+    "login" : "$username",
+    "password" : "$password"
+  }
+}
+END
+fi
+
+echo "/usr/bin/btsync --config /etc/btsync-vpsscript/sync.conf" >> /etc/rc.d/rc.local
+echo "========================================================================= "
+echo "Open port: $btsyncport"
+sleep 3
+iptables -I INPUT -p tcp --dport $btsyncport -j ACCEPT
+service iptables save
+/usr/bin/btsync --config /etc/btsync-vpsscript/sync.conf
+clear
+echo "========================================================================="
+echo "Cai dat BTsync thanh cong !"
+echo "-------------------------------------------------------------------------"
+echo "Thong tin quan ly:"
+echo "-------------------------------------------------------------------------"
+echo "Link truy cap: http://$serverip:$btsyncport"
+echo "-------------------------------------------------------------------------"
+echo "User: $username | Password: $password"
+/etc/vpsscript/menu/vpsscript-bitsync-menu
+exit
+fi  
+
+

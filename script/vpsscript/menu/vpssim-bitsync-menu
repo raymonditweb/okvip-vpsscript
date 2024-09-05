@@ -1,0 +1,46 @@
+#!/bin/sh
+. /home/vpsscript.conf
+prompt="Nhap lua chon cua ban (0-Thoat):"
+if [ -f /etc/vpsscript/btsync.info ]; then
+options=("Bat/Tat BTsync" "Xem Thong Tin Quan Ly" "Thay Mat Khau Login" "Thay Btsync Port " "Change BTsync Version" "Remove BitTorent Sync      ")
+else
+options=("Bat/Tat BTsync" "Xem Thong Tin Quan Ly" "Thay Mat Khau Login" "Thay Btsync Port " "Change BTsync Version" "Cai Dat BitTorent Sync")
+fi
+printf "=========================================================================\n"
+printf "                vpsscript - Quan Ly VPS/ Server by EchBay.com \n"
+printf "=========================================================================\n"
+printf "                           Quan Ly BitTorrent Sync                                 \n"
+printf "=========================================================================\n"
+if [ -f /usr/bin/btsync ]; then
+checksize=$(du -sb /usr/bin/btsync | awk 'NR==1 {print $1}')
+if [ $checksize -gt 9000000 ]; then 
+version=2.0
+else
+version=1.4
+fi
+ver_sionbt=`echo "| Version: $version"`
+echo   "                      Status: Installed $ver_sionbt                           "
+else
+echo   "                             Status: Not Install                           "
+fi
+printf "=========================================================================\n"
+echo ""
+
+PS3="$prompt"
+select opt in "${options[@]}" ; do 
+
+    case "$REPLY" in
+
+    1) /etc/vpsscript/menu/vpsscript-tat-bat-bitsync;;
+    2) /etc/vpsscript/menu/vpsscript-hien-mat-khau-bitsync;;
+    3) /etc/vpsscript/menu/vpsscript-change-mat-khau-bitsync;;
+    4) /etc/vpsscript/menu/vpsscript-thay-doi-bitsync-port;;
+    5) /etc/vpsscript/menu/vpsscript-bitsync-thay-doi-phien-ban-bitsync;;
+    6) /etc/vpsscript/menu/vpsscript-befor-cai-dat-xoa-bitsync;;
+    #7) clear && vpsscript;;
+    0) clear && vpsscript;;
+    *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu";continue;;
+
+    esac
+done
+ 

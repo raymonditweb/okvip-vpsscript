@@ -1,0 +1,38 @@
+#!/bin/bash
+. /home/vpsscript.conf
+
+if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "6" ]; then 
+if [ "$(/sbin/service memcached status | awk 'NR==1 {print $5}')" == "running..." ]; then
+echo "-------------------------------------------------------------------------"
+echo "Please wait....";sleep 1
+echo "flush_all" | nc 127.0.0.1 11211
+clear
+echo "========================================================================= "
+
+echo "Clear memcached thanh cong !"
+/etc/vpsscript/menu/memcache/vpsscript-before-memcache-menu
+else
+clear
+echo "========================================================================= "
+echo "Memcacche dang tat tren server."
+/etc/vpsscript/menu/memcache/vpsscript-before-memcache-menu
+exit
+fi
+fi
+#if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "7" ]; then 
+if [ ! "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "6" ]; then 
+if [ "`systemctl is-active memcached.service`" == "active" ]; then
+echo "Please wait....";sleep 1
+echo "flush_all" | nc 127.0.0.1 11211
+clear
+echo "========================================================================= "
+echo "Clear memcached thanh cong !"
+/etc/vpsscript/menu/memcache/vpsscript-before-memcache-menu
+else
+clear
+echo "========================================================================= "
+echo "Memcacche dang tat tren server"
+/etc/vpsscript/menu/memcache/vpsscript-before-memcache-menu
+exit
+fi
+fi

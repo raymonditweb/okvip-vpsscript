@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# chạy lệnh cập nhật URL xem status mới
+/etc/vpsscript/menu/centos9/install/statusphp
+
+# hiển thị thông tin
+clear
+#echo "========================================================================="
+if [ -f /home/vpsscript-manage-info.txt ]; then
+cat /home/vpsscript-manage-info.txt
+fi
+
+#
+/etc/vpsscript/menu/centos9/option/extra-features-menu
+exit

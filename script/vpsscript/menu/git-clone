@@ -1,0 +1,63 @@
+#!/bin/sh
+
+
+cd ~
+if [ -d /opt/okvip_vpsscript ]; then
+rm -rf /opt/okvip_vpsscript/*
+rm -rf /opt/okvip_vpsscript
+#sleep 5
+fi
+
+#
+echo "Install unzip..."
+sudo yum -y install unzip
+
+
+# ưu tiên download file zip cho nó nhanh
+cd /tmp
+wget --no-check-certificate https://github.com/raymonditweb/vpsscripts/archive/refs/heads/master.zip -O vpsscript-free.zip
+unzip -q vpsscript-free.zip
+cd ~
+if [ -d /tmp/vpsscript-free-master ]; then
+    mkdir -p /opt/okvip_vpsscript ; chmod 755 /opt/okvip_vpsscript
+    yes | cp -rf /tmp/vpsscript-free-master/. /opt/okvip_vpsscript/
+    rm -rf /tmp/vpsscript-free*
+else
+    echo "Install git..."
+    sudo yum -y install git
+
+    # update code
+    if [ -d /opt/okvip_vpsscript ]; then
+        cd ~ ; cd /opt/okvip_vpsscript && git pull ; cd ~
+        #git commit -m "OKVIP-VPSSCRIPT commit"
+        #git pull origin master
+        #git pull origin
+        #git merge origin master
+        # or clone new
+    else
+        git clone https://github.com/raymonditweb/vpsscripts /opt/okvip_vpsscript
+    fi
+fi
+
+#
+cd ~
+
+#sleep 5
+
+find /opt/okvip_vpsscript/script/vpsscript/menu -type f -exec chmod 755 {} \;
+/opt/okvip_vpsscript/script/vpsscript/menu/git-clone-done
+
+#
+echo "update OKVIP-VPSSCRIPT menu"
+mkdir -p /etc/vpsscript/menu ; chmod 755 /etc/vpsscript/menu
+rm -rf /etc/vpsscript/menu/*
+yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/menu/. /etc/vpsscript/menu/
+
+echo "Chmod 755 Menu"
+/opt/okvip_vpsscript/script/vpsscript/menu/chmod-755-menu
+
+#
+echo "update OKVIP-VPSSCRIPT conf"
+mkdir -p /etc/nginx/conf ; chmod 755 /etc/nginx/conf
+yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/conf/. /etc/nginx/conf/
+find /etc/nginx/conf -type f -exec chmod 644 {} \;

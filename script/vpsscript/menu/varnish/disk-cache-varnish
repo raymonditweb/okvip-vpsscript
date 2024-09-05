@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# setup varnish disk cache config
+if [ ! -f /etc/sysconfig/varnish ]; then
+yes | cp -rf /etc/vpsscript/menu/varnish/sysconfig.txt /etc/sysconfig/varnish
+fi
+chmod 644 /etc/sysconfig/varnish
+
+#
+if [ -f /etc/varnish/default.vcl ]; then
+if [ ! -f /etc/varnish/default.vcl-bak ]; then
+yes | cp -rf /etc/varnish/default.vcl /etc/varnish/default.vcl-bak
+fi
+fi
+
+#
+if [ -f /etc/vpsscript/varnish.config ];then
+current_varnish_config=$(cat /etc/vpsscript/varnish.config)
+echo $current_varnish_config
+if [ -f /etc/vpsscript/menu/varnish/default-vcl-v$current_varnish_config.txt ];then
+yes | cp -rf /etc/vpsscript/menu/varnish/default-vcl-v$current_varnish_config.txt /etc/varnish/default.vcl
+fi
+fi
+
+# xoa dong dung luong cu
+#sed -i -e "/VARNISH_STORAGE_SIZE=/d" /etc/sysconfig/varnish
+# xoa cac dong trong
+#sed -i -e "/^$/d" /etc/sysconfig/varnish
+# xoa tat ca cac khoang trong o cuoi dong
+#sed -i -e "s/ *$//" /etc/sysconfig/varnish
+
+# thay bang dong moi
+checktruenumber='^[0-9]+$'
+
+# lay dung luong theo cau hinh cua nguoi dung
+if [ -f /etc/vpsscript/varnish.storage ]; then
+varnish_size=$(cat /etc/vpsscript/varnish.storage)
+else
+
+# tinh dung luong varnish cache dang su dung
+if [ -f /var/lib/varnish/varnish_storage.bin ]; then
+#ls -l /var/lib/varnish/varnish_storage.bin
+#ls -l --b=M /var/lib/varnish/varnish_storage.bin | cut -d " " -f5
+current_varnish_storage=$(ls -l /var/lib/varnish/varnish_storage.bin | cut -d " " -f5)
+#echo $current_varnish_storage
+current_varnish_storage=$(($current_varnish_storage/1024/1024/1024))
+#echo $current_varnish_storage
+else
+current_varnish_storage=0
+fi
+
+# tinh toan dung luong o dia con dung
+disfree=$(calc $(df $PWD | awk '/[0-9]%/{print $(NF-2)}')/1024)
+echo "Disk free: "$disfree
+diskrecommended=$(($disfree/1024))
+#echo "Disk cache recommended: "$diskrecommended
+
+varnish_size=$(($current_varnish_storage+$diskrecommended))
+#echo $varnish_size
+varnish_size=$(($varnish_size-3))
+#echo $varnish_size
+echo "Disk cache recommended: "$varnish_size"G"
+
+fi
+
+if ! [[ $varnish_size =~ $checktruenumber ]] ; then
+varnish_size=12
+fi
+
+#echo "VARNISH_STORAGE_SIZE="$varnish_size"G" >> /etc/sysconfig/varnish
+
+cat > "/etc/sysconfig/varnish" <<END
+NFILES=131072
+MEMLOCK=82000
+NPROCS="unlimited"
+RELOAD_VCL=1
+VARNISH_VCL_CONF=/etc/varnish/default.vcl
+VARNISH_LISTEN_PORT=80
+VARNISH_ADMIN_LISTEN_ADDRESS=127.0.0.1
+VARNISH_ADMIN_LISTEN_PORT=6082
+VARNISH_SECRET_FILE=/etc/varnish/secret
+VARNISH_MIN_THREADS=50
+VARNISH_MAX_THREADS=5000
+VARNISH_STORAGE_FILE=/var/lib/varnish/varnish_storage.bin
+VARNISH_STORAGE_SIZE=${varnish_size}G
+VARNISH_STORAGE="file,\${VARNISH_STORAGE_FILE},\${VARNISH_STORAGE_SIZE}"
+VARNISH_TTL=120
+DAEMON_OPTS="-a \${VARNISH_LISTEN_ADDRESS}:\${VARNISH_LISTEN_PORT} \
+-f \${VARNISH_VCL_CONF} \
+-T \${VARNISH_ADMIN_LISTEN_ADDRESS}:\${VARNISH_ADMIN_LISTEN_PORT} \
+-p thread_pool_min=\${VARNISH_MIN_THREADS} \
+-p thread_pool_max=\${VARNISH_MAX_THREADS} \
+-S \${VARNISH_SECRET_FILE} \
+-s \${VARNISH_STORAGE}"
+
+END

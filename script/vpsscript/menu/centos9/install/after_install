@@ -1,0 +1,38 @@
+#!/bin/bash
+. /home/vpsscript.conf
+
+# tạo script in thông tin quản lý vps mỗi lần đăng nhập
+#rm -rf /etc/motd
+#yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/motd /etc/motd
+echo "" > /etc/motd
+
+#
+rm -rf /root/.info.sh
+yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/centos9/sh/.info.sh /root/.info.sh && chmod +x /root/.info.sh
+
+# remove
+sed -i -e "/\/root\/\.info\.sh/d" /root/.bash_profile
+# add
+echo "sh /root/.info.sh" >> /root/.bash_profile
+
+
+
+#
+rm -rf /bin/vpsscript
+yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/vpsscript /bin/vpsscript && chmod +x /bin/vpsscript
+
+
+
+#
+cd /etc/vpsscript/
+mkdir -p /etc/vpsscript/menu ; chmod 755 /etc/vpsscript/menu
+yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/menu/. /etc/vpsscript/menu/
+cd ~
+
+
+
+#
+mkdir -p /home/vpsscript.demo/errorpage_html ; chmod 755 /home/vpsscript.demo/errorpage_html
+yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/errorpage_html/. /home/vpsscript.demo/errorpage_html/
+mkdir -p /etc/vpsscript/errorpage_html ; chmod 755 /etc/vpsscript/errorpage_html
+yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/errorpage_html/. /etc/vpsscript/errorpage_html/

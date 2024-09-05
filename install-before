@@ -1,0 +1,130 @@
+#!/bin/sh
+
+#
+kiemtraemail3="^(([-a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~])+\.)*[-a-zA-Z0-9\!#\$%\&\'*+/=?^_\`{\|}~]+@\w((-|\w)*\w)*\.(\w((-|\w)*\w)*\.)*\w{2,24}$";
+
+
+
+#
+clear
+
+
+
+#
+echo "=========================================================================="
+echo "--------------------------------------------------------------------------"
+echo "Thiet lap thong tin cai dat/ Setup installation information:"
+echo "--------------------------------------------------------------------------"
+
+#default phpMyAdmin Port is 3369
+svport="3369"
+#
+#echo -n "Enter phpMyAdmin Port number (1000 - 65535): " 
+#read svport
+if [ "$svport" = "80" ] || [ "$svport" = "443" ] || [ "$svport" = "22" ] || [ "$svport" = "3306" ] || [ "$svport" = "25" ] || [ "$svport" = "465" ] || [ "$svport" = "587" ] || [ "$svport" = "21" ]; then
+svport="1241"
+echo "phpMyAdmin khong the trung voi port cua dich vu khac!"
+echo "OKVIP-VPSSCRIPT dat phpMyAdmin port mac dinh la: "$svport
+echo "--------------------------------------------------------------------------"
+echo "phpMyAdmin cannot match the port of another service!"
+echo "phpMyAdmin port default set is: "$svport
+sleep 5
+fi
+
+if [ "$svport" = "" ] ; then
+clear
+echo "=========================================================================="
+echo "phpMyAdmin Port number khong duoc de trong!"
+echo "Ban hay kiem tra lai..." 
+echo "--------------------------------------------------------------------------"
+echo "phpMyAdmin Port number can't be empty!"
+echo "Please check again..."
+bash /root/vpsscript-setup
+exit
+fi
+
+if ! [[ $svport -ge 1000 && $svport -le 65535  ]] ; then  
+clear
+echo "=========================================================================="
+echo "$svport khong hop le!"
+echo "Port hop le la so tu nhien nam trong khoang (1000 - 65535)."
+echo "Ban hay kiem tra lai..." 
+echo "--------------------------------------------------------------------------"
+echo "$svport invalid!"
+echo "Port is an integer in the range (1000 - 65535)"
+echo "Please check again..."
+echo "-------------------------------------------------------------------------"
+read -p "Nhan [Enter] de tiep tuc (Press [Enter] to continue)..."
+clear
+bash /root/vpsscript-setup
+exit
+fi
+
+
+#
+echo "--------------------------------------------------------------------------"
+#echo -n "Enter admin email: " 
+#read vpsscriptemail
+#
+vpsscriptemail = "admin@okvip.com"
+if [ "$vpsscriptemail" = "" ]; then
+clear
+echo "=========================================================================="
+echo "Admin email khong duoc de trong!"
+echo "Ban hay kiem tra lai..." 
+echo "--------------------------------------------------------------------------"
+echo "Admin email can't be empty!"
+echo "Please check again..."
+echo "-------------------------------------------------------------------------"
+read -p "Nhan [Enter] de tiep tuc (Press [Enter] to continue)..."
+clear
+bash /root/vpsscript-setup
+exit
+fi
+
+if [[ ! "$vpsscriptemail" =~ $kiemtraemail3 ]]; then
+clear
+echo "=========================================================================="
+echo "Email $vpsscriptemail khong dung dinh dang!"
+echo "Ban hay kiem tra lai..." 
+echo "--------------------------------------------------------------------------"
+echo "Email $vpsscriptemail incorrect format is supported!"
+echo "Please check again..."
+echo "-------------------------------------------------------------------------"
+read -p "Nhan [Enter] de tiep tuc (Press [Enter] to continue)..."
+clear
+bash /root/vpsscript-setup
+exit
+fi
+
+
+
+
+#
+svip=$(wget https://cloud.echbay.com/plains/ip -O - -q ; echo)
+cpuname=$( awk -F: '/model name/ {name=$2} END {print name}' /proc/cpuinfo )
+cpucores=$( awk -F: '/model name/ {core++} END {print core}' /proc/cpuinfo )
+cpufreq=$( awk -F: ' /cpu MHz/ {freq=$2} END {print freq}' /proc/cpuinfo )
+#svram=$( free -m | awk 'NR==2 {print $2}' )
+svram=$( free -m | awk '/Mem:/ {print $2}' )
+#svhdd=$( df -h | awk 'NR==2 {print $2}' )
+svhdd=$( df -h | awk '/\/dev\/sda/ {print $2}' )
+#svswap=$( free -m | awk 'NR==3 {print $2}' )
+svswap=$( free -m | awk '/Swap:/ {print $2}' )
+checktruenumber='^[0-9]+$'
+
+#
+#rm -f /tmp/vpsscript.conf
+cat > "/tmp/vpsscript.conf" <<END
+svport="$svport"
+vpsscriptemail="$vpsscriptemail"
+cpuname="$cpuname"
+cpucores="$cpucores"
+cpufreq="$cpufreq"
+svram="$svram"
+svhdd="$svhdd"
+svswap="$svswap"
+svip="$svip"
+checktruenumber="$checktruenumber"
+END
+chmod +x /tmp/vpsscript.conf

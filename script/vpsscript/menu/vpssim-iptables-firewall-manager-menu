@@ -1,0 +1,37 @@
+#!/bin/bash
+prompt="Lua chon cua ban (0-Thoat):"
+options=( "Mo Port (INPUT)" "Close Port (INPUT)" "Kiem Tra Service Dung Port" "Sao Luu IPtables Rules" "Phuc Hoi IPtables Rules" "Xem IPtables Rules Hien Tai" )
+printf "=========================================================================\n"
+printf "                vpsscript - Quan Ly VPS/ Server by EchBay.com \n"
+printf "=========================================================================\n"
+printf "                       Quan Ly IPtables Firewall\n"
+printf "=========================================================================\n"
+
+PS3="$prompt"
+select opt in "${options[@]}" ; do 
+
+    case "$REPLY" in
+
+    1) /etc/vpsscript/menu/tienich/vpsscript-mo-port-ip-tables;;
+    2) /etc/vpsscript/menu/tienich/vpsscript-dong-port-ip-tables;;
+    3) /etc/vpsscript/menu/tienich/vpsscript-check-port-service;;
+    4) /etc/vpsscript/menu/tienich/vpsscript-sao-luu-iptables;;
+    5) /etc/vpsscript/menu/tienich/vpsscript-phuc-hoi-iptables;;
+    6) /etc/vpsscript/menu/tienich/vpsscript-view-iptables-rules;;
+    7) clear && /bin/vpsscript;;
+    0) clear && vpsscript;;
+
+            *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu !";continue;;
+
+    esac
+done
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# https://packagecloud.io/varnishcache/
+# https://packagecloud.io/varnishcache/varnish61/install#bash-rpm
+
+/etc/vpsscript/menu/varnish/install-varnish-begin
+echo "6.1" > /etc/vpsscript/varnish.version
+echo "6" > /etc/vpsscript/varnish.config
+
+curl -s https://packagecloud.io/install/repositories/varnishcache/varnish61/script.rpm.sh | sudo bashbash
+
+/etc/vpsscript/menu/varnish/install-varnish-end

@@ -1,0 +1,10 @@
+#!/bin/bash 
+
+#
+echo "========================================================================="
+echo "Tao website, tai wordpress va cai dat website demo"
+echo "Add website, download wordpress and auto install demo"
+
+#
+/etc/vpsscript/menu/centos9/option/them-website "demo"
+exit

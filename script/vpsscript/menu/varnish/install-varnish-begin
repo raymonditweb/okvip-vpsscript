@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ ! -f /etc/vpsscript/varnish.version ]; then
+touch /etc/vpsscript/varnish.version
+fi
+
+chown -R root:root /etc/vpsscript/varnish.version
+chmod 644 /etc/vpsscript/varnish.version
+> /etc/vpsscript/varnish.version

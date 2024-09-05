@@ -1,0 +1,7 @@
+#!/bin/bash
+
+. /home/vpsscript.conf
+clear
+echo "========================================================================="
+echo "Cai dat vpsscript phien ban tieng ANH tai vpsscript.COM"
+vpsscript

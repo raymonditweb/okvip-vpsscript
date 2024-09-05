@@ -1,0 +1,23 @@
+#!/bin/bash
+
+clear
+echo "========================================================================="
+echo "---------------------------- vpsscript -------------------------------"
+if [ -f /etc/vpsscript/vpsscript.version ]; then
+echo "vpsscript version: "$(cat /etc/vpsscript/vpsscript.version)
+fi
+echo "------------------------------ PHP --------------------------------"
+echo "PHP version: "$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;")
+echo "------------------------- phpmyadmin ------------------------------"
+if [ -f /etc/vpsscript/phpmyadmin.version ]; then
+echo "phpmyadmin version: "$(cat /etc/vpsscript/phpmyadmin.version)
+fi
+echo "------------------------------ LDD --------------------------------"
+ldd --version
+echo "----------------------------- nginx -------------------------------"
+nginx -V
+echo "---------------------------- openssl ------------------------------"
+openssl version
+echo "========================================================================="
+
+/etc/vpsscript/menu/vpsscript-update-upgrade-service-menu

@@ -1,0 +1,204 @@
+#!/bin/sh 
+. /home/vpsscript.conf
+curTime=$(date +%d)
+checktruenumber='^[0-9]+$'
+if [ $(id -u) != "0" ]; then
+    printf "Co loi ! OKVIP-VPSSCRIPT chi chay tren user root !\n"
+    exit
+fi
+
+
+
+if [ ! -f /tmp/00-all-nginx-version.txt ]; then
+touch -a -m -t 201601180130.09 /tmp/00-all-nginx-version.txt  
+fi
+
+fileTime=$(date -r /tmp/00-all-nginx-version.txt +%d)
+if [ ! "$fileTime" == "$curTime" ]; then
+rm -rf /tmp/00-all-nginx-version.txt
+#wget -q https://vpsscript.echbay.com/script/vpsscript/00-all-nginx-version.txt -O /tmp/00-all-nginx-version.txt
+wget --no-check-certificate -q https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/vpsscript/00-all-nginx-version.txt -O /tmp/00-all-nginx-version.txt
+touch /tmp/00-all-nginx-version.txt
+Nginx1=`cat /etc/vpsscript/nginx.version`
+checksize=$(du -sb /tmp/00-all-nginx-version.txt | awk 'NR==1 {print $1}')
+if [ $checksize -gt 14 ]; then
+Nginx3=`cat /tmp/00-all-nginx-version.txt | awk 'NR==2 {print $1}' | sed 's/|//' | sed 's/|//'`
+cat >> "/tmp/vpsscript_check_nginx" <<END
+		if [  "$(grep $Nginx1 /tmp/00-all-nginx-version.txt | sed 's/|//' | sed 's/|//')" == "$Nginx1" ]; then
+			if [ ! "$Nginx1" == "$Nginx3" ]; then
+			echo "========================================================================="
+			echo "Update for Nginx Found !  "
+			echo "-------------------------------------------------------------------------"
+			echo "Your Version: $Nginx1   |   Newest version: $Nginx3"
+			echo "-------------------------------------------------------------------------"
+			echo "How to update: OKVIP-VPSSCRIPT menu => Update System => Change Nginx Version "
+			
+			fi
+		fi
+END
+chmod +x /tmp/vpsscript_check_nginx
+/tmp/vpsscript_check_nginx
+rm -rf /tmp/vpsscript_check_nginx
+fi
+fi
+
+
+
+if [ ! -f /tmp/vpsscript.newversion ]; then
+touch -a -m -t 201602180130.09 /tmp/vpsscript.newversion  
+fi
+
+
+
+fileTime2=$(date -r /tmp/vpsscript.newversion +%d)
+if [ ! "$fileTime2" == "$curTime" ]; then
+rm -rf /tmp/vpsscript.newversion
+#wget -q https://vpsscript.echbay.com/script/vpsscript/vpsscript.newversion -O /tmp/vpsscript.newversion
+wget --no-check-certificate -q https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/version -O /tmp/vpsscript.newversion
+touch /tmp/vpsscript.newversion
+LOCALVER=`cat /etc/vpsscript/vpsscript.version`
+checksize=$(du -sb /tmp/vpsscript.newversion | awk 'NR==1 {print $1}')
+###
+	if [ $checksize -gt 2 ]; then
+	REMOVER=`cat /tmp/vpsscript.newversion`
+	cat >> "/tmp/vpsscript_check_vpsscript_version" <<END
+		if [ ! "$LOCALVER" == "$REMOVER" ]; then
+			echo "========================================================================="
+			echo "Update for OKVIP-VPSSCRIPT found !  "
+			echo "-------------------------------------------------------------------------"
+			echo "Your Version: $LOCALVER   |   Newest version: $REMOVER"
+			echo "-------------------------------------------------------------------------"
+			echo "How to update: OKVIP-VPSSCRIPT menu => Update System => Update OKVIP-VPSSCRIPT "
+			
+		fi
+END
+	chmod +x /tmp/vpsscript_check_vpsscript_version
+	/tmp/vpsscript_check_vpsscript_version
+	rm -rf /tmp/vpsscript_check_vpsscript_version
+	fi
+fi
+
+if [ ! -f /etc/vpsscript/tatthongbao.csf ]; then
+if [ ! -f /etc/csf/csf.conf ]; then
+echo "========================================================================="
+echo "NGUY HIEM ! BAN CHUA CAI DAT CSF FIREWALL DE BAO VE VPS/SERVER !"
+echo "========================================================================="
+echo "Canh bao nay tu dong tat sau khi ban cai dat CSF. Hoac tat bang cach dung"
+echo "========================================================================="
+echo "Chuc nang [ Tat/Bat Canh Bao Tren Menu ] trong [ Quan Ly CSF Firewall ] "
+fi
+fi
+rm -rf /tmp/*ip*
+who am i| awk '{ print $5}' | sed 's/(//'| sed 's/)//' > /tmp/checkip
+checksize=$(du -sb /tmp/checkip | awk 'NR==1 {print $1}')
+if [ $checksize -gt 8 ]; then
+if [ -f /etc/csf/csf.conf ]; then
+checkip=$(cat /tmp/checkip)
+	if [ ! -f /etc/csf/csf.ignore ]; then
+	echo "" > /etc/csf/csf.ignore
+	fi
+if [ "$(grep $checkip /etc/csf/csf.ignore)" == "" ]; then 
+cat >> "/tmp/addcheckip" <<END
+echo "$checkip" >> /etc/csf/csf.ignore
+echo "$checkip" >> /etc/csf/csf.allow
+echo "========================================================================="
+echo "Dia chi IP hien tai cua ban:  $checkip" 
+echo "-------------------------------------------------------------------------"
+echo "Dia chi IP nay khong co trong whitelist cua CSF Firewwall"
+echo "-------------------------------------------------------------------------"
+echo "vpsscript da them IP nay vao CSF whitelist de khong bi CSF Firewall Block"
+echo "-------------------------------------------------------------------------"
+echo "De thay doi co hieu luc, CSF Firewall can khoi dong lai"
+echo "========================================================================="
+read -p "Nhan [Enter] de khoi dong lai CSF Firewall va Truy cap OKVIP-VPSSCRIPT ..."
+#iptables -I INPUT -p tcp --dport $priport -j ACCEPT
+#iptables -A INPUT -p tcp -s $checkip --dport $priport -j ACCEPT
+#service iptables save
+#service iptables restart
+/etc/vpsscript/menu/CSF-Fiwall/vpsscript-re-start-khoi-dong-lai-csf-lfd
+clear
+echo "========================================================================="
+echo "IP: $checkip da duoc them vao CSF Firewall's Whitelist"
+END
+chmod +x /tmp/addcheckip
+/tmp/addcheckip
+fi
+fi
+fi
+
+if [ ! -f /etc/vpsscript/minfreedisc.info ]; then
+echo "1000" > /etc/vpsscript/minfreedisc.info
+fi
+minfreedisc=`cat /etc/vpsscript/minfreedisc.info`
+if ! [[ $minfreedisc =~ $checktruenumber ]] ; then
+echo "1000" > /etc/vpsscript/minfreedisc.info
+fi 
+if [ ! -f /tmp/checkdiscsize ]; then
+touch -a -m -t 201602180130.09 /tmp/checkdiscsize 
+fi
+fileTime3=$(date -r /tmp/checkdiscsize +%d)
+if [ ! "$fileTime3" == "$curTime" ]; then
+touch /tmp/checkdiscsize
+disfree=$(calc $(df $PWD | awk '/[0-9]%/{print $(NF-2)}')/1024)
+	if [[ $disfree =~ $checktruenumber ]] ; then  
+	  if [ "$disfree" -lt "$minfreedisc" ]; then
+echo "========================================================================="
+echo "CANH BAO: Hien tai server con $disfree MB dung luong trong ! "
+	  fi
+   fi
+fi
+
+rm -rf /tmp/*ip*
+rm -rf /tmp/showthongbao 
+#find /etc/vpsscript/menu -type f -exec chmod 755 {} \;
+prompt="Nhap lua chon cua ban:"
+options=("Them Website & Code" "Xoa website" "Backup & Restore Code" "Quan Ly Database" "Quan Ly phpMyAdmin" "Quan Ly Zend OPcache" "Quan Ly Memcached" "Quan Ly Redis Cache" "Quan Ly FTP Server" "Quan Ly Swap" "Quan Ly Cronjob"  "Quan Ly File Log" "Config Cau Hinh PHP" "Wordpress Blog Tools" "Quan Ly CSF Firewall" "Quan Ly IPtables Firewall" "Quan Ly BitTorrent Sync" "Quan Ly VPS Backup" "Linux Malware Detect" "Cai Dat File Manager" "Cai Dat Net2FTP" "Cai Dat NetData" "Cai Dat SSL (Let's Enctypt)" "Check & Block IP DOS" "Tien ich - Addons" "Update System" "Clear All Caches" "User & Password Mac Dinh" "Server Status" "Thoat")
+
+echo "========================================================================="
+echo "    OKVIP-VPSSCRIPT - Quan Ly VPS/ Server by EchBay.com ($(cat /etc/vpsscript/vpsscript.version))                "
+echo "========================================================================="
+echo "                          OKVIP-VPSSCRIPT Menu                             "
+echo "========================================================================="
+
+PS3="$prompt"
+select opt in "${options[@]}" ; do 
+
+    case "$REPLY" in
+
+	1) clear && /etc/vpsscript/menu/vpsscript-befor-them-website-menu;;
+    2) /etc/vpsscript/menu/vpsscript-befor-xoa-website;;
+    3) clear && /etc/vpsscript/menu/vpsscript-sao-luu;;
+    4) clear && /etc/vpsscript/menu/vpsscript-befor-them-xoa-database;;
+    5) clear && /etc/vpsscript/menu/vpsscript-phpmyadmin-menu;;
+    6) clear && /etc/vpsscript/menu/opcache/vpsscript-before-opcache;;
+    7) clear && /etc/vpsscript/menu/memcache/vpsscript-before-memcache-menu;;
+    8) clear && /etc/vpsscript/menu/vpsscript-redis-befor-menu;;
+    9) clear &&/etc/vpsscript/menu/vpsscript-ftpserver-menu;;
+    10 )clear && /etc/vpsscript/menu/swap/vpsscript-them-xoa-swap-vps-menu;;
+    11) clear && /etc/vpsscript/menu/crontab/vpsscript-cronjob-menu;;
+    12) clear && /etc/vpsscript/menu/vpsscript-eroor-menu;;
+    13) clear && /etc/vpsscript/menu/vpsscript-befor-vpsscript-config-php.ini-menu;;
+    14) clear && /etc/vpsscript/menu/vpsscript-wordpress-tools-menu;;
+    #14) clear && /etc/vpsscript/menu/pagespeed/before-vpsscript-pagespeed-menu;;"Nginx Pagespeed Manage" 
+    15) /etc/vpsscript/menu/CSF-Fiwall/vpsscript-csf-firewall-before-menu;;
+    16) clear && /etc/vpsscript/menu/vpsscript-iptables-firewall-manager-menu;;
+    17) clear && /etc/vpsscript/menu/vpsscript-bitsync-menu;;
+    18) clear && /etc/vpsscript/menu/vpsscript-befor-rsync;;
+    19) clear && /etc/vpsscript/menu/vpsscript-maldet-menu;;
+    20) clear && /etc/vpsscript/menu/vpsscript-web-upload-menu;;
+    21) clear && /etc/vpsscript/menu/vpsscript-net2ftp-menu;;
+    22) clear && /etc/vpsscript/menu/vpsscript-netdata-menu;;
+    23) clear && /etc/vpsscript/menu/vpsscript-letsencrypt-menu;;
+    24) clear && /etc/vpsscript/menu/vpsscript-kiem-tra-ddos;;
+    25) clear && /etc/vpsscript/menu/vpsscript-tien-ich;;
+    26) clear && /etc/vpsscript/menu/vpsscript-update-upgrade-service-menu;;
+    27) /etc/vpsscript/menu/vpsscript-clear-cache-xoa-cache-server;;
+    28) /etc/vpsscript/menu/vpsscript-dat-mat-khau-bao-ve-folder-mac-dinh;;
+    29) clear && /etc/vpsscript/menu/vpsscript-vps-info;;
+	30) clear && cat /etc/motd && killall -g vpsscript;; 
+	0) clear && cat /etc/motd && killall -g vpsscript;; 
+    *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu !";continue;;
+
+    esac
+done
+ 

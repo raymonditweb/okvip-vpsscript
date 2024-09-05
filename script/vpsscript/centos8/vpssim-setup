@@ -1,0 +1,5 @@
+#!/bin/bash
+
+#
+echo "Recomend using centos 9..."
+exit

@@ -1,0 +1,157 @@
+#!/bin/bash 
+
+. /home/vpsscript.conf
+echo "========================================================================="
+echo "Su dung chuc nang nay de them website vao server"
+echo "-------------------------------------------------------------------------"
+echo -n "Nhap ten domain [ENTER]: " 
+read website
+website=`echo $website | tr '[A-Z]' '[a-z]'`
+if [ "$website" = "" ]; then
+clear
+echo "========================================================================="
+echo "Ban nhap sai, vui long nhap lai!"
+/etc/vpsscript/menu/vpsscript-them-website-menu
+exit
+fi
+
+kiemtradomain3="^([[:alnum:]]([[:alnum:]\-]{0,61}[[:alnum:]])?\.)+[[:alpha:]]{2,12}$";
+if [[ ! "$website" =~ $kiemtradomain3 ]]; then
+	website=`echo $website | tr '[A-Z]' '[a-z]'`
+clear
+echo "========================================================================="
+echo "$website co le khong phai la domain !!"
+echo "-------------------------------------------------------------------------"
+echo "Ban vui long thu lai  !"
+/etc/vpsscript/menu/vpsscript-them-website-menu
+exit
+fi
+
+if [ -f /etc/nginx/conf.d/$website.conf ]; then
+clear
+echo "========================================================================="
+echo "Phat hien $website da ton tai tren he thong!"
+/etc/vpsscript/menu/vpsscript-them-website-menu
+exit
+fi
+
+mkdir -p "/home/$website/public_html"
+mkdir -p "/home/$website/logs"
+
+
+
+#
+yes | cp /etc/vpsscript/menu/centos9/tmp/index.php "/home/$website/public_html/"
+yes | cp /etc/vpsscript/menu/centos9/tmp/robots.txt "/home/$website/public_html/"
+
+chown -R nginx:nginx "/home/$website/public_html/"
+find "/home/$website/public_html/" -type d -exec chmod g+s {} \;
+
+#
+yes | cp /etc/vpsscript/menu/centos7/tmp/domain_vhost.conf "/etc/nginx/conf.d/$website.conf"
+# thay domain trong file vhost
+cat > "/tmp/vpsscriptSetConfigFile" <<END
+#!/bin/bash 
+sed -i 's/\%website\%/$website/g' "/etc/nginx/conf.d/$website.conf"
+END
+chmod +x /tmp/vpsscriptSetConfigFile
+sh /tmp/vpsscriptSetConfigFile
+rm -rf /tmp/vpsscriptSetConfigFile
+
+
+if [ ! -d /etc/vpsscript/errorpage_html ]; then
+	if [ -d /opt/okvip_vpsscript/script/vpsscript/errorpage_html ]; then
+		mkdir -p /etc/vpsscript/errorpage_html ; chmod 755 /etc/vpsscript/errorpage_html
+		yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/errorpage_html/. /etc/vpsscript/errorpage_html/
+	fi
+fi
+
+mkdir -p /home/$website/errorpage_html && cp -r /etc/vpsscript/errorpage_html/*.html /home/$website/errorpage_html
+############################################################################
+############################################################################
+echo "-------------------------------------------------------------------------"
+read -r -p "Ban co muon vpsscript tao Database moi cho $website ? [y/N] " response
+case $response in
+    [yY][eE][sS]|[yY])
+    echo "-------------------------------------------------------------------------"
+    echo "Please wait....";sleep 1 
+   echo "$website" > /tmp/databasename.txt
+#echo $website | sed "s/\./_/" | sed "s/\-/_/" | cut -c1-14  > /tmp/databasename.txt  
+sed -i 's/\./_/g' /tmp/databasename.txt
+sed -i 's/\-/_/g' /tmp/databasename.txt
+random=`date |md5sum |cut -c '1-4'`
+dataname=`cat /tmp/databasename.txt | cut -c1-11`_$random
+username=`cat /tmp/databasename.txt | sed "s/\_//" | sed "s/\_//" | sed "s/\_//" | sed "s/\_//" | cut -c1-10`$random
+password=`date |md5sum |cut -c '14-29'`
+rm -rf /tmp/databasename.txt
+cat > "/tmp/config.temp" <<END
+CREATE DATABASE $dataname COLLATE utf8_general_ci;
+END
+
+mysql -u root -p$mariadbpass < /tmp/config.temp
+rm -f /tmp/config.temp
+
+ cat > "/tmp/config.temp" <<END
+CREATE USER '$username'@'localhost' IDENTIFIED BY '$password';
+END
+
+	mysql -u root -p$mariadbpass < /tmp/config.temp
+	rm -f /tmp/config.temp
+
+    cat > "/tmp/config.temp" <<END
+GRANT ALL PRIVILEGES ON $dataname . * TO '$username'@'localhost';
+END
+	mysql -u root -p$mariadbpass < /tmp/config.temp
+	rm -f /tmp/config.temp
+
+    cat > "/tmp/config.temp" <<END
+FLUSH PRIVILEGES;
+END
+	mysql -u root -p$mariadbpass < /tmp/config.temp
+	rm -f /tmp/config.temp
+
+echo "=========================================================================" >> /home/DBinfo.txt
+echo "Database: $dataname - Created on: $(date +%d/%m/%Y) when add $website to VPS" >> /home/DBinfo.txt
+echo "=========================================================================" >> /home/DBinfo.txt
+echo "Data name: $dataname" >> /home/DBinfo.txt
+echo "Username: $username" >> /home/DBinfo.txt
+echo "password: $password" >> /home/DBinfo.txt
+echo "" >> /home/DBinfo.txt
+if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "6" ]; then 
+service nginx reload
+else 
+systemctl reload nginx
+fi
+clear
+echo "========================================================================="
+echo "$website them thanh cong vao server"
+echo "-------------------------------------------------------------------------"
+echo "Vhost File: /etc/nginx/conf.d/$website.conf"
+echo "-------------------------------------------------------------------------"
+echo "Upload code vao /home/$website/public_html"
+echo "-------------------------------------------------------------------------"
+echo "Database duoc tao tu dong cho $website :"
+echo "-------------------------------------------------------------------------"
+echo "Ten Database: $dataname"
+echo "User name: $username" 
+echo "Mat khau: $password"
+echo "-------------------------------------------------------------------------"
+echo "Thong tin database da duoc luu vao: /home/DBinfo.txt"
+/etc/vpsscript/menu/vpsscript-them-website-menu
+        ;;
+    *)
+if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "6" ]; then 
+service nginx reload
+else 
+systemctl reload nginx
+fi
+clear
+echo "========================================================================="
+echo "$website duoc them thanh cong vao server"
+echo "-------------------------------------------------------------------------"
+echo "Upload code to /home/$website/public_html"
+echo "-------------------------------------------------------------------------"
+echo "Vhost File: /etc/nginx/conf.d/$website.conf"
+/etc/vpsscript/menu/vpsscript-them-website-menu
+        ;;
+esac

@@ -1,0 +1,40 @@
+#!/bin/bash
+prompt="Nhap lua chon cua ban (0-Thoat):"
+if [ ! -f /usr/local/maldetect/conf.maldet ]; then
+options=( "Scan 1 website" "Scan All websites" "View Last Scan Report" "Cai Dat Linux Malware Detect")
+else
+options=( "Scan 1 website" "Scan All websites" "View Last Scan Report" "Remove Linux Malware Detect")
+fi
+printf "=========================================================================\n"
+printf "               vpsscript - Quan Ly VPS/ Server by EchBay.com \n"
+printf "=========================================================================\n"
+if [ ! -f /usr/local/maldetect/conf.maldet ]; then
+printf "                Linux Malware Detect (LMD) - Not Install\n"
+else
+printf "                 Linux Malware Detect (LMD) - Installed \n"
+fi
+printf "=========================================================================\n"
+printf "\n"
+PS3="$prompt"
+select opt in "${options[@]}" ; do 
+
+    case "$REPLY" in
+
+
+    
+    1) /etc/vpsscript/menu/vpsscript-scan-website-maldet;;
+    2) /etc/vpsscript/menu/vpsscript-scan-home-maldet;;
+    3) /etc/vpsscript/menu/vpsscript-view-last-scan-report;;
+    4) /etc/vpsscript/menu/vpsscript-befor-maldet-cai-dat;;
+    5) clear && vpsscript;;
+    0) clear && vpsscript;;
+        *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu !";continue;;
+
+    esac
+
+done
+
+
+
+
+

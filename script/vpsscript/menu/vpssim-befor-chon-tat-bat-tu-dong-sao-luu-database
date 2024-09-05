@@ -1,0 +1,39 @@
+#!/bin/sh
+. /home/vpsscript.conf
+echo "========================================================================="
+echo "Dung chuc nang nay de BAT/TAT che do Auto backup database tren server"
+echo "-------------------------------------------------------------------------"
+echo -n "Nhap ten Database [ENTER]: " 
+read dataname
+if [ "$dataname" = "" ]; then
+clear
+echo "========================================================================="
+echo "Ban chua nhap ten database !"
+/etc/vpsscript/menu/vpsscript-them-xoa-database
+exit
+fi
+if [ ! -f /var/lib/mysql/$dataname/db.opt ]; then
+clear
+echo "========================================================================="
+echo "Database: $dataname khong ton tai tren he thong"
+/etc/vpsscript/menu/vpsscript-them-xoa-database
+exit
+fi
+if [ "$(ls -1 /var/lib/mysql/$dataname | wc -l)" == 1 ]; then
+clear
+echo "========================================================================="
+echo "Database $dataname chua co du lieu"
+/etc/vpsscript/menu/vpsscript-them-xoa-database
+exit
+fi
+
+rm -rf /tmp/databaseautobackup
+echo "$dataname" > /tmp/databaseautobackup
+if [ -f /bin/vpsscript-backupdb-$dataname ]; then
+ if [ -f /etc/cron.d/vpsscript.db.cron ]; then
+     if [ ! "$(grep vpsscript-backupdb-$dataname /etc/cron.d/vpsscript.db.cron)" == "" ]; then
+     /etc/vpsscript/menu/vpsscript-TAT-tu-dong-sao-luu-database
+     fi
+ fi
+fi 
+ /etc/vpsscript/menu/vpsscript-BAT-tu-dong-sao-luu-database

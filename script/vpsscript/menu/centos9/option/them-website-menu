@@ -1,0 +1,30 @@
+#!/bin/bash
+
+prompt="Vui long chon/ Please choose (0-Backspace):"
+options=( "Add Website" "Add Website + database" "Add Wordpress website" "Add Wordpress demo" "Domain Pointers" "Remove Pointers" "Domain vHost" )
+
+printf "=========================================================================\n"
+printf "                            Website & Code\n"
+printf "=========================================================================\n"
+
+PS3="$prompt"
+select opt in "${options[@]}"; do 
+
+    case "$REPLY" in
+
+    1) clear && /etc/vpsscript/menu/centos9/option/them-website;;
+    2) clear && /etc/vpsscript/menu/centos9/option/them-wordpress-database;;
+    3) clear && /etc/vpsscript/menu/centos9/option/them-wordpress-website;;
+    4) clear && /etc/vpsscript/menu/centos9/option/them-wordpress-demo;;
+    5) clear && /etc/vpsscript/menu/centos9/option/domain-pointers;;
+    6) clear && /etc/vpsscript/menu/centos9/option/remove-pointers;;
+    7) clear && /etc/vpsscript/menu/centos9/option/domain-vhost;;
+	0) clear && /etc/vpsscript/menu/centos9/option/account-manager-menu;;
+    *) echo "Vui long chon theo danh sach/ Please choose from the list"; continue;;
+
+    esac
+
+done
+
+#
+exit

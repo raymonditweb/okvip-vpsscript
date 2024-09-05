@@ -1,0 +1,58 @@
+#!/bin/bash
+. /home/vpsscript.conf
+
+#
+website=$1
+
+#
+clear
+
+# in ra thông tin sau khi cài đặt code
+echo "=========================================================================="
+echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+
+if [ -f /tmp/vpsscript-lastadmin.txt ]; then
+echo ". . . . . . . . . . . . Wordpress demo install. . . . . . . . . . . . . ."
+echo "Admin login URL: http://"$website"/wp-admin"
+the_text=`cat /tmp/vpsscript-lastadmin.txt`
+echo "Admin account: "$the_text
+fi
+if [ -f /tmp/vpsscript-lastpassadmin.txt ]; then
+the_text=`cat /tmp/vpsscript-lastpassadmin.txt`
+echo "Admin passwordd: "$the_text
+echo "Please save this info and visit to website and login."
+echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+fi
+
+if [ -f /tmp/vpsscript-lastdb.txt ]; then
+the_text=`cat /tmp/vpsscript-lastdb.txt`
+echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+echo "Database: "$the_text
+echo "Database user: "$the_text
+fi
+if [ -f /tmp/vpsscript-lastpassdb.txt ]; then
+the_text=`cat /tmp/vpsscript-lastpassdb.txt`
+echo "Database password: "$the_text
+echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+fi
+
+if [ -f /tmp/vpsscript-lastftp.txt ]; then
+the_text=`cat /tmp/vpsscript-lastftp.txt`
+echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+echo "FTP IP: "$serverip
+echo "FTP account: "$the_text
+fi
+if [ -f /tmp/vpsscript-lastpassftp.txt ]; then
+the_text=`cat /tmp/vpsscript-lastpassftp.txt`
+echo "FTP password: "$the_text
+echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+fi
+
+echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+echo ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . ."
+echo "=========================================================================="
+
+
+# dọn dẹp
+#rm -f /tmp/vpsscript-*

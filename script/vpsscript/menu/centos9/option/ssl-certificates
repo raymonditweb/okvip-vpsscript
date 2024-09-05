@@ -1,0 +1,106 @@
+#!/bin/bash
+. /home/vpsscript.conf
+
+#
+/etc/vpsscript/menu/centos9/inc/list-website-tren-vps-before
+
+#
+echo "========================================================================="
+echo "Su dung chuc nang nay de tao SSL Certificates Let's Encrypt cho website"
+echo "-------------------------------------------------------------------------"
+echo -n "Chon website ban muon tao SSL/ Choose domain for create SSL [ENTER]: " 
+read website
+website=`echo $website | tr '[A-Z]' '[a-z]'`
+
+#
+if [ "$website" = "" ]; then
+clear
+/etc/vpsscript/menu/centos9/option/account-manager-menu
+exit
+fi
+
+# xem số này có chứa thông tin tên miền tương ứng không
+if [ -f "/tmp/domain_number$website.txt" ]; then
+# có thì lấy tên miền trong file
+website=`cat /tmp/domain_number$website.txt`
+echo "Ten mien/ Domain: "$website
+else
+clear
+echo "========================================================================="
+echo "Vui long chon lai/ Please choose again!"
+echo "-------------------------------------------------------------------------"
+/etc/vpsscript/menu/centos9/option/ssl-certificates
+exit
+fi
+
+#
+if [ ! -f /etc/nginx/conf.d/$website.conf ]; then
+clear
+echo "========================================================================="
+echo "Ten mien khong ton tai/ Domain not exist! "$website
+/etc/vpsscript/menu/centos9/option/ssl-certificates
+exit
+fi
+
+#
+if [ ! -d /home/$website ]; then
+clear
+echo "========================================================================="
+echo "Thu muc $website khong ton tai tren he thong!"
+echo "-------------------------------------------------------------------------"
+echo "Ban hay nhap lai !"
+/etc/vpsscript/menu/centos9/option/ssl-certificates
+exit
+fi
+
+
+# bắt đầu cài đặt ssl
+prompt="Nhap lua chon cua ban/ Please choose: "
+options=( "Full version" "non-www" "www only" "Cancel" )
+
+echo "=========================================================================="
+echo "Chon de cai dat/ Choose for insall: "
+echo "=========================================================================="
+
+PS3="$prompt"
+select opt in "${options[@]}"; do 
+case "$REPLY" in
+1) xacnhanthongtin="full"; break;;
+2) xacnhanthongtin="nonwww"; break;;
+3) xacnhanthongtin="www"; break;;
+*) xacnhanthongtin="cancel"; break;;
+esac  
+done
+
+#
+update_vhost=""
+
+#
+if [ "$xacnhanthongtin" = "nonwww" ]; then
+clear
+echo "Setup SSL free for "$website
+certbot --nginx -d $website
+update_vhost="yes"
+elif [ "$xacnhanthongtin" = "www" ]; then
+echo "Setup SSL free for www."$website
+certbot --nginx -d www.$website
+update_vhost="yes"
+elif [ "$xacnhanthongtin" = "full" ]; then
+echo "Setup SSL free for "$website" and www."$website
+certbot --nginx -d $website -d www.$website
+update_vhost="yes"
+else
+clear
+echo "Ban chon huy bo/ Cancel by user"
+fi
+
+
+#
+if [ ! "$update_vhost" = "" ]; then
+/etc/vpsscript/menu/centos9/inc/add-vhost-after $website
+fi
+
+
+#
+/etc/vpsscript/menu/centos9/option/account-manager-menu
+exit

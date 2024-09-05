@@ -1,0 +1,25 @@
+#!/bin/bash
+prompt="Lua chon cua ban:"
+options=( "Restart MySQL" "Restart Nginx" "Restart PHP-FPM" "Restart VPS" "Exit" )
+printf "=========================================================================\n"
+printf "                vpsscript - Manage VPS/ Server by EchBay.com \n"
+printf "=========================================================================\n"
+printf "                            Restart Service\n"
+printf "=========================================================================\n"
+
+PS3="$prompt"
+select opt in "${options[@]}" ; do 
+
+    case "$REPLY" in
+
+
+    1) /etc/vpsscript/menu/tienich/vpsscript-restart-mysql;;
+    2) /etc/vpsscript/menu/tienich/vpsscript-restart-nginx;;
+    3) /etc/vpsscript/menu/tienich/vpsscript-restart-php;;
+    4) /etc/vpsscript/menu/tienich/vpsscript-reboot-vps;;
+    5) clear && /etc/vpsscript/menu/vpsscript-tien-ich;;
+
+            *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu !";continue;;
+
+    esac
+done

@@ -1,0 +1,93 @@
+#!/bin/bash
+. /home/vpsscript.conf
+
+#
+cd ~
+echo "=========================================================================="
+echo "Tao Username & Password bao ve phpMyadmin, backup files... "
+echo "=========================================================================="
+
+#
+cp -rf /etc/vpsscript/menu/vpsscript-tao-mat-khau-bao-ve-folder.py /usr/local/bin/htpasswd.py
+chmod 755 /usr/local/bin/htpasswd.py
+
+#
+rm -rf /etc/nginx/.htpasswd
+matkhaubv=`date |md5sum |cut -c '1-12'`
+usernamebv=`echo "${emailmanage};" | sed 's/\([^@]*\)@\([^;.]*\)\.[^;]*;[ ]*/\1 \2\n/g' | awk 'NR==1 {print $1}'`
+htpasswd.py -c -b /etc/nginx/.htpasswd $usernamebv $matkhaubv
+chmod -R 644 /etc/nginx/.htpasswd
+
+#
+cat > "/etc/vpsscript/pwprotect.default" <<END
+userdefault="$usernamebv"
+passdefault="$matkhaubv"
+END
+
+# tạo chuỗi ngẫu nhiên để tăng độ bảo mật cho URL này
+statusrandom=`date |md5sum |cut -c '1-8'`
+statusrandom="randlink-${statusrandom}-"
+
+# dọn dẹp dữ liệu cũ
+cd ~
+cd /home/vpsscript.demo/public_html/
+rm -rf randlink-*
+cd ~
+cd /home/vpsscript.demo/private_html/
+rm -rf randlink-*
+
+#
+cd ~
+
+#
+yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/Software/status.php /home/vpsscript.demo/public_html/${statusrandom}status.php
+rm -rf /etc/vpsscript/defaulpassword.php
+cat > "/etc/vpsscript/defaulpassword.php" <<END
+<?php
+define('ADMIN_USERNAME','$usernamebv');   // Admin Username
+define('ADMIN_PASSWORD','$matkhaubv');    // Admin Password
+END
+
+# thay đổi email trong status.php
+sed -i "s/vpsscript@vpsscript.com/${emailmanage}/g" /home/vpsscript.demo/public_html/${statusrandom}status.php
+
+# xóa thông tin cũ nếu có
+cat > "/tmp/vpsscriptSetConfigFile" <<END
+#!/bin/bash 
+sed -i '/usernamebv/d' /home/vpsscript.conf
+sed -i '/matkhaubv/d' /home/vpsscript.conf
+END
+chmod +x /tmp/vpsscriptSetConfigFile
+sh /tmp/vpsscriptSetConfigFile
+rm -rf /tmp/vpsscriptSetConfigFile
+
+# bổ sung thông tin mới
+cat >> "/home/vpsscript.conf" <<END
+usernamebv="$usernamebv"
+matkhaubv="$matkhaubv"
+END
+
+
+#
+cd ~
+cd /home/vpsscript.demo/private_html/
+wget --no-check-certificate https://gist.githubusercontent.com/ck-on/4959032/raw/0b871b345fd6cfcd6d2be030c1f33d1ad6a475cb/ocp.php
+mv ocp.php ${statusrandom}ocp.php
+#dir
+cd ~
+
+
+#
+cd ~
+yes | cp /etc/vpsscript/menu/centos9/tmp/index.php /home/vpsscript.demo/private_html/
+yes | cp -rf /opt/okvip_vpsscript/script/vpsscript/memcache.php.zip /home/vpsscript.demo/private_html/${statusrandom}memcache.php
+
+
+# thay thông tin mới để người dùng truy cập vào xem status
+if [ -f /home/vpsscript-manage-info.txt ]; then
+sed -i "s/Zend Opcache: .*/Zend Opcache: http:\/\/${serverip}:${priport}\/${statusrandom}ocp.php/g" /home/vpsscript-manage-info.txt
+sed -i "s/Memcache Status: .*/Memcache Status: http:\/\/${serverip}:${priport}\/${statusrandom}memcache.php/g" /home/vpsscript-manage-info.txt
+sed -i "s/Server Status: .*/Server Status: http:\/\/${serverip}\/${statusrandom}status.php/g" /home/vpsscript-manage-info.txt
+sed -i "s/Username: .*/Username: ${usernamebv}/g" /home/vpsscript-manage-info.txt
+sed -i "s/Password: .*/Password: ${matkhaubv}/g" /home/vpsscript-manage-info.txt
+fi

@@ -1,0 +1,50 @@
+#!/bin/bash
+
+echo "========================================================================="
+echo "                       OKVIP-VPSSCRIPT sitemap                             "
+echo "========================================================================="
+
+
+#
+cat > "/home/help-sitemap.txt" <<END
+Account Manager
+    Website & Code
+        Add Website
+        Domain Pointers
+        Add Website + database
+        Remove Pointers
+        Add Wordpress website
+        Domain vHost
+        Add Wordpress demo
+    Add Database
+    SSL Certificates
+    List Website in Server
+    FTP Management
+        Create FTP account
+        Reset FTP password
+        View FTP password
+Cache
+Advanced Features
+    Create/Restore Backups
+    Swap
+    Cron Jobs
+    Password Protected Directories
+Update System
+Extra Features
+    phpMyAdmin
+    Server Status
+    Imagick
+    Ioncube
+Site Summary / Statistics
+Security/ Firewall
+END
+
+
+#
+cat /home/help-sitemap.txt
+echo "========================================================================="
+
+
+#
+/etc/vpsscript/menu/centos9/main-menu
+exit

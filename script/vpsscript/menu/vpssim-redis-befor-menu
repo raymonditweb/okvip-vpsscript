@@ -1,0 +1,16 @@
+#!/bin/sh
+. /home/vpsscript.conf
+if [ ! "$(redis-cli ping)" = "PONG" ]; then
+if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "6" ]; then 
+service redis start
+else 
+systemctl start redis.service
+fi
+clear
+/etc/vpsscript/menu/vpsscript-redis-menu
+else
+/etc/vpsscript/menu/vpsscript-redis-menu
+fi
+
+
+

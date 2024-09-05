@@ -1,0 +1,117 @@
+#!/bin/bash
+. /home/vpsscript.conf
+
+#
+/etc/vpsscript/menu/centos9/inc/list-website-tren-vps-before
+
+#
+create_tmp=$2
+
+#
+if [ ! "$1" = "" ]; then
+website=$1
+else
+
+echo "========================================================================="
+echo "Su dung chuc nang nay de tao FTP user cho  website"
+echo "-------------------------------------------------------------------------"
+echo -n "Chon website ban muon tao tai khoan FTP/ Choose FTP website [ENTER]: " 
+read website
+website=`echo $website | tr '[A-Z]' '[a-z]'`
+
+#
+if [ "$website" = "" ]; then
+clear
+/etc/vpsscript/menu/centos9/option/ftpserver-menu
+exit
+fi
+
+# xem số này có chứa thông tin tên miền tương ứng không
+if [ -f "/tmp/domain_number$website.txt" ]; then
+# có thì lấy tên miền trong file
+website=`cat /tmp/domain_number$website.txt`
+echo "Ten mien/ Domain: "$website
+else
+clear
+echo "========================================================================="
+echo "Vui long chon lai/ Please choose again!"
+echo "-------------------------------------------------------------------------"
+/etc/vpsscript/menu/centos9/option/tao-ftp-user-cho-domain
+exit
+fi
+
+fi
+
+#
+/etc/vpsscript/menu/centos9/inc/ftpserver-menu-validate $website
+
+#
+if [ ! -f /etc/pure-ftpd/pureftpd.passwd ]; then
+touch /etc/pure-ftpd/pureftpd.passwd
+fi
+
+#
+if [ ! "$(pure-pw list | grep "/home/$website/")" == "" ]; then
+clear
+echo "========================================================================="
+echo "Ban da tao tai khoan FTP cho $website" 
+echo "-------------------------------------------------------------------------"
+echo "Thong tin tai khoan FTP:"
+echo "-------------------------------------------------------------------------"
+echo "IP: $serverip "
+echo "-------------------------------------------------------------------------"
+echo "User: $(grep "/home/$website/" /etc/vpsscript/FTP-Account.info | awk 'NR==1 {print $7}') | Password: $(grep "/home/$website/" /etc/vpsscript/FTP-Account.info | awk 'NR==1 {print $10}')"
+if [ ! "$create_tmp" = "" ]; then
+/etc/vpsscript/menu/centos9/option/ftpserver-menu
+exit
+fi
+fi
+
+
+#
+echo "-------------------------------------------------------------------------"
+echo "Tim thay $website tren he thong"
+echo "-------------------------------------------------------------------------"
+echo "$website chua tao tai khoan FTP"
+echo "-------------------------------------------------------------------------"
+echo "vpsscript se tao tai khoan FTP cho $website ngay bay gio"
+echo "-------------------------------------------------------------------------"
+echo "Please wait...";
+
+
+#echo "$website" > /tmp/vpsscriptftp.txt
+#sed -i 's/\.//g' /tmp/vpsscriptftp.txt
+#sed -i 's/\-//g' /tmp/vpsscriptftp.txt
+#username=`cat /tmp/vpsscriptftp.txt | sed "s/\_//" | sed "s/\_//" | sed "s/\_//" | sed "s/\_//" | cut -c1-30`
+username="ftp@"$website
+password=`date |md5sum |cut -c '1-16'`
+#useradd -m -d /home/$website -g nginx -p $password $username
+#usermod -aG nginx $username
+#chmod g+rxw /home/$website
+( echo ${password} ; echo ${password} ) | pure-pw useradd $username -u nginx -g nginx -d /home/$website -m 
+pure-pw mkdb
+rm -rf /tmp/ftpvpsscript.temp;
+pure-pw mkdb
+
+if [ ! -f /etc/vpsscript/FTP-Account.info ]; then
+echo "=========================================================================" > /etc/vpsscript/FTP-Account.info
+echo "Please Do Not Delete This File " >> /etc/vpsscript/FTP-Account.info
+echo "-------------------------------------------------------------------------" >> /etc/vpsscript/FTP-Account.info
+echo "If you delete this file, vpsscript will not run !" >> /etc/vpsscript/FTP-Account.info
+echo "-------------------------------------------------------------------------" >> /etc/vpsscript/FTP-Account.info
+echo "All FTP User for all domain on VPS list below:" >> /etc/vpsscript/FTP-Account.info
+echo "=========================================================================" >> /etc/vpsscript/FTP-Account.info
+echo "" >> /etc/vpsscript/FTP-Account.info
+fi
+
+#
+/etc/vpsscript/menu/centos9/inc/ftp-password-after $website $username $password
+
+# lưu thông tin database để quá trình tạo website wordpress có cái mà sử dụng luôn
+if [ ! "$create_tmp" = "" ]; then
+echo "$username" > /tmp/vpsscript-lastftp.txt
+echo "$password" > /tmp/vpsscript-lastpassftp.txt
+else
+/etc/vpsscript/menu/centos9/option/ftpserver-menu
+exit
+fi

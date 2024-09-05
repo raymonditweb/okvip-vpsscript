@@ -1,0 +1,42 @@
+#!/bin/sh
+
+curTime=$(date +%d)
+#echo "curTime: "$curTime
+
+
+if [ ! -f /tmp/vpsscript.newversion ]; then
+touch -a -m -t 201602180130.09 /tmp/vpsscript.newversion  
+fi
+
+fileTime2=$(date -r /tmp/vpsscript.newversion +%d)
+#echo "fileTime2: "$fileTime2
+
+if [ ! "$fileTime2" == "$curTime" ]; then
+rm -rf /tmp/vpsscript.newversion
+#wget -q https://vpsscript.echbay.com/script/vpsscript/vpsscript.newversion -O /tmp/vpsscript.newversion
+wget --no-check-certificate -q https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/version -O /tmp/vpsscript.newversion
+touch /tmp/vpsscript.newversion
+LOCALVER=`cat /etc/vpsscript/vpsscript.version`
+checksize=$(du -sb /tmp/vpsscript.newversion | awk 'NR==1 {print $1}')
+###
+	if [ $checksize -gt 2 ]; then
+	REMOVER=`cat /tmp/vpsscript.newversion`
+	cat >> "/tmp/vpsscript_check_vpsscript_version" <<END
+		if [ ! "$LOCALVER" == "$REMOVER" ]; then
+			echo "========================================================================="
+			echo "Update for vpsscript found !  "
+			echo "-------------------------------------------------------------------------"
+			echo "Your Version: $LOCALVER   |   Newest version: $REMOVER"
+			echo "-------------------------------------------------------------------------"
+			echo "How to update: OKVIP-VPSSCRIPT menu => Update System => Update OKVIP-VPSSCRIPT "
+			
+		fi
+END
+	chmod +x /tmp/vpsscript_check_vpsscript_version
+	/tmp/vpsscript_check_vpsscript_version
+	rm -rf /tmp/vpsscript_check_vpsscript_version
+	fi
+fi
+
+
+

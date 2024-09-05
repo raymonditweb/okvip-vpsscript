@@ -1,0 +1,17 @@
+#!/bin/sh
+#curTime=$(date +%d)
+#checktruenumber='^[0-9]+$'
+if [ $(id -u) != "0" ]; then
+    printf "Co loi ! vpsscript chi chay tren user root !\n"
+    exit
+fi
+
+#
+clear
+
+#  sử dụng menu theo OS version
+if [ "$(rpm -q --qf "%{VERSION}" $(rpm -q --whatprovides redhat-release))" == "7" ]; then
+/etc/vpsscript/menu/centos7/main-menu
+else
+/etc/vpsscript/menu/centos9/main-menu
+fi

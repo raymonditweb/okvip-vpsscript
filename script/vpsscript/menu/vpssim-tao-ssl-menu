@@ -1,0 +1,27 @@
+#!/bin/bash
+prompt="Lua chon cua ban (0-Thoat):"
+options=( "Tao domain key & Sign SSL certificate" "Tai Domain CSR va Vhost Mau " "Fix Khong the download files")
+printf "=========================================================================\n"
+printf "                vpsscript - Quan Ly VPS/ Server by EchBay.com \n"
+printf "=========================================================================\n"
+printf "                            Setup SSL (https) \n"
+printf "=========================================================================\n"
+printf "  \n"
+
+PS3="$prompt"
+select opt in "${options[@]}" ; do 
+
+    case "$REPLY" in
+    1) /etc/vpsscript/menu/vpsscript-tao-ssl;;
+    2) /etc/vpsscript/menu/vpsscript-tao-ssl-link-download-domain-csr;;
+    3) /etc/vpsscript/menu/vpsscript-khong-the-download-csr-file;;
+    4) clear && /bin/vpsscript;;
+    0) clear && vpsscript;;
+        *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu !";continue;;
+
+    esac
+
+done
+
+
+

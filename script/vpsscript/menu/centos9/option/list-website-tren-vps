@@ -1,0 +1,6 @@
+#!/bin/bash
+
+#
+/etc/vpsscript/menu/centos9/inc/list-website-tren-vps-before
+/etc/vpsscript/menu/centos9/option/account-manager-menu
+exit

@@ -1,0 +1,30 @@
+#!/bin/sh
+prompt="Lua chon cua ban (0-Thoat):"
+options=("Services dang chay va RAM dung" "RAM MySQL su dung" "Free Disc " "Uptime VPS" "CPU Load average" "Last YUM update" "Authenication Failures" "User dang nhat gan day" "Xem thong tin CPU" "Check I/O Speed" "Check download Speed")
+printf "=========================================================================\n"
+printf "                vpsscript - Manage VPS/ Server by EchBay.com             \n"
+printf "=========================================================================\n"
+printf "                     Check VPS/Server information\n"
+printf "=========================================================================\n"
+PS3="$prompt"
+select opt in "${options[@]}" "Thoat"; do 
+
+    case "$REPLY" in
+    1) clear && echo "=========================================================================" && /etc/vpsscript/menu/vpsscript-tien-trinh-dang-chay-ram-use;;
+    2) /etc/vpsscript/menu/checkddos/vpsscript-ram-mysql-dung;;
+    3) /etc/vpsscript/menu/checkddos/vpsscript-dung-luong-disc-trong;;
+    4) /etc/vpsscript/menu/checkddos/vpsscript-uptime-vps;;
+    5) /etc/vpsscript/menu/checkddos/vpsscript-load-average;;
+    6) /etc/vpsscript/menu/checkddos/vpsscript-lan-cap-nhat-yum-cuoi;;
+    7) /etc/vpsscript/menu/checkddos/vpsscript-Authenication-Failures;;
+    8) /etc/vpsscript/menu/checkddos/vpsscript-user-dang-nhap-gan-day;;
+    9) echo "-------------------------------------------------------------------------" && cat /proc/cpuinfo && echo "-------------------------------------------------------------------------";;
+    10) echo "-------------------------------------------------------------------------" && dd if=/dev/zero of=test bs=64k count=16k conv=fdatasync; rm test && echo "-------------------------------------------------------------------------";;
+#    11) clear && wget http://hostingaz.vn/script/others/freeVPSbench.sh -O - -o /dev/null|bash;;
+    11) clear && wget --no-check-certificate https://raw.githubusercontent.com/raymonditweb/vpsscripts/master/script/others/freeVPSbench.sh -O - -o /dev/null|bash;;
+    0) clear && vpsscript;;
+$(( ${#options[@]}+1 )) ) echo "Bye!";  clear && /bin/vpsscript;;
+    *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu !";continue;;
+
+    esac
+done
