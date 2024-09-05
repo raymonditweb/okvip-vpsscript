@@ -66,7 +66,8 @@ echo "--------------------------------------------------------------------------
 #echo -n "Enter admin email: " 
 #read vpsscriptemail
 #
-vpsscriptemail = "admin@okvip.com"
+vpsscriptemail="admin@okvip.com"
+
 if [ "$vpsscriptemail" = "" ]; then
 clear
 echo "=========================================================================="
