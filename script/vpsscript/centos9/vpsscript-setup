@@ -97,16 +97,18 @@ echo "--------------------------------------------------------------------------
 echo "OKVIP-VPSSCRIPT Version: $vpsscript_version"
 echo "=========================================================================="
 
-prompt="Nhap lua chon cua ban (Please select): "
-options=( "Toi dong y/ I agree" "Khong dong y / Disagree")
-PS3="$prompt"
-select opt in "${options[@]}"; do 
-    case "$REPLY" in
-    1) xacnhanthongtin="dongy"; break;;
-    2) xacnhanthongtin="khongdongy"; break;;
-    *) echo "Vui long chon theo danh sach/ Please choose from the list"; continue;;
-    esac  
-done
+#prompt="Nhap lua chon cua ban (Please select): "
+#options=( "Toi dong y/ I agree" "Khong dong y / Disagree")
+#PS3="$prompt"
+#select opt in "${options[@]}"; do 
+#    case "$REPLY" in
+#    1) xacnhanthongtin="dongy"; break;;
+#    2) xacnhanthongtin="khongdongy"; break;;
+#    *) echo "Vui long chon theo danh sach/ Please choose from the list"; continue;;
+#    esac  
+#done
+
+xacnhanthongtin="dongy"
 
 if [ "$xacnhanthongtin" = "dongy" ]; then
 echo "--------------------------------------------------------------------------"
