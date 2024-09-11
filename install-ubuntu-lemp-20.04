@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Kiểm tra quyền root
 if [ "$EUID" -ne 0 ]; then
   echo "Vui lòng chạy với quyền root."
@@ -41,7 +43,11 @@ apt update && apt upgrade -y
 
 # Cài đặt Nginx
 echo "Cài đặt Nginx..."
-apt install nginx -y
+if ! apt install nginx -y; then
+    echo "Failed to install Nginx. Exiting."
+    exit 1
+fi
+
 
 # Mở full cổng firewall cho Nginx
 ufw allow 'Nginx Full'
@@ -52,23 +58,19 @@ NGINX_VERSION=$(nginx -v 2>&1 | cut -d '/' -f 2)
 # Cài đặt MariaDB
 echo "Cài đặt MariaDB..."
 apt install software-properties-common -y
-add-apt-repository -y ppa:mariadb/server
+curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | sudo apt-key add -
+add-apt-repository 'deb [arch=amd64] http://mirror.example.com/mariadb/repo/10.5/ubuntu focal main'
 apt update
-apt install mariadb-server mariadb-client -y
-
-# Thiết lập MariaDB với mật khẩu root truyền từ dòng lệnh hoặc đã tạo
-echo "Cấu hình trước mật khẩu root cho MariaDB..."
-debconf-set-selections <<< "mariadb-server-10.5 mysql-server/root_password password $MARIADB_ROOT_PASSWORD"
-debconf-set-selections <<< "mariadb-server-10.5 mysql-server/root_password_again password $MARIADB_ROOT_PASSWORD"
 apt install mariadb-server -y
 
-# Thiết lập bảo mật MariaDB
-echo "Thiết lập bảo mật MariaDB..."
-mysql --user=root --password="$MARIADB_ROOT_PASSWORD" <<-EOF
+# Cấu hình mật khẩu root cho MariaDB
+echo "Cấu hình mật khẩu root cho MariaDB..."
+mysql --user=root <<-EOF
   ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MARIADB_ROOT_PASSWORD';
   FLUSH PRIVILEGES;
 EOF
 
+# Thiết lập bảo mật MariaDB
 mysql_secure_installation <<EOF
 
 y
