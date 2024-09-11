@@ -49,14 +49,14 @@ NGINX_VERSION=$(nginx -v 2>&1 | cut -d '/' -f 2)
 echo "Cài đặt MariaDB..."
 apt install software-properties-common -y
 curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | sudo apt-key add -
-add-apt-repository 'deb [arch=amd64] http://mirror.example.com/mariadb/repo/10.5/ubuntu focal main'
+add-apt-repository 'deb [arch=amd64] http://mariadb.mirror.liquidweb.com/repo/10.5/ubuntu focal main'
 apt update
 apt install mariadb-server -y
 
 # Cấu hình mật khẩu root cho MariaDB
 echo "Cấu hình mật khẩu root cho MariaDB..."
 mysql --user=root <<-EOF
-  SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$MARIADB_ROOT_PASSWORD');
+  ALTER USER 'root'@'localhost' IDENTIFIED BY '$MARIADB_ROOT_PASSWORD';
   FLUSH PRIVILEGES;
 EOF
 
