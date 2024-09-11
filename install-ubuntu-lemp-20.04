@@ -22,7 +22,7 @@ MYSQL_ROOT_PASSWORD=$1
 
 if [ -z "$MYSQL_ROOT_PASSWORD" ]; then
   # Tạo mật khẩu ngẫu nhiên nếu không được truyền vào
-  MYSQL_ROOT_PASSWORD=$(openssl rand -base64 12)
+  MYSQL_ROOT_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 fi
 
 # Đọc domain từ tham số dòng lệnh hoặc dùng mặc định
@@ -35,50 +35,20 @@ echo "Bắt đầu cài đặt LEMP stack trên Ubuntu 20.04 với domain $DOMAI
 # Cập nhật và nâng cấp hệ thống
 apt update && apt upgrade -y
 
-# Cài đặt Nginx
-echo "Cài đặt Nginx..."
-apt install nginx -y
+# Cài đặt LEMP
+echo "Cài đặt LEMP..."
+apt install nginx mysql-server php-fpm php-mysql -y
 
 # Mở full cổng firewall cho Nginx
 ufw allow 'Nginx Full'
 
-# Lấy phiên bản Nginx
-NGINX_VERSION=$(nginx -v 2>&1 | cut -d '/' -f 2)
-
-# Đặt mật khẩu root MySQL thông qua debconf để không bị hỏi
-echo "Cấu hình mật khẩu root cho MySQL..."
-debconf-set-selections <<< "mysql-server mysql-server/root_password password $MYSQL_ROOT_PASSWORD"
-debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $MYSQL_ROOT_PASSWORD"
-
 # Cài đặt MySQL Server thay vì MariaDB
-echo "Cài đặt MySQL..."
-apt update
-apt install mysql-server -y
-
-# Cấu hình mật khẩu root cho MySQL và thay đổi phương thức xác thực
-echo "Cấu hình mật khẩu root cho MySQL và thay đổi phương thức xác thực..."
-
-# Sử dụng sudo để kết nối MySQL mà không cần mật khẩu hiện tại
-sudo mysql <<EOF
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';
-FLUSH PRIVILEGES;
-EOF
-
-# Thiết lập bảo mật MySQL tự động
-echo "Thiết lập bảo mật MySQL..."
-sudo mysql_secure_installation <<EOF
-y
-$MYSQL_ROOT_PASSWORD
-$MYSQL_ROOT_PASSWORD
-y
-y
-y
-y
-EOF
+echo "Cài đặt mật khẩu cho MySQL..."
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';"
 
 # Tạo database với tên từ domain không có phần mở rộng
 echo "Tạo database có tên $DB_NAME..."
-sudo mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 # Cài đặt PHP 7.4 và các module cần thiết
 echo "Cài đặt PHP 7.4..."
