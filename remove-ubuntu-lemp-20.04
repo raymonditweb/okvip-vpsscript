@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Vui lòng chạy với quyền root."
+  exit 1
+fi
+
+echo "Bắt đầu gỡ bỏ Nginx và MariaDB..."
+
+# Dừng các dịch vụ Nginx và MariaDB
+echo "Dừng dịch vụ Nginx và MariaDB..."
+systemctl stop nginx
+systemctl stop mariadb
+
+# Gỡ bỏ các gói Nginx và MariaDB
+echo "Gỡ bỏ các gói Nginx và MariaDB..."
+apt purge nginx* mariadb-server* -y
+
+# Xóa các cấu hình và dữ liệu còn lại
+echo "Xóa các cấu hình và dữ liệu còn lại..."
+rm -rf /etc/nginx
+rm -rf /var/www/html/phpmyadmin
+rm -rf /var/www/*
+rm -rf /var/lib/mysql
+rm -rf /var/log/nginx
+rm -rf /home/vpsscript.conf
+
+# Xóa các gói không cần thiết
+echo "Xóa các gói không cần thiết..."
+apt autoremove -y
+
+# Xóa các bản sao lưu của MariaDB và Nginx
+echo "Xóa các bản sao lưu cũ..."
+rm -rf /var/backups/nginx
+rm -rf /var/backups/mariadb
+
+# Xóa các người dùng và nhóm liên quan nếu có
+echo "Xóa các người dùng và nhóm liên quan..."
+deluser --remove-home www-data
+delgroup www-data
+
+echo "Gỡ bỏ Nginx và MariaDB hoàn tất."
+
+# Cập nhật hệ thống
+apt update
+
+echo "Bạn có thể chạy lại script cài đặt từ đầu sau khi đã gỡ bỏ hoàn toàn các phần mềm và cấu hình cũ."
