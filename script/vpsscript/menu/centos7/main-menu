@@ -31,7 +31,7 @@ select opt in "${options[@]}" ; do
 
     case "$REPLY" in
 
-	1) clear && /etc/vpsscript/menu/vpsscript-befor-them-website-menu;;
+	1) clear && /etc/vpsscript/menu/vpsscript-befor-them-website-menu;; 
     2) /etc/vpsscript/menu/vpsscript-befor-xoa-website;;
     3) clear && /etc/vpsscript/menu/vpsscript-sao-luu;;
     4) clear && /etc/vpsscript/menu/vpsscript-befor-them-xoa-database;;

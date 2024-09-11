@@ -1,0 +1,146 @@
+#!/bin/bash
+
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Vui lòng chạy với quyền root."
+  exit 1
+fi
+
+# Kiểm tra phiên bản Ubuntu
+OS=$(lsb_release -si)
+VERSION=$(lsb_release -sr)
+
+if [[ "$OS" != "Ubuntu" || "$VERSION" != "20.04" ]]; then
+  echo "Script này chỉ hỗ trợ Ubuntu 20.04."
+  exit 1
+fi
+
+# Đọc mật khẩu MySQL từ tham số dòng lệnh
+MYSQL_ROOT_PASSWORD=$1
+
+if [ -z "$MYSQL_ROOT_PASSWORD" ]; then
+  echo "Vui lòng truyền mật khẩu root MySQL dưới dạng đối số đầu tiên."
+  exit 1
+fi
+
+# Đọc domain từ tham số dòng lệnh hoặc dùng mặc định
+DOMAIN=${2:-"ubuntu.demo"}
+WEB_ROOT="/var/www/$DOMAIN"
+
+# Lấy tên database từ domain (bỏ phần mở rộng)
+DB_NAME=$(echo "$DOMAIN" | cut -d '.' -f 1)
+
+echo "Bắt đầu cài đặt LEMP stack trên Ubuntu 20.04 với domain $DOMAIN..."
+
+# Cập nhật và nâng cấp hệ thống
+apt update && apt upgrade -y
+
+# Cài đặt Nginx
+echo "Cài đặt Nginx..."
+apt install nginx -y
+
+# Mở full cổng firewall cho Nginx
+ufw allow 'Nginx Full'
+
+# Cài đặt MySQL 5.7
+echo "Cài đặt MySQL 5.7..."
+wget https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
+dpkg -i mysql-apt-config_0.8.12-1_all.deb
+apt update
+apt install mysql-server -y
+
+# Thiết lập MySQL với mật khẩu root truyền từ dòng lệnh
+echo "Thiết lập bảo mật MySQL..."
+mysql --user=root <<-EOF
+  ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY '$MYSQL_ROOT_PASSWORD';
+  FLUSH PRIVILEGES;
+EOF
+
+mysql_secure_installation <<EOF
+
+y
+$MYSQL_ROOT_PASSWORD
+$MYSQL_ROOT_PASSWORD
+y
+y
+y
+y
+EOF
+
+# Tạo database với tên từ domain không có phần mở rộng
+echo "Tạo database có tên $DB_NAME..."
+mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# Cài đặt PHP 7.4 và các module cần thiết
+echo "Cài đặt PHP 7.4..."
+apt install php7.4-fpm php7.4-mysql php7.4-cli php7.4-curl php7.4-json php7.4-mbstring php7.4-xml php7.4-zip php7.4-gd -y
+
+# Cài đặt phpMyAdmin
+echo "Cài đặt phpMyAdmin..."
+DEBIAN_FRONTEND=noninteractive apt install phpmyadmin -y
+
+# Cấu hình phpMyAdmin với Nginx
+ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
+
+# Khởi động lại các dịch vụ
+systemctl restart nginx
+systemctl restart mysql
+systemctl restart php7.4-fpm
+
+# Tạo một site demo với domain truyền vào hoặc mặc định ubuntu.demo
+echo "Tạo site mẫu $DOMAIN..."
+
+# Tạo thư mục cho website
+mkdir -p $WEB_ROOT
+
+# Tạo một trang index.php mẫu
+echo "<?php phpinfo(); ?>" > $WEB_ROOT/index.php
+
+# Chuyển quyền thư mục
+chown -R www-data:www-data $WEB_ROOT
+chmod -R 755 $WEB_ROOT
+
+# Cấu hình Nginx cho website
+cat > /etc/nginx/sites-available/$DOMAIN <<EOL
+server {
+    listen 80;
+    server_name $DOMAIN;
+    root $WEB_ROOT;
+
+    index index.php index.html index.htm;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+    error_log /var/log/nginx/$DOMAIN-error.log;
+    access_log /var/log/nginx/$DOMAIN-access.log;
+}
+EOL
+
+# Kích hoạt cấu hình website
+ln -s /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
+
+# Kiểm tra cấu hình Nginx
+nginx -t
+
+# Khởi động lại Nginx để áp dụng cấu hình mới
+systemctl restart nginx
+
+# Thêm domain vào /etc/hosts
+echo "127.0.0.1 $DOMAIN" >> /etc/hosts
+
+echo "Website demo đã được khởi tạo thành công tại http://$DOMAIN!"
+echo "Database $DB_NAME đã được tạo!"
+echo "Bạn có thể truy cập trang tại http://$DOMAIN để xem kết quả."

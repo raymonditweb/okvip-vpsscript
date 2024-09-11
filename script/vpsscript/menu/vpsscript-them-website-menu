@@ -23,7 +23,7 @@ select opt in "${options[@]}" ; do
     6) /etc/vpsscript/menu/vpsscript-them-website-wp;;
     7) /etc/vpsscript/menu/vpsscript-them-website-joomla;;
     8) /etc/vpsscript/menu/vpsscript-them-website-drupal;;
-    9) /etc/vpsscript/menu/vpsscript-list-website-tren-vps;; 
+    9) /etc/vpsscript/menu/vpsscript-list-website-tren-vps;;  
     10) clear && vpsscript;;
     0) clear && vpsscript;;
         *) echo "Ban nhap sai, vui long nhap theo so thu tu tren menu !";continue;;
