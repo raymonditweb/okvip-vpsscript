@@ -17,12 +17,12 @@ fi
 
 set -e
 
-# Đọc mật khẩu MariaDB từ tham số dòng lệnh hoặc tạo ngẫu nhiên nếu không có
-MARIADB_ROOT_PASSWORD=$1
+# Đọc mật khẩu MySQL từ tham số dòng lệnh hoặc tạo ngẫu nhiên nếu không có
+MYSQL_ROOT_PASSWORD=$1
 
-if [ -z "$MARIADB_ROOT_PASSWORD" ]; then
+if [ -z "$MYSQL_ROOT_PASSWORD" ]; then
   # Tạo mật khẩu ngẫu nhiên nếu không được truyền vào
-  MARIADB_ROOT_PASSWORD=$(openssl rand -base64 12)
+  MYSQL_ROOT_PASSWORD=$(openssl rand -base64 12)
 fi
 
 # Đọc domain từ tham số dòng lệnh hoặc dùng mặc định
@@ -45,30 +45,26 @@ ufw allow 'Nginx Full'
 # Lấy phiên bản Nginx
 NGINX_VERSION=$(nginx -v 2>&1 | cut -d '/' -f 2)
 
-# Cài đặt MariaDB
-echo "Cài đặt MariaDB..."
-apt install software-properties-common -y
-apt-key adv --fetch-keys 'https://mariadb.org/mariadb_release_signing_key.asc'
-add-apt-repository 'deb [arch=amd64] http://mariadb.mirror.liquidweb.com/repo/10.5/ubuntu focal main'
-apt update
-apt install mariadb-server -y
+# Cài đặt MySQL
+echo "Cài đặt MySQL..."
+apt install mysql-server -y
 
-# Cấu hình mật khẩu root cho MariaDB và thay đổi phương thức xác thực
-echo "Cấu hình mật khẩu root cho MariaDB và thay đổi phương thức xác thực..."
+# Cấu hình mật khẩu root cho MySQL và thay đổi phương thức xác thực
+echo "Cấu hình mật khẩu root cho MySQL và thay đổi phương thức xác thực..."
 
-# Sử dụng sudo để kết nối MariaDB mà không cần mật khẩu hiện tại
+# Thiết lập mật khẩu root và phương thức xác thực cho MySQL
 sudo mysql <<EOF
-ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password USING PASSWORD('$MARIADB_ROOT_PASSWORD');
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';
 FLUSH PRIVILEGES;
 EOF
 
-# Thiết lập bảo mật MariaDB tự động
-echo "Thiết lập bảo mật MariaDB..."
+# Thiết lập bảo mật MySQL tự động
+echo "Thiết lập bảo mật MySQL..."
 sudo mysql_secure_installation <<EOF
 
 y
-$MARIADB_ROOT_PASSWORD
-$MARIADB_ROOT_PASSWORD
+$MYSQL_ROOT_PASSWORD
+$MYSQL_ROOT_PASSWORD
 y
 y
 y
@@ -77,7 +73,7 @@ EOF
 
 # Tạo database với tên từ domain không có phần mở rộng
 echo "Tạo database có tên $DB_NAME..."
-mysql --user=root --password="$MARIADB_ROOT_PASSWORD" -e "CREATE DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 # Cài đặt PHP 7.4 và các module cần thiết
 echo "Cài đặt PHP 7.4..."
@@ -102,7 +98,7 @@ ufw allow $PHPMYADMIN_PORT
 
 # Khởi động lại các dịch vụ
 systemctl restart nginx
-systemctl restart mariadb
+systemctl restart mysql
 systemctl restart php7.4-fpm
 
 # Tạo một site demo với domain truyền vào hoặc mặc định vpsscript.demo
@@ -169,7 +165,7 @@ current_os_version="$VERSION"
 nginx_version="$NGINX_VERSION"
 php_version="$PHP_VERSION"
 mainsite="$DOMAIN"
-mariadb_root_password="$MARIADB_ROOT_PASSWORD"
+mysql_root_password="$MYSQL_ROOT_PASSWORD"
 phpmyadmin_version="$PHPMYADMIN_VERSION"
 priport="$PHPMYADMIN_PORT"
 END
@@ -178,4 +174,4 @@ echo "Thông tin cài đặt đã được lưu trong /home/vpsscript.conf"
 echo "Website demo đã được khởi tạo thành công tại http://$DOMAIN!"
 echo "Database $DB_NAME đã được tạo!"
 echo "Bạn có thể truy cập phpMyAdmin tại http://$SERVER_IP:$PHPMYADMIN_PORT/phpmyadmin"
-echo "Mật khẩu root: $MARIADB_ROOT_PASSWORD"
+echo "Mật khẩu root: $MYSQL_ROOT_PASSWORD"
