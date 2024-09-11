@@ -47,8 +47,8 @@ NGINX_VERSION=$(nginx -v 2>&1 | cut -d '/' -f 2)
 
 # Đặt mật khẩu root MySQL thông qua debconf để không bị hỏi
 echo "Cấu hình mật khẩu root cho MySQL..."
-debconf-set-selections <<< "mysql-server mysql-server/root_password password $MARIADB_ROOT_PASSWORD"
-debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $MARIADB_ROOT_PASSWORD"
+debconf-set-selections <<< "mysql-server mysql-server/root_password password $MYSQL_ROOT_PASSWORD"
+debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $MYSQL_ROOT_PASSWORD"
 
 # Cài đặt MySQL Server thay vì MariaDB
 echo "Cài đặt MySQL..."
@@ -60,7 +60,7 @@ echo "Cấu hình mật khẩu root cho MySQL và thay đổi phương thức x�
 
 # Sử dụng sudo để kết nối MySQL mà không cần mật khẩu hiện tại
 sudo mysql <<EOF
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MARIADB_ROOT_PASSWORD';
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';
 FLUSH PRIVILEGES;
 EOF
 
@@ -79,7 +79,7 @@ EOF
 
 # Tạo database với tên từ domain không có phần mở rộng
 echo "Tạo database có tên $DB_NAME..."
-mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+sudo mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 # Cài đặt PHP 7.4 và các module cần thiết
 echo "Cài đặt PHP 7.4..."
