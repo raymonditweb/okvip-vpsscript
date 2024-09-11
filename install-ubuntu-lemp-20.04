@@ -45,16 +45,22 @@ ufw allow 'Nginx Full'
 # Lấy phiên bản Nginx
 NGINX_VERSION=$(nginx -v 2>&1 | cut -d '/' -f 2)
 
-# Cài đặt MySQL
+# Đặt mật khẩu root MySQL thông qua debconf để không bị hỏi
+echo "Cấu hình mật khẩu root cho MySQL..."
+debconf-set-selections <<< "mysql-server mysql-server/root_password password $MARIADB_ROOT_PASSWORD"
+debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $MARIADB_ROOT_PASSWORD"
+
+# Cài đặt MySQL Server thay vì MariaDB
 echo "Cài đặt MySQL..."
+apt update
 apt install mysql-server -y
 
 # Cấu hình mật khẩu root cho MySQL và thay đổi phương thức xác thực
 echo "Cấu hình mật khẩu root cho MySQL và thay đổi phương thức xác thực..."
 
-# Thiết lập mật khẩu root và phương thức xác thực cho MySQL
+# Sử dụng sudo để kết nối MySQL mà không cần mật khẩu hiện tại
 sudo mysql <<EOF
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MARIADB_ROOT_PASSWORD';
 FLUSH PRIVILEGES;
 EOF
 
