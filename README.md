@@ -4,6 +4,14 @@ OKVIP-VPSSCRIPT là bản chỉnh sửa lại từ vpsscript-3.8.1, hỗ trợ c
 
 ### Lệnh Cài Đặt OKVIP-VPSSCRIPT :
 
+#### Ubuntu 20.04:
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/install-ubuntu-lemp-20.04 ) <mysql_root_password> <init_main_domain.com>
+*) mysql_root_password : rỗng = tự tạo
+*) init_main_domain.com : rỗng = vpsscript.demo
+```
+
+#### CentOS 7,8,9, Almalinux 8,9: 
 ```
 bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/install )
 ```
