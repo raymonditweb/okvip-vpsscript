@@ -67,7 +67,6 @@ EOF
 # Thiết lập bảo mật MySQL tự động
 echo "Thiết lập bảo mật MySQL..."
 sudo mysql_secure_installation <<EOF
-
 y
 $MYSQL_ROOT_PASSWORD
 $MYSQL_ROOT_PASSWORD
