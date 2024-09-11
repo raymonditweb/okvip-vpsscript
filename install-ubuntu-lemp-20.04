@@ -1,17 +1,9 @@
 #!/bin/bash
 
-set -e
-
 # Kiểm tra quyền root
 if [ "$EUID" -ne 0 ]; then
   echo "Vui lòng chạy với quyền root."
   exit 1
-fi
-
-# Kiểm tra xem script đã được cài trước đó chưa
-if [ -f "/home/vpsscript.conf" ]; then
-  echo "Script đã được cài trên VPS này. Xem thông tin trong /home/vpsscript.conf"
-  exit 0
 fi
 
 # Kiểm tra phiên bản Ubuntu
@@ -22,6 +14,8 @@ if [[ "$OS" != "Ubuntu" || "$VERSION" != "20.04" ]]; then
   echo "Script này chỉ hỗ trợ Ubuntu 20.04."
   exit 1
 fi
+
+set -e
 
 # Đọc mật khẩu MariaDB từ tham số dòng lệnh hoặc tạo ngẫu nhiên nếu không có
 MARIADB_ROOT_PASSWORD=$1
@@ -43,11 +37,7 @@ apt update && apt upgrade -y
 
 # Cài đặt Nginx
 echo "Cài đặt Nginx..."
-if ! apt install nginx -y; then
-    echo "Failed to install Nginx. Exiting."
-    exit 1
-fi
-
+apt install nginx -y
 
 # Mở full cổng firewall cho Nginx
 ufw allow 'Nginx Full'
@@ -66,7 +56,7 @@ apt install mariadb-server -y
 # Cấu hình mật khẩu root cho MariaDB
 echo "Cấu hình mật khẩu root cho MariaDB..."
 mysql --user=root <<-EOF
-  ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MARIADB_ROOT_PASSWORD';
+  SET PASSWORD FOR 'root'@'localhost' = PASSWORD('$MARIADB_ROOT_PASSWORD');
   FLUSH PRIVILEGES;
 EOF
 
