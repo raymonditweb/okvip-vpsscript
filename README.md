@@ -52,7 +52,7 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/m
 
 #### List danh sách website trên vps
 ```
-/etc/vpsscript/menu/vpsscript-list-website-tren-vps;;  
+bash <( curl -k /etc/vpsscript/menu/vpsscript-list-website-tren-vps )  
 ```
 
 #### Cài đặt website WordPress tự động theo template: 
