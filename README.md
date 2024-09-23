@@ -63,6 +63,10 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/m
 + Download mẫu
 + Cấu hình config
 
+```
+https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/refs/heads/main/install-wordpress <mysql_root_password*> <domain*> <template_slug = default>
+```
+
 #### Tiện ích: Bật / Tắt 1 hoặc nhiều website
 
 ### Cập nhật plugin and Wordpress core:
