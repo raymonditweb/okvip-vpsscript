@@ -17,6 +17,9 @@ fi
 
 set -e
 
+# Lấy địa chỉ IP server
+SERVER_IP=$(hostname -I | awk '{print $1}')
+
 # Đọc mật khẩu MySQL từ tham số dòng lệnh hoặc tạo ngẫu nhiên nếu không có
 MYSQL_ROOT_PASSWORD=$1
 
@@ -179,9 +182,6 @@ systemctl restart nginx
 
 # Thêm domain vào /etc/hosts
 echo "127.0.0.1 $DOMAIN" >> /etc/hosts
-
-# Lấy địa chỉ IP server
-SERVER_IP=$(hostname -I | awk '{print $1}')
 
 # Ghi thông tin cấu hình ra file vpsscript.conf
 cat > "/home/vpsscript.conf" <<END
