@@ -4,7 +4,7 @@ OKVIP-VPSSCRIPT là nền để quản lý và cài đặt website wordpress tr�
 
 
 ### 1. Quản lý Máy Chủ (Server/VPS)
-#### - Cài đặt LEMP:
+#### Cài đặt LEMP:
 + Ubuntu 20.04:
 ```
 bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/install-ubuntu-lemp-20.04 ) <mysql_root_password> <init_main_domain.com>
@@ -15,56 +15,57 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/m
 bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/yum-cron-setup )
 ```
 
-#### - Quản lý file:
+#### Quản lý file:
 + List file & folder
 + Upload/ Add / Edit / Zip / Unzip/ Delete
 + Set chrmode file, folder
 
-#### -  Theo dõi thong số server:
+####  Theo dõi thông số server:
 + Ram, Ổ cứng,
 + Process
 + Network, load
-s
-#### - Quản lý application:
+
+#### Quản lý application:
 + Install application list
 + Install / Uninstall
 
-#### - Quản lý services:
+#### Quản lý services:
 + Restart VPS / Terminal
 + Stop / Start / Restart /
 
-#### - Quản lý logs:
+#### Quản lý logs:
 + Service logs
 + Error log
 + Application Log
 + System log
 
-#### - Backup VPS: Backup to google driver
+#### Backup VPS: Backup to google driver
 
-#### - Cronjob:
+#### Cronjob:
 + Quản lý / Thêm / Xoá
 
-#### - Security:
+#### Security:
 + Firewall Rules
 + Change SSH Port
 
 ### 2. Quản lý website
 
-#### - List danh sách website trên vps
+#### List danh sách website trên vps
 ```
 /etc/vpsscript/menu/vpsscript-list-website-tren-vps;;  
 ```
 
-#### - Cài đặt website WordPress tự động theo template: 
-+ Thêm domain
+#### Cài đặt website WordPress tự động theo template: 
++ Add domain
++ Tạo database
 + SSL 
 + FTP
 + Download mẫu
 + Cấu hình config
 
-#### - Tiện ích: Bật / Tắt 1 hoặc nhiều website
+#### Tiện ích: Bật / Tắt 1 hoặc nhiều website
 
-### - Cập nhật plugin and Wordpress core:
+### Cập nhật plugin and Wordpress core:
 
 ```
 bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/vpsscript/menu/tienich/update-wordpress-for-all-site )
@@ -76,8 +77,7 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/m
 bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/vpsscript/menu/tienich/scan-wordpress-malware.sh )
 ```
 
-#### - Quản lý Database:
+#### Quản lý Database:
 + Listdbs / Add / Edit / Delete
 + Db Users / Add / Edit / Delete
 
-#### - Website template: Upload / Delete

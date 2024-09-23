@@ -43,8 +43,18 @@ apt install nginx mysql-server php-fpm php-mysql -y
 ufw allow 'Nginx Full'
 
 # Cài đặt MySQL Server thay vì MariaDB
-echo "Cài đặt mật khẩu cho MySQL..."
-mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';"
+#echo "Cài đặt mật khẩu cho MySQL..."
+#mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';"
+
+echo "Cài đặt mật khẩu cho MySQL root..."
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';"
+
+# Áp dụng thay đổi ngay lập tức
+#mysql -e "FLUSH PRIVILEGES;"
+
+# Kiểm tra mật khẩu đã được thiết lập thành công
+echo "Xác minh cài đặt mật khẩu MySQL root..."
+mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "SELECT 'MySQL root password đã được thiết lập thành công.';"
 
 # Tạo database với tên từ domain không có phần mở rộng
 echo "Tạo database có tên $DB_NAME..."
@@ -68,8 +78,48 @@ PHPMYADMIN_VERSION=$(dpkg -l | grep phpmyadmin | awk '{print $3}')
 PHPMYADMIN_PORT=8080
 ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
 
+# Cấu hình Nginx để chạy phpMyAdmin trên cổng 8080
+echo "Cấu hình Nginx cho phpMyAdmin trên cổng $PHPMYADMIN_PORT..."
+cat > /etc/nginx/sites-available/phpmyadmin <<EOL
+server {
+    listen $PHPMYADMIN_PORT;
+    server_name $SERVER_IP;
+
+    root /usr/share/phpmyadmin;
+    index index.php index.html index.htm;
+
+    location / {
+        try_files \$uri \$uri/ =404;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+    error_log /var/log/nginx/phpmyadmin-error.log;
+    access_log /var/log/nginx/phpmyadmin-access.log;
+}
+EOL
+
+# Kích hoạt cấu hình phpMyAdmin
+ln -s /etc/nginx/sites-available/phpmyadmin /etc/nginx/sites-enabled/
+
+# Kiểm tra cấu hình Nginx
+nginx -t
+
+# Khởi động lại Nginx để áp dụng cấu hình mới
+systemctl restart nginx
+
 # Mở cổng cho phpMyAdmin
-ufw allow $PHPMYADMIN_PORT
+ufw allow $PHPMYADMIN_PORT/tcp
+
 
 # Khởi động lại các dịch vụ
 systemctl restart nginx
@@ -148,5 +198,5 @@ END
 echo "Thông tin cài đặt đã được lưu trong /home/vpsscript.conf"
 echo "Website demo đã được khởi tạo thành công tại http://$DOMAIN!"
 echo "Database $DB_NAME đã được tạo!"
-echo "Bạn có thể truy cập phpMyAdmin tại http://$SERVER_IP:$PHPMYADMIN_PORT/phpmyadmin"
+echo "Bạn có thể truy cập phpMyAdmin tại http://$SERVER_IP:$PHPMYADMIN_PORT"
 echo "Mật khẩu root: $MYSQL_ROOT_PASSWORD"
