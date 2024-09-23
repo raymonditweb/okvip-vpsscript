@@ -116,6 +116,36 @@ server {
     error_log /var/log/nginx/$DOMAIN-error.log;
     access_log /var/log/nginx/$DOMAIN-access.log;
 }
+
+server {
+    listen 443 ssl;
+    server_name $DOMAIN;
+
+    ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
+    ssl_trusted_certificate /etc/letsencrypt/live/$DOMAIN/chain.pem;
+
+    root $WEB_ROOT;
+    index index.php index.html index.htm;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$args;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+    error_log /var/log/nginx/$DOMAIN-ssl-error.log;
+    access_log /var/log/nginx/$DOMAIN-ssl-access.log;
+}
 EOL
 
 # Kích hoạt cấu hình Nginx
@@ -140,9 +170,9 @@ fi
 echo "Cấu hình wp-config.php..."
 if [ -f "$WEB_ROOT/wp-config.php" ]; then
   echo "wp-config.php đã tồn tại, cập nhật các thông tin cần thiết..."
-  sed -i "s/database_name_here/$DB_NAME/" $WEB_ROOT/wp-config.php
-  sed -i "s/username_here/$DB_USER/" $WEB_ROOT/wp-config.php
-  sed -i "s/password_here/$DB_PASSWORD/" $WEB_ROOT/wp-config.php
+  wp config set DB_NAME "$DB_NAME" --path=$WEB_ROOT --allow-root
+  wp config set DB_USER "$DB_USER" --path=$WEB_ROOT --allow-root
+  wp config set DB_PASSWORD "$DB_PASSWORD" --path=$WEB_ROOT --allow-root
 else
   echo "Tạo mới wp-config.php..."
   wp config create --dbname="$DB_NAME" --dbuser="$DB_USER" --dbpass="$DB_PASSWORD" --dbhost="localhost" --path=$WEB_ROOT --allow-root
@@ -157,7 +187,7 @@ chown -R www-data:www-data $WEB_ROOT
 chmod -R 755 $WEB_ROOT
 
 # Kết thúc
-echo "WordPress đã được cài đặt thành công trên domain https://$DOMAIN!"
+echo "WordPress đã được cài đặt thành công trên domain https://$DOMAIN/"
 echo "Thông tin cơ sở dữ liệu:"
 echo "  - Database: $DB_NAME"
 echo "  - User: $DB_USER"
