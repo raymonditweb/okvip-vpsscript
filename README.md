@@ -64,10 +64,22 @@ bash <( curl -k /etc/vpsscript/menu/vpsscript-list-website-tren-vps )
 + Cấu hình config
 
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/refs/heads/main/install-wordpress) <mysql_root_password*> <domain*> <template_slug = default>
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/install-wordpress) <mysql_root_password*> <domain*> <template_slug = default>
+```
+#### Xoá website: yêu cầu có mysql root password để remove db
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/remove-website)  <domain*> <mysql_root_password*>
 ```
 
 #### Tiện ích: Bật / Tắt 1 hoặc nhiều website
++ Bật website
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/enable-website)  <domain*>
+```
++ Tắt website
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/disable-website)  <domain*>
+```
 
 ### Cập nhật plugin and Wordpress core:
 

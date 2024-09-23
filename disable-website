@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Vui lòng chạy với quyền root."
+  exit 1
+fi
+
+# Đọc thông tin đầu vào
+DOMAIN=$1
+NGINX_CONFIG_SYMLINK="/etc/nginx/sites-enabled/$DOMAIN"
+
+if [ -z "$DOMAIN" ]; then
+  echo "Sử dụng: ./disable-website.sh <domain>"
+  exit 1
+fi
+
+# Kiểm tra symlink trong sites-enabled
+if [ ! -f "$NGINX_CONFIG_SYMLINK" ]; then
+  echo "Website $DOMAIN chưa được bật hoặc không có trong sites-enabled."
+else
+  echo "Tắt website $DOMAIN..."
+  rm -f $NGINX_CONFIG_SYMLINK
+fi
+
+# Tải lại Nginx
+echo "Tải lại Nginx..."
+nginx -t && systemctl reload nginx
+
+echo "Website $DOMAIN đã được tắt!"
