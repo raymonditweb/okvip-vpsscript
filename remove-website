@@ -9,58 +9,61 @@ fi
 # Đọc thông tin đầu vào
 DOMAIN=$1
 MYSQL_ROOT_PASSWORD=$2
-DB_NAME=$(echo "$DOMAIN" | cut -d '.' -f 1)
-WEB_ROOT="/var/www/$DOMAIN"
-NGINX_CONFIG="/etc/nginx/sites-available/$DOMAIN"
-NGINX_CONFIG_SYMLINK="/etc/nginx/sites-enabled/$DOMAIN"
 
 if [ -z "$DOMAIN" ] || [ -z "$MYSQL_ROOT_PASSWORD" ]; then
-  echo "Sử dụng: ./delete-website <domain> <mysql_root_password>"
+  echo "Sử dụng: ./remove-website.sh <domain> <mysql_root_password>"
   exit 1
 fi
 
-# Xóa cơ sở dữ liệu MySQL
-echo "Xóa database MySQL cho domain $DOMAIN..."
-mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE IF EXISTS $DB_NAME;"
-mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP USER IF EXISTS '$DB_NAME_user'@'localhost';"
-mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
-
-# Xóa thư mục mã nguồn
-if [ -d "$WEB_ROOT" ]; then
-  echo "Xóa thư mục mã nguồn tại $WEB_ROOT..."
-  rm -rf $WEB_ROOT
-else
-  echo "Không tìm thấy thư mục mã nguồn tại $WEB_ROOT."
-fi
-
 # Xóa tệp cấu hình Nginx
-if [ -f "$NGINX_CONFIG" ]; then
-  echo "Xóa cấu hình Nginx cho $DOMAIN..."
-  rm -f $NGINX_CONFIG
-fi
-
-# Xóa symlink của Nginx trong sites-enabled
-if [ -f "$NGINX_CONFIG_SYMLINK" ]; then
-  echo "Xóa symlink cấu hình Nginx trong sites-enabled..."
-  rm -f $NGINX_CONFIG_SYMLINK
-fi
-
-# Tải lại Nginx
-echo "Tải lại Nginx..."
-nginx -t && systemctl reload nginx
-
-# Xóa chứng chỉ SSL với Certbot (nếu có)
-if certbot certificates | grep -q "$DOMAIN"; then
-  echo "Xóa chứng chỉ SSL với Certbot cho $DOMAIN..."
-  certbot delete --cert-name $DOMAIN --non-interactive
+if [ -f "/etc/nginx/sites-available/$DOMAIN" ]; then
+  rm /etc/nginx/sites-available/$DOMAIN
+  echo "Đã xóa tệp cấu hình Nginx trong sites-available."
 else
-  echo "Không tìm thấy chứng chỉ SSL cho $DOMAIN."
+  echo "Tệp cấu hình không tồn tại trong sites-available."
 fi
 
-# Xóa mục khỏi tệp /etc/hosts
-if grep -q "127.0.0.1 $DOMAIN" /etc/hosts; then
-  echo "Xóa mục $DOMAIN khỏi /etc/hosts..."
-  sed -i "/127.0.0.1 $DOMAIN/d" /etc/hosts
+# Xóa liên kết tượng trưng
+if [ -L "/etc/nginx/sites-enabled/$DOMAIN" ]; then
+  rm /etc/nginx/sites-enabled/$DOMAIN
+  echo "Đã xóa liên kết tượng trưng trong sites-enabled."
+else
+  echo "Liên kết tượng trưng không tồn tại trong sites-enabled."
 fi
 
-echo "Website $DOMAIN đã được xóa hoàn toàn!"
+# Kiểm tra và xóa database MySQL
+if mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "USE $DOMAIN;"; then
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DOMAIN;"
+  echo "Đã xóa database MySQL cho domain $DOMAIN."
+else
+  echo "Database không tồn tại hoặc không thể truy cập."
+fi
+
+# Kiểm tra và xóa thư mục web
+WEB_ROOT="/var/www/$DOMAIN"
+if [ -d "$WEB_ROOT" ]; then
+  rm -rf "$WEB_ROOT"
+  echo "Đã xóa thư mục web tại $WEB_ROOT."
+else
+  echo "Thư mục web không tồn tại."
+fi
+
+
+# Kiểm tra và xóa tham chiếu trong nginx.conf
+if grep -q "bizcode.net" /etc/nginx/nginx.conf; then
+  sed -i "/bizcode.net/d" /etc/nginx/nginx.conf
+  echo "Đã xóa tham chiếu đến bizcode.net trong nginx.conf."
+else
+  echo "Không tìm thấy tham chiếu đến bizcode.net trong nginx.conf."
+fi
+
+# Kiểm tra lại cấu hình Nginx
+nginx -t
+if [ $? -eq 0 ]; then
+  echo "Cấu hình Nginx hợp lệ."
+  systemctl reload nginx
+else
+  echo "Cấu hình Nginx không hợp lệ, không thể tải lại."
+fi
+
+echo "Quá trình xóa website hoàn tất."

@@ -116,36 +116,6 @@ server {
     error_log /var/log/nginx/$DOMAIN-error.log;
     access_log /var/log/nginx/$DOMAIN-access.log;
 }
-
-server {
-    listen 443 ssl;
-    server_name $DOMAIN;
-
-    ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
-    ssl_trusted_certificate /etc/letsencrypt/live/$DOMAIN/chain.pem;
-
-    root $WEB_ROOT;
-    index index.php index.html index.htm;
-
-    location / {
-        try_files \$uri \$uri/ /index.php?\$args;
-    }
-
-    location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-        include fastcgi_params;
-    }
-
-    location ~ /\.ht {
-        deny all;
-    }
-
-    error_log /var/log/nginx/$DOMAIN-ssl-error.log;
-    access_log /var/log/nginx/$DOMAIN-ssl-access.log;
-}
 EOL
 
 # Kích hoạt cấu hình Nginx
@@ -154,12 +124,12 @@ nginx -t
 systemctl reload nginx
 
 # Cài đặt SSL với Let's Encrypt nếu chưa có
-if ! sudo certbot certificates | grep -q "$DOMAIN"; then
-  echo "Cài đặt SSL với Let's Encrypt cho domain $DOMAIN..."
-  certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m your-email@example.com --redirect
-else
-  echo "SSL cho domain $DOMAIN đã tồn tại."
-fi
+# if ! sudo certbot certificates | grep -q "$DOMAIN"; then
+#   echo "Cài đặt SSL với Let's Encrypt cho domain $DOMAIN..."
+#   certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m no-reply@okvip.com --redirect
+# else
+#   echo "SSL cho domain $DOMAIN đã tồn tại."
+# fi
 
 # Thêm domain vào /etc/hosts
 if ! grep -q "127.0.0.1 $DOMAIN" /etc/hosts; then
