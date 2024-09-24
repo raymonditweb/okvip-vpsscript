@@ -70,6 +70,16 @@ apt install php7.4-fpm php7.4-mysql php7.4-cli php7.4-curl php7.4-json php7.4-mb
 # Lấy phiên bản PHP
 PHP_VERSION=$(php -v | head -n 1 | cut -d ' ' -f 2)
 
+#cài đặt wp cli
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+php wp-cli.phar --info
+chmod +x wp-cli.phar
+sudo mv wp-cli.phar /usr/local/bin/wp
+
+#cài đặt zip
+apt install unzip -y
+
+
 # Cài đặt phpMyAdmin
 echo "Cài đặt phpMyAdmin..."
 DEBIAN_FRONTEND=noninteractive apt install phpmyadmin -y
