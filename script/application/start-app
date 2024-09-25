@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Vui lòng chạy với quyền root."
+  exit 1
+fi
+
+APP_NAME=$1
+if [ -z "$APP_NAME" ]; then
+  echo "Sử dụng: ./start-app <app_name>"
+  exit 1
+fi
+
+echo "Khởi động $APP_NAME..."
+systemctl start $APP_NAME
+
+if [ $? -eq 0 ]; then
+  echo "$APP_NAME đã được khởi động thành công!"
+else
+  echo "Có lỗi xảy ra khi khởi động $APP_NAME!"
+fi

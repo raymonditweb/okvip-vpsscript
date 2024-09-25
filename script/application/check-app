@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Vui lòng chạy với quyền root."
+  exit 1
+fi
+
+APP_NAME=$1
+if [ -z "$APP_NAME" ]; then
+  echo "Sử dụng: ./check-app <app_name>"
+  exit 1
+fi
+
+# Phát hiện hệ điều hành
+if [ -f /etc/os-release ]; then
+  OS=$(grep ^ID= /etc/os-release | cut -d= -f2 | tr -d '"')
+else
+  echo "Không phát hiện được hệ điều hành!"
+  exit 1
+fi
+
+# Kiểm tra ứng dụng đã cài đặt trên Ubuntu
+check_installed_ubuntu() {
+  dpkg -l | grep -qw "$APP_NAME"
+}
+
+# Kiểm tra ứng dụng đã cài đặt trên CentOS
+check_installed_centos() {
+  rpm -qa | grep -qw "$APP_NAME"
+}
+
+# Kiểm tra và trả về 0 nếu đã cài, 1 nếu chưa cài
+if [[ "$OS" == "ubuntu" ]]; then
+  if check_installed_ubuntu; then
+    exit 0
+  else
+    exit 1
+  fi
+elif [[ "$OS" == "centos" ]]; then
+  if check_installed_centos; then
+    exit 0
+  else
+    exit 1
+  fi
+else
+  echo "Hệ điều hành không được hỗ trợ!"
+  exit 1
+fi

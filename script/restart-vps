@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Vui lòng chạy với quyền root."
+  exit 1
+fi
+
+# Khởi động lại VPS ngay lập tức
+echo "Khởi động lại VPS..."
+reboot

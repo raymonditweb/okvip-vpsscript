@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Vui lòng chạy với quyền root."
+  exit 1
+fi
+
+APP_NAME=$1
+if [ -z "$APP_NAME" ]; then
+  echo "Sử dụng: ./remove-app <app_name>"
+  exit 1
+fi
+
+# Phát hiện hệ điều hành
+if [ -f /etc/os-release ]; then
+  OS=$(grep ^ID= /etc/os-release | cut -d= -f2 | tr -d '"')
+else
+  echo "Không phát hiện được hệ điều hành!"
+  exit 1
+fi
+
+# Remove cho Ubuntu
+remove_ubuntu() {
+  echo "Đang xoá $APP_NAME trên Ubuntu..."
+  apt remove -y $APP_NAME && apt autoremove -y
+  echo "$APP_NAME đã được xoá!"
+}
+
+# Remove cho CentOS
+remove_centos() {
+  echo "Đang xoá $APP_NAME trên CentOS..."
+  yum remove -y $APP_NAME
+  echo "$APP_NAME đã được xoá!"
+}
+
+# Kiểm tra hệ điều hành và thực hiện remove
+if [[ "$OS" == "ubuntu" ]]; then
+  remove_ubuntu
+elif [[ "$OS" == "centos" ]]; then
+  remove_centos
+else
+  echo "Hệ điều hành không được hỗ trợ!"
+  exit 1
+fi
