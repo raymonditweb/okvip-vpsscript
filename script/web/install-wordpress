@@ -2,7 +2,7 @@
 
 # Kiểm tra quyền root
 if [ "$EUID" -ne 0 ]; then
-  echo "Vui lòng chạy với quyền root."
+  echo "Error: Vui lòng chạy với quyền root."
   exit 1
 fi
 
@@ -17,32 +17,32 @@ DB_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
 TEMPLATE_URL="https://github.com/raymonditweb/okvip-vpsscript/raw/main/templates/wordpress/$TEMPLATE.zip"
 
 if [ -z "$MYSQL_ROOT_PASSWORD" ] || [ -z "$DOMAIN" ]; then
-  echo "Sử dụng: ./install-wordpress <mysql_root_password> <domain> [template]"
+  echo "Error: Sử dụng: ./install-wordpress <mysql_root_password> <domain> [template]"
   exit 1
 fi
 
 # Kiểm tra Nginx có được cài đặt không
 if ! command -v nginx >/dev/null; then
-  echo "Nginx chưa được cài đặt. Vui lòng khởi tạo server trước."
+  echo "Error: Nginx chưa được cài đặt. Vui lòng khởi tạo server trước."
   exit 1
 fi
 
 # Kiểm tra MySQL có được cài đặt không
 if ! command -v mysql >/dev/null; then
-  echo "MySQL chưa được cài đặt. Vui lòng khởi tạo server trước."
+  echo "Error: MySQL chưa được cài đặt. Vui lòng khởi tạo server trước."
   exit 1
 fi
 
 # Kiểm tra PHP có được cài đặt không
 if ! command -v php >/dev/null; then
-  echo "PHP chưa được cài đặt. Vui lòng khởi tạo server trước."
+  echo "Error: PHP chưa được cài đặt. Vui lòng khởi tạo server trước."
   exit 1
 fi
 
 # Kiểm tra mật khẩu MySQL
 echo "Kiểm tra kết nối MySQL..."
 if ! mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "exit" >/dev/null 2>&1; then
-  echo "Mật khẩu MySQL không chính xác. Dừng lại."
+  echo "Error: Mật khẩu MySQL không chính xác. Dừng lại."
   exit 1
 fi
 
@@ -96,7 +96,7 @@ if [ -f "$WEB_ROOT/db.sql" ]; then
   echo "Import database từ db.sql..."
   mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_NAME < $WEB_ROOT/db.sql
 else
-  echo "Không tìm thấy file db.sql trong template. Dừng lại."
+  echo "Error: Không tìm thấy file db.sql trong template. Dừng lại."
   exit 1
 fi
 

@@ -2,7 +2,7 @@
 
 # Kiểm tra quyền root
 if [ "$EUID" -ne 0 ]; then
-  echo "Vui lòng chạy với quyền root."
+  echo "Error: Vui lòng chạy với quyền root."
   exit 1
 fi
 
@@ -11,7 +11,7 @@ OS=$(lsb_release -si)
 VERSION=$(lsb_release -sr)
 
 if [[ "$OS" != "Ubuntu" || "$VERSION" != "20.04" ]]; then
-  echo "Script này chỉ hỗ trợ Ubuntu 20.04."
+  echo "Error: Script này chỉ hỗ trợ Ubuntu 20.04."
   exit 1
 fi
 

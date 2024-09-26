@@ -2,13 +2,13 @@
 
 # Kiểm tra quyền root
 if [ "$EUID" -ne 0 ]; then
-  echo "Vui lòng chạy với quyền root."
+  echo "Error: Vui lòng chạy với quyền root."
   exit 1
 fi
 
 APP_NAME=$1
 if [ -z "$APP_NAME" ]; then
-  echo "Sử dụng: ./reload-app <app_name>"
+  echo "Error: Sử dụng: ./reload-app <app_name>"
   exit 1
 fi
 

@@ -2,7 +2,7 @@
 
 # Kiểm tra quyền root
 if [ "$EUID" -ne 0 ]; then
-  echo "Vui lòng chạy với quyền root."
+  echo "Error: Vui lòng chạy với quyền root."
   exit 1
 fi
 
@@ -11,7 +11,7 @@ DOMAIN=$1
 NGINX_CONFIG_SYMLINK="/etc/nginx/sites-enabled/$DOMAIN"
 
 if [ -z "$DOMAIN" ]; then
-  echo "Sử dụng: ./disable-website.sh <domain>"
+  echo "Error: Sử dụng: ./disable-website.sh <domain>"
   exit 1
 fi
 

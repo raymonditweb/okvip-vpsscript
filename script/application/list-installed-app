@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: Vui lòng chạy với quyền root."
+  exit 1
+fi
+
+# Hàm liệt kê các ứng dụng đã cài cho Ubuntu/Debian
+list_ubuntu_apps() {
+    apt list --installed 2>/dev/null | grep -E '^(nginx|php|redis|mysql|apache2|python|nodejs|docker|java|golang|postgresql|mongodb|ruby|docker-compose|kubernetes|git|memcached|rabbitmq|prometheus|grafana|elasticsearch|logstash|kibana|vim|curl|wget|tmux|screen|ssh|htop|net-tools|ufw)'
+}
+
+# Hàm liệt kê các ứng dụng đã cài cho CentOS/RHEL
+list_centos_apps() {
+    yum list installed 2>/dev/null | grep -E '^(nginx|php|redis|mysql|apache2|python|nodejs|docker|java|golang|postgresql|mongodb|ruby|docker-compose|kubernetes|git|memcached|rabbitmq|prometheus|grafana|elasticsearch|logstash|kibana|vim|curl|wget|tmux|screen|ssh|htop|net-tools|ufw)'
+}
+
+# Kiểm tra hệ điều hành và chạy hàm phù hợp
+if [ -f /etc/debian_version ]; then
+    list_ubuntu_apps
+elif [ -f /etc/redhat-release ]; then
+    list_centos_apps
+else
+    echo "Error: Hệ điều hành không được hỗ trợ."
+    exit 1
+fi

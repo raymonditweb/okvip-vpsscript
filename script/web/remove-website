@@ -2,7 +2,7 @@
 
 # Kiểm tra quyền root
 if [ "$EUID" -ne 0 ]; then
-  echo "Vui lòng chạy với quyền root."
+  echo "Error: Vui lòng chạy với quyền root."
   exit 1
 fi
 
@@ -11,7 +11,7 @@ DOMAIN=$1
 MYSQL_ROOT_PASSWORD=$2
 
 if [ -z "$DOMAIN" ] || [ -z "$MYSQL_ROOT_PASSWORD" ]; then
-  echo "Sử dụng: ./remove-website.sh <domain> <mysql_root_password>"
+  echo "Error: Sử dụng: ./remove-website.sh <domain> <mysql_root_password>"
   exit 1
 fi
 
