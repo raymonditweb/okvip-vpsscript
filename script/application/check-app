@@ -33,15 +33,15 @@ check_installed_centos() {
 # Kiểm tra và trả về 0 nếu đã cài, 1 nếu chưa cài
 if [[ "$OS" == "ubuntu" ]]; then
   if check_installed_ubuntu; then
-    echo 0
-  else
     echo 1
+  else
+    echo 0
   fi
 elif [[ "$OS" == "centos" ]]; then
   if check_installed_centos; then
-    echo 0
-  else
     echo 1
+  else
+    echo 0
   fi
 else
   echo "Error: Hệ điều hành không được hỗ trợ!"
