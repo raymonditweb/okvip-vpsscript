@@ -32,9 +32,30 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/m
 - Upload / Add / Delete: [Code core]
 
 ####  Theo dõi thông số server:
-- Ram, Ổ cứng,
-- Process
+- Thông tin RAM
+```
+free -h
+```
+- Thông tin ổ cứng
+```
+df -h
+```
+- Thông tin INODE
+```
+df -i
+```
+- Danh sách process
+```
+ps aux --sort=-%cpu | head -n 10
+```
+- Danh sách sử dụng dung lượng RAM
+```
+ps aux --sort=-%mem | head -n 10
+```
 - Network, load
+```
+iftop -n
+```
 
 #### Quản lý application / services:
 - Kiểm tra đã cài đặt chưa, trả về 0 hoặc 1
@@ -57,10 +78,21 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/m
 ```
 
 #### Quản lý logs:
-- Service logs
-- Error log
-- Application Log
-- System log
+Mở file log để đọc, log được lưu trong /var/log, sử dụng lên cat để đọc
+
+```
+cat [file_log]
+```
++ Danh sách file logs: nằm trong /var/log/
+/var/log/syslog: Log hệ thống chính, chứa log từ nhiều dịch vụ và hoạt động hệ thống.
+/var/log/auth.log: Log về việc đăng nhập và xác thực.
+/var/log/dmesg: Log của kernel, ghi lại thông tin phần cứng và các thiết bị.
+/var/log/boot.log: Log quá trình khởi động hệ thống.
+/var/log/nginx/error.log: Log lỗi của Nginx.
+/var/log/mysql/error.log: Log lỗi của MySQL.
+/var/log/apache2/error.log: Log lỗi của Apache (nếu cài đặt).
+/var/log/php7.4-fpm.log: Log của PHP-FPM (nếu đang sử dụng PHP).
+
 
 #### Backup VPS: Backup to google driver
 
@@ -126,8 +158,6 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/m
 ```
 
 #### Quản lý Database:
-- Listdbs / Add / Edit / Delete
-- Db Users / Add / Edit / Delete
 
 - Liệt kê danh sách database:
 ```
