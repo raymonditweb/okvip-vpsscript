@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script này với quyền root."
+  exit 1
+fi
+
+# Kiểm tra tham số mật khẩu MySQL root, tên người dùng, mật khẩu người dùng, và (tùy chọn) database
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+  echo "Error: Vui lòng truyền mật khẩu MySQL root, tên người dùng, và mật khẩu người dùng."
+  exit 1
+fi
+
+MYSQL_ROOT_PASSWORD=$1
+NEW_USER=$2
+NEW_USER_PASSWORD=$3
+DB_NAME=$4
+
+# Thêm người dùng MySQL
+mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "CREATE USER '$NEW_USER'@'localhost' IDENTIFIED BY '$NEW_USER_PASSWORD';" -y
+
+# Nếu có tên database, cấp quyền cho người dùng
+if [ ! -z "$DB_NAME" ]; then
+  mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$NEW_USER'@'localhost'; FLUSH PRIVILEGES;" -y
+  echo "Người dùng '$NEW_USER' đã được tạo và cấp quyền trên database '$DB_NAME'."
+else
+  echo "Người dùng '$NEW_USER' đã được tạo thành công."
+fi

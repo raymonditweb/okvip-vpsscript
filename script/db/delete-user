@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script này với quyền root."
+  exit 1
+fi
+
+# Kiểm tra tham số mật khẩu MySQL root và tên người dùng
+if [ -z "$1" ] || [ -z "$2" ]; then
+  echo "Error: Vui lòng truyền mật khẩu MySQL root và tên người dùng."
+  exit 1
+fi
+
+MYSQL_ROOT_PASSWORD=$1
+USER_TO_DELETE=$2
+
+# Xóa người dùng MySQL
+mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "DROP USER '$USER_TO_DELETE'@'localhost'; FLUSH PRIVILEGES;" -y
+
+if [ $? -eq 0 ]; then
+    echo "Người dùng '$USER_TO_DELETE' đã được xóa thành công."
+else
+    echo "Error: Không thể xóa người dùng '$USER_TO_DELETE'."
+fi

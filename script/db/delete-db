@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script này với quyền root."
+  exit 1
+fi
+
+# Kiểm tra tham số mật khẩu MySQL root
+if [ -z "$1" ]; then
+  echo "Error: Vui lòng truyền mật khẩu MySQL root."
+  exit 1
+fi
+
+MYSQL_ROOT_PASSWORD=$1
+
+# Nhập tên database muốn xóa
+read -p "Nhập tên database muốn xóa: " DB_NAME
+
+# Xóa database
+mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;" -y
+
+if [ $? -eq 0 ]; then
+    echo "Database '$DB_NAME' đã được xóa thành công."
+else
+    echo "Error: Không thể xóa database '$DB_NAME'."
+fi

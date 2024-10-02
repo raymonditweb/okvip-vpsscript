@@ -5,71 +5,87 @@ OKVIP-VPSSCRIPT là nền để quản lý và cài đặt website wordpress tr�
 
 ### 1. Quản lý Máy Chủ (Server/VPS)
 #### Cài đặt LEMP:
-+ Ubuntu 20.04:
+- Ubuntu 20.04:
 ```
 bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/install-ubuntu-lemp-20.04 ) <mysql_root_password> <init_main_domain.com>
 ```
 
 ### Lệnh Cài Đặt yum-cron (auto update system):
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/yum-cron-setup )
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/yum-cron-setup )
 ```
 
 #### Restart VPS:
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/restart-vps )
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/restart-vps )
 ```
 
 #### Quản lý file:
-+ List file & folder
-+ Upload/ Add / Edit / Zip / Unzip/ Delete
-+ Set chrmode file, folder
+- List file & folder
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/file/list-files.sh ) </path/to/file_or_folder*>
+```
+- Set chrmode file, folder
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/file/set-chmod ) <mod*> </path/to/file_or_folder*>
+```
+- Upload / Add / Delete: [Code core]
 
 ####  Theo dõi thông số server:
-+ Ram, Ổ cứng,
-+ Process
-+ Network, load
+- Ram, Ổ cứng,
+- Process
+- Network, load
 
 #### Quản lý application / services:
-+ Kiểm tra đã cài đặt chưa, trả về 0 hoặc 1
+- Kiểm tra đã cài đặt chưa, trả về 0 hoặc 1
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/application/check-app ) <app_name*>
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/check-app ) <app_name*>
 ```
-+ Cài đặt ứng dụng mới
+- Cài đặt ứng dụng mới
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/application/install-app ) <app_name*> <app_type=[app|service]> <app_version=lastest>
-```
-
-+ Remove ứng dụng
-```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/application/remove-app ) <app_name*>
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/install-app ) <app_name*> <app_type=[app|service]> <app_version=lastest>
 ```
 
-+ Start/Stop/Reload ứng dụng
+- Remove ứng dụng
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/application/[start/stop/reload]-app ) <app_name*>
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/remove-app ) <app_name*>
+```
+
+- Start/Stop/Reload ứng dụng
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/[start/stop/reload]-app ) <app_name*>
 ```
 
 #### Quản lý logs:
-+ Service logs
-+ Error log
-+ Application Log
-+ System log
+- Service logs
+- Error log
+- Application Log
+- System log
 
 #### Backup VPS: Backup to google driver
 
 #### Cronjob:
-+ Quản lý / Thêm / Xoá
-
+- List 
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/list.sh )
+```
+- Add
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/add.sh ) <"* * * * * exec-command"*>
+```
+- Delete
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/delete.sh ) <"* * * * * exec-command"*>
+```
 #### Security:
-+ Firewall Rules
-+ Change SSH Port
+- Firewall Rules
+- Change SSH Port
 
 ### 2. Quản lý website
 
 #### List danh sách website trên vps
 ```
-bash <( curl -k /etc/vpsscript/menu/vpsscript-list-website-tren-vps )  
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/list-websites)  
 ```
 
 #### Cài đặt website WordPress tự động theo template: 
@@ -88,11 +104,11 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/m
 ```
 
 #### Tiện ích: Bật / Tắt 1 hoặc nhiều website
-+ Bật website
+- Bật website
 ```
 bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/enable-website) <domain*>
 ```
-+ Tắt website
+- Tắt website
 ```
 bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/disable-website) <domain*>
 ```
@@ -100,15 +116,53 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/m
 ### Cập nhật plugin and Wordpress core:
 
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/vpsscript/menu/tienich/update-wordpress-for-all-site )
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/vpsscript/menu/tienich/update-wordpress-for-all-site )
 ```
 
 ### Scan malware for Wordpress website:
 
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/master/script/vpsscript/menu/tienich/scan-wordpress-malware.sh )
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/vpsscript/menu/tienich/scan-wordpress-malware.sh )
 ```
 
 #### Quản lý Database:
-+ Listdbs / Add / Edit / Delete
-+ Db Users / Add / Edit / Delete
+- Listdbs / Add / Edit / Delete
+- Db Users / Add / Edit / Delete
+
+- Liệt kê danh sách database:
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/list-db ) <mysql_root_password*>
+```
+- Thêm database mới:
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/add-db ) <mysql_root_password*> <db_name*>
+```
+- Đổi tên database:
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/rename-db ) <mysql_root_password*> <old_db_name*> <new_db_name*>
+```
+- Xóa database:
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/delete-db ) <mysql_root_password*> <db_name*>
+```
+- Liệt kê danh sách database users:
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/list-users ) <mysql_root_password*>
+```
+- Thêm db user & assign db: 
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/add-user ) <mysql_root_password*> <user_name*> <user_password*> [db_name]
+```
+* nếu không truyền vào db_name thì chỉ tạo user
+- Đổi tên người dùng:
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/rename-user ) <mysql_root_password*> <old_user_name*> <new_user_name*>
+```
+- Đổi mật khẩu người dùng: 
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/change-user-password ) <mysql_root_password*> <user_name*> <new_password*>
+```
+- Xóa người dùng: 
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/delete-user ) <mysql_root_password*> <user_name*>
+```

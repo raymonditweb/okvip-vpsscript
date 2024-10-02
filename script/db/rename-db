@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script này với quyền root."
+  exit 1
+fi
+
+# Kiểm tra tham số mật khẩu MySQL root và tên database cũ, mới
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+  echo "Error: Vui lòng truyền mật khẩu MySQL root, tên database cũ và tên database mới."
+  exit 1
+fi
+
+MYSQL_ROOT_PASSWORD=$1
+OLD_DB_NAME=$2
+NEW_DB_NAME=$3
+
+# Đổi tên database
+mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "RENAME DATABASE $OLD_DB_NAME TO $NEW_DB_NAME;" -y
+
+if [ $? -eq 0 ]; then
+    echo "Database '$OLD_DB_NAME' đã được đổi thành '$NEW_DB_NAME'."
+else
+    echo "Error: Không thể đổi tên database '$OLD_DB_NAME'."
+fi

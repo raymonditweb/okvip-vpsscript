@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script này với quyền root."
+  exit 1
+fi
+
+# Kiểm tra tham số mật khẩu MySQL root, tên người dùng cũ và tên người dùng mới
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+  echo "Error: Vui lòng truyền mật khẩu MySQL root, tên người dùng cũ và tên người dùng mới."
+  exit 1
+fi
+
+MYSQL_ROOT_PASSWORD=$1
+OLD_USER=$2
+NEW_USER=$3
+
+# Đổi tên người dùng MySQL
+mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "RENAME USER '$OLD_USER'@'localhost' TO '$NEW_USER'@'localhost';" -y
+
+if [ $? -eq 0 ]; then
+    echo "Người dùng '$OLD_USER' đã được đổi thành '$NEW_USER'."
+else
+    echo "Error: Không thể đổi tên người dùng '$OLD_USER'."
+fi

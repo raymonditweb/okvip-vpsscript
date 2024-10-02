@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# Kiểm tra xem người dùng có quyền root hay không
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script với quyền root."
+  exit 1
+fi
+
+# Kiểm tra xem Nginx hoặc Apache đã được cài đặt hay chưa
+if command -v nginx &> /dev/null; then
+  WEBSERVER="nginx"
+  CONF_PATH="/etc/nginx/sites-available"
+elif command -v apache2 &> /dev/null; then
+  WEBSERVER="apache"
+  CONF_PATH="/etc/apache2/sites-available"
+else
+  echo "Error: Không tìm thấy Nginx hoặc Apache trên hệ thống."
+  exit 1
+fi
+
+echo "Liệt kê danh sách website trên $WEBSERVER:"
+
+# Liệt kê các file cấu hình trong thư mục cấu hình
+if [ -d "$CONF_PATH" ]; then
+  for conf in "$CONF_PATH"/*; do
+    if [ -f "$conf" ]; then
+      # Đọc tên miền từ file cấu hình (tìm dòng 'server_name' cho Nginx hoặc 'ServerName' cho Apache)
+      if [ "$WEBSERVER" = "nginx" ]; then
+        DOMAIN=$(grep 'server_name' "$conf" | awk '{print $2}' | sed 's/;//')
+      elif [ "$WEBSERVER" = "apache" ]; then
+        DOMAIN=$(grep 'ServerName' "$conf" | awk '{print $2}')
+      fi
+
+      # Hiển thị tên miền
+      if [ -n "$DOMAIN" ]; then
+        echo "- $DOMAIN"
+      fi
+    fi
+  done
+else
+  echo "Error: Không tìm thấy thư mục cấu hình $CONF_PATH."
+  exit 1
+fi
