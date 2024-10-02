@@ -111,7 +111,22 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/m
 ```
 #### Security:
 - Firewall Rules
++ Liệt kê danh sách firewall rules:
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/list.sh )
+```
++ Thêm database mới:
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/add.sh ) <port*> <tcp|udp*>
+```
++ Đổi tên database:
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/remove.sh )  <port*> <tcp|udp*>
+```
 - Change SSH Port
+```
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/change-ssh-port.sh ) <new_ssh_port*>
+```
 
 ### 2. Quản lý website
 
