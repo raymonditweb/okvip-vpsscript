@@ -9,15 +9,28 @@ fi
 # Đọc thông tin đầu vào
 MYSQL_ROOT_PASSWORD=$1
 DOMAIN=$2
-TEMPLATE=${3:-default}
+TEMPLATE_URL=$3
 WEB_ROOT="/var/www/$DOMAIN"
 DB_NAME=$(echo "$DOMAIN" | cut -d '.' -f 1)
 DB_USER=$DB_NAME"_user"
 DB_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
-TEMPLATE_URL="https://github.com/raymonditweb/okvip-vpsscript/raw/main/templates/wordpress/$TEMPLATE.zip"
 
+# Kiểm tra nếu không nhập template URL thì báo lỗi
+if [ -z "$TEMPLATE_URL" ]; then
+  echo "Error: Vui lòng nhập URL của template."
+  echo "Sử dụng: ./install-wordpress <mysql_root_password> <domain> <template_url>"
+  exit 1
+fi
+
+# Kiểm tra URL có hợp lệ không (phải bắt đầu bằng http:// hoặc https://)
+if ! [[ "$TEMPLATE_URL" =~ ^https?:// ]]; then
+  echo "Error: Template URL không hợp lệ. URL phải bắt đầu bằng http:// hoặc https://"
+  exit 1
+fi
+
+# Kiểm tra các thông tin đầu vào
 if [ -z "$MYSQL_ROOT_PASSWORD" ] || [ -z "$DOMAIN" ]; then
-  echo "Error: Sử dụng: ./install-wordpress <mysql_root_password> <domain> [template]"
+  echo "Error: Sử dụng: ./install-wordpress <mysql_root_password> <domain> <template_url>"
   exit 1
 fi
 
@@ -46,7 +59,7 @@ if ! mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "exit" >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "Bắt đầu cài đặt WordPress với domain $DOMAIN và template $TEMPLATE..."
+echo "Bắt đầu cài đặt WordPress với domain $DOMAIN và template từ $TEMPLATE_URL..."
 
 # Cài đặt unzip nếu chưa có
 if ! command -v unzip >/dev/null; then
@@ -84,12 +97,17 @@ mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
 
 
 # Tải template từ URL và giải nén
-echo "Tải template $TEMPLATE từ $TEMPLATE_URL..."
+echo "Tải template từ $TEMPLATE_URL..."
 mkdir -p $WEB_ROOT
-wget -O /tmp/$TEMPLATE.zip $TEMPLATE_URL
+wget -O /tmp/template.zip "$TEMPLATE_URL"
+
+if [ $? -ne 0 ]; then
+  echo "Error: Không thể tải template từ URL $TEMPLATE_URL. Dừng lại."
+  exit 1
+fi
 
 echo "Giải nén template..."
-unzip /tmp/$TEMPLATE.zip -d $WEB_ROOT
+unzip /tmp/template.zip -d $WEB_ROOT
 
 # Import database
 if [ -f "$WEB_ROOT/db.sql" ]; then

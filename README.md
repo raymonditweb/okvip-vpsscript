@@ -143,7 +143,7 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/m
 + Cấu hình config
 
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/install-wordpress) <mysql_root_password*> <domain*> <template_slug = default>
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/install-wordpress) <mysql_root_password*> <domain*> <template_url*>
 ```
 #### Xoá website: yêu cầu có mysql root password để remove db
 ```
