@@ -23,8 +23,8 @@ if [ -z "$TEMPLATE_URL" ]; then
 fi
 
 # Kiểm tra URL có hợp lệ không (phải bắt đầu bằng http:// hoặc https://)
-if ! [[ "$TEMPLATE_URL" =~ ^https?:// ]]; then
-  echo "Error: Template URL không hợp lệ. URL phải bắt đầu bằng http:// hoặc https://"
+if ! [[ "$TEMPLATE_URL" =~ ^https:// ]]; then
+  echo "Error: Template URL không hợp lệ. URL phải bắt đầu bằng https://"
   exit 1
 fi
 
