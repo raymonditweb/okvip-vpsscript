@@ -95,11 +95,10 @@ fi
 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
 
-
 # Tải template từ URL và giải nén
 echo "Tải template từ $TEMPLATE_URL..."
 mkdir -p $WEB_ROOT
-wget -O /tmp/template.zip "$TEMPLATE_URL"
+wget -O /tmp/template.zip "$TEMPLATE_URL" --no-check-certificate --quiet
 
 if [ $? -ne 0 ]; then
   echo "Error: Không thể tải template từ URL $TEMPLATE_URL. Dừng lại."
@@ -107,7 +106,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Giải nén template..."
-unzip /tmp/template.zip -d $WEB_ROOT
+unzip -o /tmp/template.zip -d $WEB_ROOT
 
 # Import database
 if [ -f "$WEB_ROOT/db.sql" ]; then

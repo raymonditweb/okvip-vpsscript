@@ -7,27 +7,27 @@ OKVIP-VPSSCRIPT là nền để quản lý và cài đặt website wordpress tr�
 #### Cài đặt LEMP:
 - Ubuntu 20.04:
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/install-ubuntu-lemp-20.04 ) <mysql_root_password> <init_main_domain.com>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/install-ubuntu-lemp-20.04 ) <mysql_root_password> <init_main_domain.com>
 ```
 
 ### Lệnh Cài Đặt yum-cron (auto update system):
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/yum-cron-setup )
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/yum-cron-setup )
 ```
 
 #### Restart VPS:
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/restart-vps )
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/restart-vps )
 ```
 
 #### Quản lý file:
 - List file & folder
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/file/list-files.sh ) </path/to/file_or_folder*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/file/list-files.sh ) </path/to/file_or_folder*>
 ```
 - Set chrmode file, folder
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/file/set-chmod ) <mod*> </path/to/file_or_folder*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/file/set-chmod ) <mod*> </path/to/file_or_folder*>
 ```
 - Upload / Add / Delete: [Code core]
 
@@ -60,21 +60,21 @@ iftop -n
 #### Quản lý application / services:
 - Kiểm tra đã cài đặt chưa, trả về 0 hoặc 1
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/check-app ) <app_name*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/check-app ) <app_name*>
 ```
 - Cài đặt ứng dụng mới
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/install-app ) <app_name*> <app_type=[app|service]> <app_version=lastest>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/install-app ) <app_name*> <app_type=[app|service]> <app_version=lastest>
 ```
 
 - Remove ứng dụng
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/remove-app ) <app_name*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/remove-app ) <app_name*>
 ```
 
 - Start/Stop/Reload ứng dụng
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/[start/stop/reload]-app ) <app_name*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/[start/stop/reload]-app ) <app_name*>
 ```
 
 #### Quản lý logs:
@@ -99,40 +99,40 @@ cat [file_log]
 #### Cronjob:
 - List 
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/list.sh )
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/list.sh )
 ```
 - Add
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/add.sh ) <"* * * * * exec-command"*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/add.sh ) <"* * * * * exec-command"*>
 ```
 - Delete
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/remove.sh ) <"* * * * * exec-command"*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/remove.sh ) <"* * * * * exec-command"*>
 ```
 #### Security:
 - Firewall Rules
 + Liệt kê danh sách firewall rules:
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/list.sh )
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/list.sh )
 ```
 + Thêm database mới:
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/add.sh ) <port*> <tcp|udp*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/add.sh ) <port*> <tcp|udp*>
 ```
 + Đổi tên database:
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/remove.sh )  <port*> <tcp|udp*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/remove.sh )  <port*> <tcp|udp*>
 ```
 - Change SSH Port
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/change-ssh-port.sh ) <new_ssh_port*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/change-ssh-port.sh ) <new_ssh_port*>
 ```
 
 ### 2. Quản lý website
 
 #### List danh sách website trên vps
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/list-websites)  
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/list-websites)  
 ```
 
 #### Cài đặt website WordPress tự động theo template: 
@@ -143,71 +143,71 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/m
 + Cấu hình config
 
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/install-wordpress) <mysql_root_password*> <domain*> <template_url*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/install-wordpress) <mysql_root_password*> <domain*> <template_url*>
 ```
 #### Xoá website: yêu cầu có mysql root password để remove db
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/remove-website) <domain*> <mysql_root_password*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/remove-website) <domain*> <mysql_root_password*>
 ```
 
 #### Tiện ích: Bật / Tắt 1 hoặc nhiều website
 - Bật website
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/enable-website) <domain*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/enable-website) <domain*>
 ```
 - Tắt website
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/disable-website) <domain*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/disable-website) <domain*>
 ```
 
 ### Cập nhật plugin and Wordpress core:
 
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/vpsscript/menu/tienich/update-wordpress-for-all-site )
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/vpsscript/menu/tienich/update-wordpress-for-all-site )
 ```
 
 ### Scan malware for Wordpress website:
 
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/vpsscript/menu/tienich/scan-wordpress-malware.sh )
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/vpsscript/menu/tienich/scan-wordpress-malware.sh )
 ```
 
 #### Quản lý Database:
 
 - Liệt kê danh sách database:
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/list-db ) <mysql_root_password*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/list-db ) <mysql_root_password*>
 ```
 - Thêm database mới:
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/add-db ) <mysql_root_password*> <db_name*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/add-db ) <mysql_root_password*> <db_name*>
 ```
 - Đổi tên database:
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/rename-db ) <mysql_root_password*> <old_db_name*> <new_db_name*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/rename-db ) <mysql_root_password*> <old_db_name*> <new_db_name*>
 ```
 - Xóa database:
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/delete-db ) <mysql_root_password*> <db_name*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/delete-db ) <mysql_root_password*> <db_name*>
 ```
 - Liệt kê danh sách database users:
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/list-users ) <mysql_root_password*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/list-users ) <mysql_root_password*>
 ```
 - Thêm db user & assign db: 
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/add-user ) <mysql_root_password*> <user_name*> <user_password*> [db_name]
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/add-user ) <mysql_root_password*> <user_name*> <user_password*> [db_name]
 ```
 * nếu không truyền vào db_name thì chỉ tạo user
 - Đổi tên người dùng:
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/rename-user ) <mysql_root_password*> <old_user_name*> <new_user_name*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/rename-user ) <mysql_root_password*> <old_user_name*> <new_user_name*>
 ```
 - Đổi mật khẩu người dùng: 
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/change-user-password ) <mysql_root_password*> <user_name*> <new_password*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/change-user-password ) <mysql_root_password*> <user_name*> <new_password*>
 ```
 - Xóa người dùng: 
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/delete-user ) <mysql_root_password*> <user_name*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/delete-user ) <mysql_root_password*> <user_name*>
 ```
