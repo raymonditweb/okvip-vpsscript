@@ -107,7 +107,7 @@ bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/m
 ```
 - Delete
 ```
-bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/delete.sh ) <"* * * * * exec-command"*>
+bash <( curl -k https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/remove.sh ) <"* * * * * exec-command"*>
 ```
 #### Security:
 - Firewall Rules
