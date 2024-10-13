@@ -31,7 +31,7 @@ fi
 # Kiểm tra cronjob đã tồn tại hay chưa
 crontab -l 2>/dev/null | grep -F "$CRONJOB" >/dev/null
 if [ $? -eq 0 ]; then
-  echo "Cronjob đã tồn tại: $CRONJOB"
+  echo "Error: Cronjob đã tồn tại: $CRONJOB"
   exit 0
 fi
 
