@@ -20,6 +20,9 @@ fi
 
 echo "Liệt kê danh sách website trên $WEBSERVER:"
 
+# Biến cờ để theo dõi số lượng website
+FOUND_WEBSITES=0
+
 # Liệt kê các file cấu hình trong thư mục cấu hình
 if [ -d "$CONF_PATH" ]; then
   for conf in "$CONF_PATH"/*; do
@@ -31,12 +34,18 @@ if [ -d "$CONF_PATH" ]; then
         DOMAIN=$(grep 'ServerName' "$conf" | awk '{print $2}')
       fi
 
-      # Hiển thị tên miền
+      # Hiển thị tên miền nếu tìm thấy
       if [ -n "$DOMAIN" ]; then
         echo "- $DOMAIN"
+        FOUND_WEBSITES=1
       fi
     fi
   done
+
+  # Kiểm tra nếu không tìm thấy website nào
+  if [ "$FOUND_WEBSITES" -eq 0 ]; then
+    echo "Không tìm thấy website nào."
+  fi
 else
   echo "Error: Không tìm thấy thư mục cấu hình $CONF_PATH."
   exit 1
