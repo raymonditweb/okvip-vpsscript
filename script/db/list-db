@@ -22,4 +22,4 @@ query="SELECT db.db AS db_name, IFNULL(GROUP_CONCAT(DISTINCT user.User SEPARATOR
        GROUP BY db.db;"
 
 # Chạy truy vấn và hiển thị kết quả
-mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "$query" --skip-column-names
+mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "$query"
