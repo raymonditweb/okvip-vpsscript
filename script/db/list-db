@@ -14,31 +14,13 @@ fi
 
 MYSQL_ROOT_PASSWORD=$1
 
-# Kiểm tra kết nối với MySQL
-if ! mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "EXIT" > /dev/null 2>&1; then
-  echo "Error: Không thể kết nối với MySQL bằng mật khẩu đã cung cấp."
-  exit 1
-fi
+# Câu truy vấn để lấy tên database và người dùng, bỏ qua các system db
+query="SELECT db_name, IFNULL(GROUP_CONCAT(DISTINCT user SEPARATOR ', '), '') AS users
+       FROM (
+         SELECT table_schema AS db_name, user FROM information_schema.SCHEMA_PRIVILEGES
+         WHERE table_schema NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')
+       ) AS db_users
+       GROUP BY db_name;"
 
-# Liệt kê danh sách các database
-databases=$(mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES;" | tail -n +2)
-
-if [ -z "$databases" ]; then
-  echo "Error: Không tìm thấy database nào."
-  exit 0
-fi
-
-# Lặp qua từng database để lấy danh sách user quản lý
-for db in $databases; do
-  # Lấy danh sách user quản lý cho database
-  users=$(mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "SELECT DISTINCT user FROM mysql.db WHERE db = '$db';" | tail -n +2 | paste -sd "," -)
-  
-  # Nếu không có user, gán chuỗi rỗng
-  if [ -z "$users" ]; then
-    users=""
-  fi
-
-  # In kết quả ra theo định dạng db_name: user1, user2,...
-  echo "$db: $users"
-done
-
+# Chạy truy vấn và hiển thị kết quả
+mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "$query" --skip-column-names
