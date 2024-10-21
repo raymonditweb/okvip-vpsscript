@@ -18,7 +18,7 @@ MYSQL_ROOT_PASSWORD=$1
 query="SELECT db.db AS db_name, IFNULL(GROUP_CONCAT(DISTINCT user.User SEPARATOR ', '), '') AS users
        FROM mysql.db AS db
        LEFT JOIN mysql.user AS user ON db.User = user.User
-       WHERE db.db NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')
+       WHERE db.db NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys', 'phpmyadmin')
        GROUP BY db.db;"
 
 # Chạy truy vấn và hiển thị kết quả
