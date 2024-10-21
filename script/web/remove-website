@@ -32,7 +32,7 @@ else
 fi
 
 # Kiểm tra và xóa database MySQL
-if mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "USE $DOMAIN;"; then
+if mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DOMAIN';" | grep -q "$DOMAIN"; then
   mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DOMAIN;"
   echo "Đã xóa database MySQL cho domain $DOMAIN."
 else
@@ -48,13 +48,12 @@ else
   echo "Thư mục web không tồn tại."
 fi
 
-
 # Kiểm tra và xóa tham chiếu trong nginx.conf
-if grep -q "bizcode.net" /etc/nginx/nginx.conf; then
-  sed -i "/bizcode.net/d" /etc/nginx/nginx.conf
-  echo "Đã xóa tham chiếu đến bizcode.net trong nginx.conf."
+if grep -q "$DOMAIN" /etc/nginx/nginx.conf; then
+  sed -i "/$DOMAIN/d" /etc/nginx/nginx.conf
+  echo "Đã xóa tham chiếu đến $DOMAIN trong nginx.conf."
 else
-  echo "Không tìm thấy tham chiếu đến bizcode.net trong nginx.conf."
+  echo "Không tìm thấy tham chiếu đến $DOMAIN trong nginx.conf."
 fi
 
 # Kiểm tra lại cấu hình Nginx
