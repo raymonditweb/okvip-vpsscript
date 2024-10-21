@@ -15,6 +15,10 @@ if [ -z "$DOMAIN" ] || [ -z "$MYSQL_ROOT_PASSWORD" ]; then
   exit 1
 fi
 
+# Lấy tên database từ domain (phần trước dấu chấm)
+DB_NAME=$(echo "$DOMAIN" | cut -d '.' -f 1)
+USER_DB="${DB_NAME}_user"
+
 # Xóa tệp cấu hình Nginx
 if [ -f "/etc/nginx/sites-available/$DOMAIN" ]; then
   rm /etc/nginx/sites-available/$DOMAIN
@@ -32,11 +36,19 @@ else
 fi
 
 # Kiểm tra và xóa database MySQL
-if mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DOMAIN';" | grep -q "$DOMAIN"; then
-  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DOMAIN;"
+if mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DB_NAME';" | grep -q "$DB_NAME"; then
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;"
   echo "Đã xóa database MySQL cho domain $DOMAIN."
 else
   echo "Database không tồn tại hoặc không thể truy cập."
+fi
+
+# Kiểm tra và xóa người dùng MySQL
+if mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SELECT User FROM mysql.user WHERE User = '$USER_DB';" | grep -q "$USER_DB"; then
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP USER '$USER_DB'@'localhost';"
+  echo "Đã xóa người dùng MySQL liên kết với database $DB_NAME."
+else
+  echo "Người dùng không tồn tại hoặc không thể truy cập."
 fi
 
 # Kiểm tra và xóa thư mục web
