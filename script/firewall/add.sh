@@ -6,19 +6,32 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# Kiểm tra tham số cổng và giao thức
-if [ -z "$1" ] || [ -z "$2" ]; then
-  echo "Error: Vui lòng cung cấp cổng và giao thức (tcp/udp)."
-  echo "Usage: $0 <port> <tcp|udp>"
+# Kiểm tra tham số cổng
+if [ -z "$1" ]; then
+  echo "Error: Vui lòng cung cấp cổng."
+  echo "Usage: $0 <port> [tcp|udp]"
   exit 1
 fi
 
 PORT=$1
 PROTOCOL=$2
 
-# Thêm quy tắc tường lửa
-echo "---- THÊM QUY TẮC TƯỜNG LỬA ----"
-ufw allow $PORT/$PROTOCOL
+# Kiểm tra và xác định giao thức
+if [ -z "$PROTOCOL" ]; then
+  echo "Không có giao thức được cung cấp. Đang mở full port (TCP và UDP)..."
+  ufw allow $PORT || { echo "Error: Lỗi khi thêm quy tắc tường lửa cho cổng $PORT."; exit 1; }
+else
+  # Kiểm tra giao thức có hợp lệ hay không
+  if [[ "$PROTOCOL" != "tcp" && "$PROTOCOL" != "udp" ]]; then
+    echo "Error: Giao thức không hợp lệ. Vui lòng chọn tcp hoặc udp."
+    exit 1
+  fi
+  echo "Đang mở cổng $PORT với giao thức $PROTOCOL..."
+  ufw allow $PORT/$PROTOCOL || { echo "Error: Lỗi khi thêm quy tắc tường lửa cho cổng $PORT/$PROTOCOL."; exit 1; }
+fi
 
 # Kiểm tra trạng thái của tường lửa
+echo "Kiểm tra trạng thái của tường lửa..."
 ufw status
+
+echo "Quy tắc tường lửa đã được thêm thành công."
