@@ -115,11 +115,11 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/list.sh )
 ```
-+ Thêm database mới:
++ Thêm ip mới:
 ```
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/add.sh ) <port*> <tcp|udp*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/add.sh ) <port*> [tcp|udp]
 ```
-+ Đổi tên database:
++ remove ip:
 ```
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/remove.sh )  <port*> <tcp|udp*>
 ```
