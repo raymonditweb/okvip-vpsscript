@@ -21,15 +21,24 @@ if ! [[ $NEW_SSH_PORT =~ ^[0-9]+$ ]] || [ "$NEW_SSH_PORT" -lt 1 ] || [ "$NEW_SSH
   exit 1
 fi
 
-# Backup file cấu hình SSH trước khi thay đổi
+# Đường dẫn tệp cấu hình SSH
 SSH_CONFIG_FILE="/etc/ssh/sshd_config"
 BACKUP_FILE="/etc/ssh/sshd_config.bak"
+
+# Backup tệp cấu hình SSH trước khi thay đổi
 if [ ! -f "$BACKUP_FILE" ]; then
   cp $SSH_CONFIG_FILE $BACKUP_FILE
   echo "Đã tạo bản sao lưu của $SSH_CONFIG_FILE thành $BACKUP_FILE"
 fi
 
-# Thay đổi cổng SSH trong file cấu hình
+# Lấy cổng SSH hiện tại (mặc định là 22 nếu chưa thay đổi)
+CURRENT_SSH_PORT=$(grep "^Port" $SSH_CONFIG_FILE | awk '{print $2}')
+if [ -z "$CURRENT_SSH_PORT" ]; then
+  CURRENT_SSH_PORT=22
+fi
+echo "Cổng SSH hiện tại là $CURRENT_SSH_PORT"
+
+# Thay đổi cổng SSH trong tệp cấu hình
 if grep -q "^#Port" $SSH_CONFIG_FILE; then
   sed -i "s/^#Port.*/Port $NEW_SSH_PORT/" $SSH_CONFIG_FILE
 elif grep -q "^Port" $SSH_CONFIG_FILE; then
@@ -39,14 +48,14 @@ else
 fi
 echo "Cổng SSH đã được thay đổi thành $NEW_SSH_PORT trong $SSH_CONFIG_FILE"
 
+# Xóa quy tắc cổng SSH hiện tại khỏi tường lửa
+echo "Xóa cổng SSH hiện tại ($CURRENT_SSH_PORT) khỏi tường lửa..."
+ufw delete allow $CURRENT_SSH_PORT/tcp
+
 # Cập nhật tường lửa để cho phép cổng SSH mới
 echo "Cập nhật tường lửa để cho phép cổng SSH mới..."
 ufw allow $NEW_SSH_PORT/tcp
 echo "Cổng $NEW_SSH_PORT đã được mở trong tường lửa."
-
-# Xóa quy tắc cũ (mặc định là cổng 22) khỏi tường lửa
-echo "Xóa cổng SSH cũ khỏi tường lửa..."
-ufw delete allow 22/tcp
 
 # Khởi động lại dịch vụ SSH để áp dụng thay đổi
 echo "Khởi động lại dịch vụ SSH..."
