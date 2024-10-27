@@ -131,8 +131,9 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 
 - Change password Root
 ```
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/change-password.sh ) <new_password*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/change-password.sh ) <'new_password'*>
 ```
+nhập mật khẩu mới trong cặp dấu nháy đơn, ví dụ: 'cC,2K%5kSkj!yKqtu'
 
 ### 2. Quản lý website
 
