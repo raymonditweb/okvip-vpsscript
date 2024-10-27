@@ -123,9 +123,15 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/remove.sh )  <port*> <tcp|udp*>
 ```
+
 - Change SSH Port
 ```
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/change-ssh-port.sh ) <new_ssh_port*>
+```
+
+- Change password Root
+```
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/change-password.sh ) <new_password*>
 ```
 
 ### 2. Quản lý website
