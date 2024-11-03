@@ -10,8 +10,8 @@ fi
 OS=$(lsb_release -si)
 VERSION=$(lsb_release -sr)
 
-if [[ "$OS" != "Ubuntu" || "$VERSION" != "20.04" ]]; then
-  echo "Error: Script này chỉ hỗ trợ Ubuntu 20.04."
+if [[ "$OS" != "Ubuntu" || "$VERSION" != "20.04" || "$VERSION" != "22.04" ]]; then
+  echo "Error: Script này chỉ hỗ trợ Ubuntu 20.04 đến 22.04"
   exit 1
 fi
 
