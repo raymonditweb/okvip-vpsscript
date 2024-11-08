@@ -23,7 +23,7 @@ DB_EXISTS=$(mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DB_N
 USER_EXISTS=$(mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SELECT User FROM mysql.user WHERE User = '$USER_NAME';" | grep "$USER_NAME")
 
 if [ "$DB_EXISTS" ] || [ "$USER_EXISTS" ]; then
-  echo "Database '$DB_NAME' hoặc user '$USER_NAME' đã tồn tại. Không tạo lại database hoặc user."
+  echo "Error: Database '$DB_NAME' hoặc user '$USER_NAME' đã tồn tại. Không tạo lại database hoặc user."
 else
   # Tạo database và user, sau đó cấp quyền cho user nếu cả hai chưa tồn tại
   mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE \`$DB_NAME\`;"
