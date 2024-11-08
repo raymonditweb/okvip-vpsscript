@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script với quyền root."
+  exit 1
+fi
+
+# Kiểm tra các tham số đầu vào
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]; then
+  echo "Error: Vui lòng cung cấp đầy đủ tham số: MySQL root password, tên database, và mật khẩu user."
+  echo "Usage: $0 <mysql_root_password> <dbname> <user_password>"
+  exit 1
+fi
+
+MYSQL_ROOT_PASSWORD=$1
+DB_NAME=$2
+USER_PASSWORD=$3
+USER_NAME=$DB_NAME  # Username giống với tên database
+
+# Kiểm tra database và user đã tồn tại chưa
+DB_EXISTS=$(mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DB_NAME';" | grep "$DB_NAME")
+USER_EXISTS=$(mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SELECT User FROM mysql.user WHERE User = '$USER_NAME';" | grep "$USER_NAME")
+
+if [ "$DB_EXISTS" ] || [ "$USER_EXISTS" ]; then
+  echo "Database '$DB_NAME' hoặc user '$USER_NAME' đã tồn tại. Không tạo lại database hoặc user."
+else
+  # Tạo database và user, sau đó cấp quyền cho user nếu cả hai chưa tồn tại
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE \`$DB_NAME\`;"
+  echo "Đã tạo database '$DB_NAME'."
+
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "
+    CREATE USER '$USER_NAME'@'localhost' IDENTIFIED BY '$USER_PASSWORD';
+    GRANT ALL PRIVILEGES ON \`$DB_NAME\`.* TO '$USER_NAME'@'localhost';
+    FLUSH PRIVILEGES;"
+  echo "Đã tạo user '$USER_NAME' và cấp quyền trên database '$DB_NAME'."
+fi

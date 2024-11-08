@@ -185,9 +185,9 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/list-db ) <mysql_root_password*>
 ```
-- Thêm database mới:
+- Thêm database và userdb tương ứng mới (userdb = dbname):
 ```
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/add-db ) <mysql_root_password*> <db_name*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/add-db ) <mysql_root_password*> <db_name*> <db_user_password*>
 ```
 - Đổi tên database:
 ```
