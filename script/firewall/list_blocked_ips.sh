@@ -34,6 +34,16 @@ if ! command -v ufw &> /dev/null; then
     exit 1
 fi
 
+# Kích hoạt UFW với tùy chọn --force để tự động chọn [y/n] by y khi cài đặt
+echo "Kích hoạt UFW..."
+ufw --force enable
+
 # Hiển thị danh sách các IP bị chặn
 echo "Danh sách các IP bị chặn:"
-ufw status numbered | grep DENY
+denied_ips=$(ufw status numbered | grep DENY)
+
+if [ -z "$denied_ips" ]; then
+    echo "Chưa có IP nào đang bị chặn."
+else
+    echo "$denied_ips"
+fi
