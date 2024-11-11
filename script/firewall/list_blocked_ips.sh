@@ -40,10 +40,4 @@ ufw --force enable
 
 # Hiển thị danh sách các IP bị chặn
 echo "Danh sách các IP bị chặn:"
-denied_ips=$(ufw status numbered | grep DENY)
-
-if [ -z "$denied_ips" ]; then
-    echo "Chưa có IP nào đang bị chặn."
-else
-    echo "$denied_ips"
-fi
+ufw status numbered | grep DENY
