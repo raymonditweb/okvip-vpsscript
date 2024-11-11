@@ -122,6 +122,16 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 + remove ip:
 ```
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/remove.sh )  <port*> <tcp|udp*>
+
++ Liệt kê danh sách blocked ips:
+```
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/list_blocked_ip.sh )
+
+```
+
+- Liệt kê danh sách fail2ban:
+```
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/get_list_fail2ban.sh )
 ```
 
 - Change SSH Port
@@ -139,7 +149,7 @@ nhập mật khẩu mới trong cặp dấu nháy đơn, ví dụ: 'cC,2K%5kSkj!
 
 #### List danh sách website trên vps
 ```
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/list-websites)  
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/list-websites)
 ```
 
 #### Cài đặt website WordPress tự động theo template: 
@@ -217,4 +227,15 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 - Xóa người dùng: 
 ```
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/delete-user ) <mysql_root_password*> <user_name*>
+```
+
+#### Quản lý Network:
+- Lấy thông tin network/load:
+```
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/network/get_network_and_load.sh )
+```
+#### Quản lý application / services:
+- Lấy danh sách package đã cài gần đây:
+```
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/package/get_recently_installed_packages.sh )
 ```
