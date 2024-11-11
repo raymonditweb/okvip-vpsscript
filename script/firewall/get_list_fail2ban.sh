@@ -18,7 +18,7 @@ if ! command -v fail2ban-client &> /dev/null; then
     elif command -v yum &> /dev/null; then
         yum install -y fail2ban
     else
-        echo "Không thể xác định trình quản lý gói. Vui lòng cài đặt Fail2Ban thủ công."
+        echo "Error: Không thể xác định trình quản lý gói. Vui lòng cài đặt Fail2Ban thủ công."
         exit 1
     fi
 
@@ -40,4 +40,4 @@ fi
 
 # Liệt kê các jail (quy tắc) của Fail2Ban
 echo "Danh sách các jail của Fail2Ban:"
-fail2ban-client status || { echo "Không thể lấy danh sách các jail."; exit 1; }
+fail2ban-client status || { echo "Error: Không thể lấy danh sách các jail."; exit 1; }

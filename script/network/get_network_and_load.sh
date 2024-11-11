@@ -23,14 +23,14 @@ install_tools() {
         echo "Đang cài đặt ifconfig và ifstat trên hệ điều hành Red Hat/CentOS..."
         yum install net-tools ifstat -y
     else
-        echo "Trình quản lý gói không được hỗ trợ. Vui lòng cài đặt ifconfig và ifstat theo cách thủ công."
+        echo "Error: Trình quản lý gói không được hỗ trợ. Vui lòng cài đặt ifconfig và ifstat theo cách thủ công."
         exit 1
     fi
 }
 
 # Kiểm tra ifconfig
 if ! command -v ifconfig &> /dev/null; then
-    echo "ifconfig không được cài đặt."
+    echo "ifconfig không được cài đặt. Đang cài đặt..."
     install_tools
 else
     echo "ifconfig đã được cài đặt."
@@ -38,7 +38,7 @@ fi
 
 # Kiểm tra ifstat
 if ! command -v ifstat &> /dev/null; then
-    echo "ifstat không được cài đặt."
+    echo "ifstat không được cài đặt. Đang cài đặt..."
     install_tools
 else
     echo "ifstat đã được cài đặt."

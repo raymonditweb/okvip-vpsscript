@@ -17,7 +17,7 @@ install_ufw() {
         yum install -y epel-release
         yum install -y ufw
     else
-        echo "Không thể xác định trình quản lý gói. Vui lòng cài đặt UFW thủ công."
+        echo "Error: Không thể xác định trình quản lý gói. Vui lòng cài đặt UFW thủ công."
         exit 1
     fi
 }
@@ -30,7 +30,7 @@ fi
 
 # Kiểm tra lại xem UFW đã cài đặt thành công chưa
 if ! command -v ufw &> /dev/null; then
-    echo "Cài đặt UFW thất bại. Vui lòng kiểm tra lại."
+    echo "Error: Cài đặt UFW thất bại. Vui lòng kiểm tra lại."
     exit 1
 fi
 

@@ -16,7 +16,7 @@ get_recently_installed_packages() {
         # Đối với hệ điều hành Red Hat/CentOS
         rpm -qa --last | head -n 10
     else
-        echo "Hệ điều hành không được hỗ trợ."
+        echo "Error: Hệ điều hành không được hỗ trợ."
         exit 1
     fi
 }
