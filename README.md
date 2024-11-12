@@ -278,7 +278,8 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```
 + Kết quả trả về:
 ++ Thành công: Tài khoản [username] đã được xóa.
-++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.``
+++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
+++ Thất bại: Error: Vui lòng cung cấp tên tài khoản để xóa.
 ```
 - Bật tài khoản FTP:
 ```
@@ -286,9 +287,9 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```
 ```
 + Kết quả trả về:
-++ Thành công: Tài khoản [username] đã được bật thành công.
+++ Thành công: Tài khoản [username] đã được bật.
 ++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
-++ Nếu tài khoản đã được bật rồi: Tài khoản [username] đã được bật trước đó.
+++ Truyền sai: Error: Hành động không hợp lệ. Vui lòng sử dụng 'enable' hoặc 'disable'.
 ```
 - Tắt tài khoản FTP:
 ```
@@ -296,7 +297,7 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```
 ```
 + Kết quả trả về:
-++ Thành công: Tài khoản [username] đã được tắt thành công.
+++ Thành công: Tài khoản [username] đã được tắt.
 ++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
-++ Nếu tài khoản đã bị tắt trước đó: Tài khoản [username] đã bị tắt trước đó.
+++ Truyền sai: Error: Hành động không hợp lệ. Vui lòng sử dụng 'enable' hoặc 'disable'.
 ```
