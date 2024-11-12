@@ -12,7 +12,7 @@ delete_account() {
     sed -i "/^$username:/d" "$FTP_USER_FILE"
     echo "Tài khoản $username đã được xóa."
   else
-    echo "Tài khoản $username không tồn tại."
+    echo "Error: Tài khoản $username không tồn tại."
   fi
 }
 
