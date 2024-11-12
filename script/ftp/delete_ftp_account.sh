@@ -2,17 +2,28 @@
 
 # Đường dẫn tới tệp chứa danh sách tài khoản FTP
 FTP_USER_FILE="/etc/ftp_users.txt"
+FTP_HOME="/home/ftp_users"
 
 # Hàm để xóa tài khoản FTP
 delete_account() {
   local username="$1"
 
-  if grep -q "^$username:" "$FTP_USER_FILE"; then
-    # Xóa tài khoản từ tệp
+  if [ -z "$username" ]; then
+    echo "Vui lòng cung cấp tên tài khoản để xóa."
+    exit 1
+  fi
+
+  # Kiểm tra xem tài khoản có tồn tại trong hệ thống không
+  if id "$username" &>/dev/null; then
+    # Xóa tài khoản hệ thống
+    userdel -r "$username"  # Xóa người dùng và thư mục cá nhân
+
+    # Xóa tài khoản khỏi tệp
     sed -i "/^$username:/d" "$FTP_USER_FILE"
-    echo "Tài khoản $username đã được xóa."
+
+    echo "Đã xóa tài khoản FTP cho $username."
   else
-    echo "Error: Tài khoản $username không tồn tại."
+    echo "Tài khoản $username không tồn tại."
   fi
 }
 
@@ -22,12 +33,5 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-# Kiểm tra tên người dùng được truyền từ tham số
-if [ -z "$1" ]; then
-  echo "Error: Vui lòng cung cấp tên tài khoản FTP muốn xóa."
-  echo "Cú pháp: $0 <username>"
-  exit 1
-fi
-
-# Gọi hàm xóa tài khoản với tên người dùng truyền vào
+# Gọi hàm xóa tài khoản với tham số từ dòng lệnh
 delete_account "$1"
