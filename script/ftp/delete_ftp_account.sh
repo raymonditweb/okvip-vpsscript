@@ -9,7 +9,7 @@ delete_account() {
   local username="$1"
 
   if [ -z "$username" ]; then
-    echo "Vui lòng cung cấp tên tài khoản để xóa."
+    echo "Error: Vui lòng cung cấp tên tài khoản để xóa."
     exit 1
   fi
 
@@ -23,7 +23,7 @@ delete_account() {
 
     echo "Đã xóa tài khoản FTP cho $username."
   else
-    echo "Tài khoản $username không tồn tại."
+    echo "Error: Tài khoản $username không tồn tại."
   fi
 }
 
