@@ -266,7 +266,7 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```
 ```
 + Kết quả trả về:
-++ Thành công: Tài khoản [username] đã được thêm thành công.
+++ Thành công: Tài khoản FTP [username] đã được thêm thành công với đầy đủ quyền.
 ++ Nếu tài khoản đã tồn tại: Error: Tài khoản [username] đã tồn tại.
 ++ Nếu không có thông tin đầu vào: Sử dụng: [default_username] [default_password]``
 
