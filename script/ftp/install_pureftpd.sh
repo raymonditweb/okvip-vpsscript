@@ -6,12 +6,6 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-# Kiểm tra xem có quá trình nâng cấp kernel đang chạy hay không
-if [ -f /var/run/reboot-required ]; then
-  echo "Có một quá trình nâng cấp hệ thống đang diễn ra. Vui lòng hoàn tất nâng cấp trước khi tiếp tục."
-  exit 1
-fi
-
 # Kiểm tra xem Pure-FTPd đã được cài đặt hay chưa
 if command -v pure-ftpd > /dev/null 2>&1; then
   echo "Pure-FTPd đã được cài đặt."
