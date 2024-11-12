@@ -8,7 +8,7 @@ fi
 
 # Kiểm tra xem Pure-FTPd đã được cài đặt hay chưa
 if command -v pure-ftpd > /dev/null 2>&1; then
-  echo "Pure-FTPd đã được cài đặt."
+  echo "Error: Pure-FTPd đã được cài đặt."
 else
   echo "Pure-FTPd chưa được cài đặt. Đang tiến hành cài đặt..."
 
@@ -21,7 +21,7 @@ else
     # Hệ điều hành CentOS/RHEL
     yum install -y pure-ftpd
   else
-    echo "Hệ điều hành không được hỗ trợ."
+    echo "Error: Hệ điều hành không được hỗ trợ."
     exit 1
   fi
 
