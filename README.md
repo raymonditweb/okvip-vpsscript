@@ -301,3 +301,41 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
 ++ Truyền sai: Error: Hành động không hợp lệ. Vui lòng sử dụng 'enable' hoặc 'disable'.
 ```
+- Set FTP Quota:
+```
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/set_ftp_quota.sh ) [username] [quota]
+```
+```
++ Kết quả trả về:
+++ Thành công: Đã đặt [quota] cho tài khoản FTP [username].
+++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
+```
+- Copy password FTP:
+```
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/copy_ftp_password.sh ) [username]
+```
+```
++ Kết quả trả về:
+++ Thành công: Mật khẩu của tài khoản [username] là: [password].
+++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
+```
+- Change password FTP:
+```
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/change_ftp_pass.sh ) [username] [new_password]
+```
+```
++ Kết quả trả về:
+++ Thành công: Mật khẩu cho tài khoản [username] đã được thay đổi.
+++ Thành công: Mật khẩu cho tài khoản [username] đã được cập nhật trong Pure-FTPd.
+++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
+```
+- Change FTP Home Directory (Ftp folder path):
+```
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/change_ftp_pass.sh ) [username] [new_home_directory]
+```
+```
++ Kết quả trả về:
+++ Thành công: Thư mục [new_home] đã được tạo thành công.
+++ Thành công: Thư mục home cho tài khoản [username] đã được cập nhật trong Pure-FTPd.
+++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
+```
