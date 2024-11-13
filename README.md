@@ -239,3 +239,65 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/package/get_recently_installed_packages.sh )
 ```
+#### Quản lý FTP:
+- Kiểm tra Pure-Ftpd / -> Cài đặt nếu chưa có:
+```
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/install_pureftpd.sh )
+```
+```
++ Kết quả trả về:
+++ Thành công: Pure-FTPd đã được cài đặt thành công.
+++ Nếu Pure-FTPd đã được cài đặt: Error: Pure-FTPd đã được cài đặt.
+```
+- Danh sách FTP Account:
+```
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/list_ftp_accounts.sh )
+```
+```
++ Kết quả trả về:
+++ Nếu có tài khoản FTP: List tài khoản FTP:
+[user1]:[password1]
+[user2]:[password2]
+++ Nếu không có tài khoản FTP: No result
+```
+- Thêm FTP Account:
+```
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/add_ftp_account.sh ) [username] [password]
+```
+```
++ Kết quả trả về:
+++ Thành công: Tài khoản FTP [username] đã được thêm thành công với đầy đủ quyền.
+++ Nếu tài khoản đã tồn tại: Error: Tài khoản [username] đã tồn tại.
+++ Nếu không có thông tin đầu vào: Sử dụng: [default_username] [default_password]``
+
+```
+- Xoá FTP Account:
+```
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/delete_ftp_account.sh ) [username]
+```
+```
++ Kết quả trả về:
+++ Thành công: Tài khoản [username] đã được xóa.
+++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
+++ Thất bại: Error: Vui lòng cung cấp tên tài khoản để xóa.
+```
+- Bật tài khoản FTP:
+```
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/script/ftp/toggle_ftp_account.sh ) [username] enable
+```
+```
++ Kết quả trả về:
+++ Thành công: Tài khoản [username] đã được bật.
+++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
+++ Truyền sai: Error: Hành động không hợp lệ. Vui lòng sử dụng 'enable' hoặc 'disable'.
+```
+- Tắt tài khoản FTP:
+```
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/script/ftp/toggle_ftp_account.sh ) [username] disable
+```
+```
++ Kết quả trả về:
+++ Thành công: Tài khoản [username] đã được tắt.
+++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
+++ Truyền sai: Error: Hành động không hợp lệ. Vui lòng sử dụng 'enable' hoặc 'disable'.
+```
