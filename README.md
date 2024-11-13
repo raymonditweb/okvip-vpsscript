@@ -331,7 +331,7 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```
 - Change FTP Home Directory (Ftp folder path):
 ```
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/change_ftp_pass.sh ) [username] [new_home_directory]
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/change_ftp_home_directory.sh ) [username] [new_home_directory]
 ```
 ```
 + Kết quả trả về:
