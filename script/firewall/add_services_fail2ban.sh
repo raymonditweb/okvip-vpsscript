@@ -6,58 +6,64 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# Check if fail2ban is installed
+# Kiểm tra xem fail2ban đã được cài đặt hay chưa
 if ! command -v fail2ban-client &> /dev/null; then
-  echo "Error: fail2ban is not installed"
+  echo "Error: fail2ban chưa được cài đặt."
   exit 1
 fi
 
-# Check if fail2ban service is running
+# Kiểm tra xem dịch vụ fail2ban có đang chạy hay không
 if ! systemctl is-active --quiet fail2ban; then
-  echo "Error: fail2ban service is not running"
-  exit 1
+    echo "Error: Dịch vụ fail2ban không đang chạy."
+    exit 1
 fi
 
-# Get service name from command line argument
+# Lấy tên dịch vụ và cổng từ tham số dòng lệnh
 service_name="$1"
+port="$2"
 
-# Check if service name is provided
+# Kiểm tra xem tên dịch vụ và cổng có được cung cấp hay không
 if [ -z "$service_name" ]; then
-  echo "Error: Service name not provided"
+  echo "Error: Tên dịch vụ không được cung cấp."
   exit 1
 fi
 
-# Create new jail configuration
+if [ -z "$port" ]; then
+  echo "Error: Cổng không được cung cấp."
+  exit 1
+fi
+
+# Tạo cấu hình jail mới
 jail_config="/etc/fail2ban/jail.d/${service_name}.conf"
 
-# Check if the config file already exists to avoid overwriting
+# Kiểm tra xem tệp cấu hình đã tồn tại để tránh ghi đè
 if [ -f "$jail_config" ]; then
-  echo "Error: Jail configuration for '$service_name' already exists."
+  echo "Error: Cấu hình jail cho '$service_name' đã tồn tại."
   exit 1
 fi
 
-# Create the jail configuration
-cat << EOF | sudo tee "$jail_config" > /dev/null
+# Tạo cấu hình jail
+cat << EOF | tee "$jail_config" > /dev/null
 [${service_name}]
 enabled = true
-port = 0
+port = $port
 filter = ${service_name}
 logpath = /var/log/${service_name}/${service_name}.log
 maxretry = 5
 bantime = 600
 EOF
 
-# Create filter configuration
+# Tạo cấu hình filter
 filter_config="/etc/fail2ban/filter.d/${service_name}.conf"
 
-# Check if the filter already exists to avoid overwriting
+# Kiểm tra xem filter đã tồn tại để tránh ghi đè
 if [ -f "$filter_config" ]; then
-  echo "Error: Filter configuration for '$service_name' already exists."
+  echo "Error: Cấu hình filter cho '$service_name' đã tồn tại."
   exit 1
 fi
 
-# Create the filter configuration
-cat << EOF | sudo tee "$filter_config" > /dev/null
+# Tạo cấu hình filter
+cat << EOF | tee "$filter_config" > /dev/null
 [INCLUDES]
 before = common.conf
 
@@ -66,9 +72,9 @@ failregex = ^%(__prefix_line)s<HOST> - (.*)
 ignoreregex =
 EOF
 
-# Restart fail2ban to apply changes
-if sudo systemctl restart fail2ban; then
-  echo "New service '$service_name' added to fail2ban successfully!"
+# Khởi động lại fail2ban để áp dụng các thay đổi
+if systemctl restart fail2ban; then
+  echo "Dịch vụ mới '$service_name' đã được thêm vào fail2ban thành công!"
 else
-  echo "Error: Failed to restart fail2ban"
+  echo "Error: Khởi động lại fail2ban không thành công."
 fi
