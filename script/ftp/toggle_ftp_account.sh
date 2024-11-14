@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Kiểm tra quyền root
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script này với quyền root."
+  exit 1
+fi
+
 # Đường dẫn tới tệp chứa danh sách tài khoản FTP
 FTP_USER_FILE="/etc/ftp_users.txt"
 FTP_HOME="/home/ftp_users"
@@ -10,7 +16,7 @@ toggle_account() {
   local action="$2"
 
   if [ -z "$username" ] || [ -z "$action" ]; then
-    echo "Sử dụng: $0 [tên_tài_khoản] [enable/disable]"
+    echo "Error: Vui lòng truyền tham số: $0 [tên_tài_khoản] [enable/disable]"
     exit 1
   fi
 
@@ -35,12 +41,6 @@ toggle_account() {
       ;;
   esac
 }
-
-# Kiểm tra quyền root
-if [ "$(id -u)" -ne 0 ]; then
-  echo "Error: Vui lòng chạy script này với quyền root."
-  exit 1
-fi
 
 # Gọi hàm bật/tắt tài khoản với tham số từ dòng lệnh
 toggle_account "$1" "$2"

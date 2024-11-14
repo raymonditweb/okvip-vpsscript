@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script với quyền root."
+  exit 1
+fi
+
 # Đường dẫn tới tệp chứa danh sách tài khoản FTP
 FTP_USER_FILE="/etc/ftp_users.txt"
 
@@ -9,7 +15,7 @@ change_home() {
   local new_home="$2"
 
   if [ -z "$username" ] || [ -z "$new_home" ]; then
-    echo "Sử dụng: $0 [tên_tài_khoản] [thư_mục_home_mới]"
+    echo "Error: Vui lòng truyền tham số: $0 [tên_tài_khoản] [thư_mục_home_mới]"
     exit 1
   fi
 
@@ -43,12 +49,6 @@ change_home() {
     echo "Thư mục home cho tài khoản $username đã được cập nhật trong Pure-FTPd."
   fi
 }
-
-# Kiểm tra quyền root
-if [ "$EUID" -ne 0 ]; then
-  echo "Error: Vui lòng chạy script với quyền root."
-  exit 1
-fi
 
 # Gọi hàm thay đổi thư mục home với tham số từ dòng lệnh
 change_home "$1" "$2"

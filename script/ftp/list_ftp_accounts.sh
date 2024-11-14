@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Kiểm tra quyền root
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script này với quyền root."
+  exit 1
+fi
+
 # Đường dẫn tới tệp chứa danh sách tài khoản FTP
 FTP_USER_FILE="/etc/ftp_users.txt"
 
@@ -12,12 +18,6 @@ list_accounts() {
     echo
   fi
 }
-
-# Kiểm tra quyền root
-if [ "$(id -u)" -ne 0 ]; then
-  echo "Error: Vui lòng chạy script này với quyền root."
-  exit 1
-fi
 
 # Thực thi hàm liệt kê tài khoản
 list_accounts

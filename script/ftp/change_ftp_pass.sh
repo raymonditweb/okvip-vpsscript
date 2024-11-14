@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script với quyền root."
+  exit 1
+fi
+
 # Đường dẫn tới tệp chứa danh sách tài khoản FTP
 FTP_USER_FILE="/etc/ftp_users.txt"
 
@@ -9,7 +15,7 @@ change_password() {
   local new_password="$2"
 
   if [ -z "$username" ] || [ -z "$new_password" ]; then
-    echo "Sử dụng: $0 [tên_tài_khoản] [mật_khẩu_mới]"
+    echo "Error: Vui lòng truyền tham số: $0 [tên_tài_khoản] [mật_khẩu_mới]"
     exit 1
   fi
 
@@ -31,12 +37,6 @@ change_password() {
     echo "Mật khẩu cho tài khoản $username đã được cập nhật trong Pure-FTPd."
   fi
 }
-
-# Kiểm tra quyền root
-if [ "$EUID" -ne 0 ]; then
-  echo "Error: Vui lòng chạy script với quyền root."
-  exit 1
-fi
 
 # Gọi hàm thay đổi mật khẩu với tham số từ dòng lệnh
 change_password "$1" "$2"

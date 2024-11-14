@@ -1,88 +1,120 @@
-## OKVIP-VPSSCRIPT:
+# OKVIP-VPSSCRIPT Documentation
 
 OKVIP-VPSSCRIPT là nền để quản lý và cài đặt website wordpress trên Ubuntu 20.04
+[OKVIP-VPSSCRIPT is a management and installation framework for WordPress websites on Ubuntu 20.04]
 
+## 1. Quản lý Máy Chủ (Server/VPS) - Server/VPS Management
 
-### 1. Quản lý Máy Chủ (Server/VPS)
-#### Cài đặt LEMP:
-- Ubuntu 20.04:
-```
+### Cài đặt LEMP - LEMP Installation
+
+For Ubuntu 20.04:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/install-ubuntu-lemp-20.04 ) <mysql_root_password> <init_main_domain.com>
 ```
 
-### Lệnh Cài Đặt yum-cron (auto update system):
-```
+### System Management Commands
+
+#### Lệnh Cài Đặt yum-cron - Auto Update System
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/yum-cron-setup )
 ```
 
-#### Restart VPS:
-```
+#### VPS Restart
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/restart-vps )
 ```
 
-#### Quản lý file:
-- List file & folder
-```
+### Quản lý file - File Management
+
+#### List Files & Folders
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/file/list-files.sh ) </path/to/file_or_folder*>
 ```
-- Set chrmode file, folder
-```
+
+#### Set File/Folder Permissions
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/file/set-chmod ) <mod*> </path/to/file_or_folder*>
 ```
-- Upload / Add / Delete: [Code core]
 
-####  Theo dõi thông số server:
-- Thông tin RAM
-```
+### System Monitoring
+
+#### Theo dõi thông số server - Memory Information
+
+```bash
 free -h
 ```
-- Thông tin ổ cứng
-```
+
+#### Thông tin ổ cứng - Disk Usage
+
+```bash
 df -h
 ```
-- Thông tin INODE
-```
+
+#### Thông tin INODE - INODE Usage
+
+```bash
 df -i
 ```
-- Danh sách process
-```
+
+#### Danh sách process- Process Management
+
+Top CPU Usage:
+
+```bash
 ps aux --sort=-%cpu | head -n 10
 ```
-- Danh sách sử dụng dung lượng RAM
-```
+
+Danh sách sử dụng dung lượng RAM - Top Memory Usage:
+
+```bash
 ps aux --sort=-%mem | head -n 10
 ```
-- Network, load
-```
+
+Network Load:
+
+```bash
 iftop -n
 ```
 
-#### Quản lý application / services:
-- Kiểm tra đã cài đặt chưa, trả về 0 hoặc 1
-```
+### Application Management
+
+#### Kiểm tra đã cài đặt chưa, trả về 0 hoặc 1 - Check Application Installation
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/check-app ) <app_name*>
 ```
-- Cài đặt ứng dụng mới
-```
+
+#### Cài đặt ứng dụng mới - Install Application
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/install-app ) <app_name*> <app_type=[app|service]> <app_version=lastest>
 ```
 
-- Remove ứng dụng
-```
+#### Remove Application
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/remove-app ) <app_name*>
 ```
 
-- Start/Stop/Reload ứng dụng
-```
+#### Start/Stop/Reload ứng dụng - Control Applications
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/application/[start/stop/reload]-app ) <app_name*>
 ```
 
-#### Quản lý logs:
+### Quản lý logs - Log Management
+
 Mở file log để đọc, log được lưu trong /var/log, sử dụng lên cat để đọc
 
-```
+```bash
 cat [file_log]
 ```
+
 + Danh sách file logs: nằm trong /var/log/
 /var/log/syslog: Log hệ thống chính, chứa log từ nhiều dịch vụ và hoạt động hệ thống.
 /var/log/auth.log: Log về việc đăng nhập và xác thực.
@@ -93,249 +125,325 @@ cat [file_log]
 /var/log/apache2/error.log: Log lỗi của Apache (nếu cài đặt).
 /var/log/php7.4-fpm.log: Log của PHP-FPM (nếu đang sử dụng PHP).
 
-
 #### Backup VPS: Backup to google driver
 
-#### Cronjob:
-- List 
-```
+### Cron Job Management
+
+#### List Cron Jobs
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/list.sh )
 ```
-- Add
-```
+
+#### Add Cron Job
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/add.sh ) <"* * * * * exec-command"*>
 ```
-- Delete
-```
+
+#### Delete Cron Job
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/remove.sh ) <"* * * * * exec-command"*>
 ```
-#### Security:
-- Firewall Rules
-+ Liệt kê danh sách firewall rules:
-```
+
+### Security Management
+
+#### Firewall Rules
+
+List firewall rules:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/list.sh )
 ```
-+ Thêm ip mới:
-```
+
+Add new port:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/add.sh ) <port*> [tcp|udp]
 ```
-+ remove ip:
-```
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/remove.sh )  <port*> <tcp|udp*>
 
-+ Liệt kê danh sách blocked ips:
+Remove port:
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/remove.sh ) <port*> <tcp|udp*>
 ```
+
+List blocked IPs:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/refs/heads/main/script/firewall/list_blocked_ips.sh )
-
 ```
 
-- Liệt kê danh sách fail2ban:
-```
+#### Other Security Features
+
+Liệt kê danh sách fail2ban - List fail2ban status:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/get_list_fail2ban.sh )
 ```
 
-- Change SSH Port
-```
+Change SSH port:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/change-ssh-port.sh ) <new_ssh_port*>
 ```
 
-- Change password Root
-```
+Change root password:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/change-password.sh ) <'new_password'*>
 ```
-nhập mật khẩu mới trong cặp dấu nháy đơn, ví dụ: 'cC,2K%5kSkj!yKqtu'
 
-### 2. Quản lý website
+Nhập mật khẩu mới trong cặp dấu nháy đơn, ví dụ: 'cC,2K%5kSkj!yKqtu'
 
-#### List danh sách website trên vps
-```
+## 2. Website Management
+
+### Website Operations
+
+#### List Websites
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/list-websites)
 ```
 
-#### Cài đặt website WordPress tự động theo template: 
+#### Cài đặt website WordPress tự động theo template
+
 + Add domain
 + Tạo database
-+ SSL 
++ SSL
 + Download mẫu
 + Cấu hình config
 
-```
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/install-wordpress) <mysql_root_password*> <domain*> <template_url*>
 ```
-#### Xoá website: yêu cầu có mysql root password để remove db
-```
+
+#### Xoá website: yêu cầu có mysql root password để remove db - Remove Website
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/remove-website) <domain*> <mysql_root_password*>
 ```
 
-#### Tiện ích: Bật / Tắt 1 hoặc nhiều website
-- Bật website
-```
+#### Tiện ích: Bật / Tắt 1 hoặc nhiều website - Enable/Disable Website
+
+Enable:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/enable-website) <domain*>
 ```
-- Tắt website
-```
+
+Disable:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/disable-website) <domain*>
 ```
 
-### Cập nhật plugin and Wordpress core:
+### WordPress Maintenance
 
-```
+#### Cập nhật plugin and Wordpress core- Update WordPress Core and Plugins
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/vpsscript/menu/tienich/update-wordpress-for-all-site )
 ```
 
-### Scan malware for Wordpress website:
+#### Scan WordPress Malware
 
-```
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/vpsscript/menu/tienich/scan-wordpress-malware.sh )
 ```
 
-#### Quản lý Database:
+### Database Management
 
-- Liệt kê danh sách database:
-```
+#### Database Operations
+
+Liệt kê danh sách database - List databases:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/list-db ) <mysql_root_password*>
 ```
-- Thêm database và userdb tương ứng mới (userdb = dbname):
-```
+
+Thêm database và userdb tương ứng mới (userdb = dbname) - Add database:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/add-db ) <mysql_root_password*> <db_name*> <db_user_password*>
 ```
-- Đổi tên database:
-```
+
+Rename database:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/rename-db ) <mysql_root_password*> <old_db_name*> <new_db_name*>
 ```
-- Xóa database:
-```
+
+Delete database:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/delete-db ) <mysql_root_password*> <db_name*>
 ```
-- Liệt kê danh sách database users:
-```
+
+#### User Operations
+
+List users:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/list-users ) <mysql_root_password*>
 ```
-- Thêm db user & assign db: 
-```
+
+Thêm db user & assign db - Add user:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/add-user ) <mysql_root_password*> <user_name*> <user_password*> [db_name]
 ```
-* nếu không truyền vào db_name thì chỉ tạo user
-- Đổi tên người dùng:
-```
+
++ nếu không truyền vào db_name thì chỉ tạo user
+
+Đổi tên người dùng
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/rename-user ) <mysql_root_password*> <old_user_name*> <new_user_name*>
 ```
-- Đổi mật khẩu người dùng: 
-```
+
+Đổi mật khẩu người dùng - Change user password:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/change-user-password ) <mysql_root_password*> <user_name*> <new_password*>
 ```
-- Xóa người dùng: 
-```
+
+Delete user:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/delete-user ) <mysql_root_password*> <user_name*>
 ```
 
-#### Quản lý Network:
-- Lấy thông tin network/load:
-```
+### FTP Management
+
+#### Quản lý Network
+
+Lấy thông tin network/load:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/network/get_network_and_load.sh )
 ```
+
 #### Quản lý application / services:
-- Lấy danh sách package đã cài gần đây:
-```
+
+Lấy danh sách package đã cài gần đây:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/package/get_recently_installed_packages.sh )
 ```
-#### Quản lý FTP:
-- Kiểm tra Pure-Ftpd / -> Cài đặt nếu chưa có:
-```
+
+#### Install Pure-FTPd
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/install_pureftpd.sh )
 ```
-```
+
 + Kết quả trả về:
 ++ Thành công: Pure-FTPd đã được cài đặt thành công.
 ++ Nếu Pure-FTPd đã được cài đặt: Error: Pure-FTPd đã được cài đặt.
-```
-- Danh sách FTP Account:
-```
+
+#### FTP Account Management
+
+Danh sách FTP Account - List accounts:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/list_ftp_accounts.sh )
 ```
-```
+
 + Kết quả trả về:
 ++ Nếu có tài khoản FTP: List tài khoản FTP:
 [user1]:[password1]
 [user2]:[password2]
 ++ Nếu không có tài khoản FTP: No result
-```
-- Thêm FTP Account:
-```
+
+Thêm FTP Account - Add account:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/add_ftp_account.sh ) [username] [password]
 ```
-```
+
 + Kết quả trả về:
 ++ Thành công: Tài khoản FTP [username] đã được thêm thành công với đầy đủ quyền.
 ++ Nếu tài khoản đã tồn tại: Error: Tài khoản [username] đã tồn tại.
-++ Nếu không có thông tin đầu vào: Sử dụng: [default_username] [default_password]``
+++ Không đủ tham số: Error: Vui lòng truyền tham số: [default_username] [default_password]
 
-```
-- Xoá FTP Account:
-```
+Xoá FTP Account - Delete account:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/delete_ftp_account.sh ) [username]
 ```
-```
+
 + Kết quả trả về:
 ++ Thành công: Tài khoản [username] đã được xóa.
 ++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
 ++ Thất bại: Error: Vui lòng cung cấp tên tài khoản để xóa.
-```
-- Bật tài khoản FTP:
-```
+++ Không đủ tham số: Error: Vui lòng cung cấp tên tài khoản để xóa.
+
+Bật tài khoản FTP - Enable account:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/script/ftp/toggle_ftp_account.sh ) [username] enable
 ```
-```
+
 + Kết quả trả về:
 ++ Thành công: Tài khoản [username] đã được bật.
 ++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
 ++ Truyền sai: Error: Hành động không hợp lệ. Vui lòng sử dụng 'enable' hoặc 'disable'.
-```
-- Tắt tài khoản FTP:
-```
+
+Disable account - Tắt tài khoản FTP:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/script/ftp/toggle_ftp_account.sh ) [username] disable
 ```
-```
+
 + Kết quả trả về:
 ++ Thành công: Tài khoản [username] đã được tắt.
 ++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
 ++ Truyền sai: Error: Hành động không hợp lệ. Vui lòng sử dụng 'enable' hoặc 'disable'.
-```
-- Set FTP Quota:
-```
+
+Set FTP Quota:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/set_ftp_quota.sh ) [username] [quota]
 ```
-```
+
 + Kết quả trả về:
 ++ Thành công: Đã đặt [quota] cho tài khoản FTP [username].
 ++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
-```
-- Copy password FTP:
-```
+++ Không đủ tham số: Error: Vui lòng truyền tham số: [tên_tài_khoản] [quota (MB)]
+
+Copy password FTP:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/copy_ftp_password.sh ) [username]
 ```
-```
+
 + Kết quả trả về:
 ++ Thành công: Mật khẩu của tài khoản [username] là: [password].
 ++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
-```
-- Change password FTP:
-```
+++ Không đủ tham số: Error: Vui lòng truyền tham số: [tên_tài_khoản]
+
+Change password:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/change_ftp_pass.sh ) [username] [new_password]
 ```
-```
+
 + Kết quả trả về:
 ++ Thành công: Mật khẩu cho tài khoản [username] đã được thay đổi.
 ++ Thành công: Mật khẩu cho tài khoản [username] đã được cập nhật trong Pure-FTPd.
 ++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
-```
-- Change FTP Home Directory (Ftp folder path):
-```
+++ Không đủ tham số: Error: Vui lòng truyền tham số: [tên_tài_khoản] [mật_khẩu_mới]
+
+Change home directory:
+
+```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/change_ftp_home_directory.sh ) [username] [new_home_directory]
 ```
-```
+
 + Kết quả trả về:
 ++ Thành công: Thư mục [new_home] đã được tạo thành công.
 ++ Thành công: Thư mục home cho tài khoản [username] đã được cập nhật trong Pure-FTPd.
 ++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
-```
+++ Không đủ tham số: Error: Vui lòng truyền tham số: [tên_tài_khoản] [thư_mục_home_mới]
