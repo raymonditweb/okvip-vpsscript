@@ -6,75 +6,63 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# Kiểm tra xem fail2ban đã được cài đặt hay chưa
-if ! command -v fail2ban-client &> /dev/null; then
-  echo "Error: fail2ban chưa được cài đặt."
+# Kiểm tra tham số đầu vào
+SERVICE_NAME="$1"
+PORT="$2"
+
+if [ -z "$SERVICE_NAME" ] || [ -z "$PORT" ]; then
+  echo "Error: Vui lòng cung cấp tên dịch vụ va port: $0 [tên_dịch_vụ] [port]"
   exit 1
 fi
 
-# Kiểm tra xem dịch vụ fail2ban có đang chạy hay không
-if ! systemctl is-active --quiet fail2ban; then
-    echo "Error: Dịch vụ fail2ban không đang chạy."
-    exit 1
-fi
+# Đường dẫn file cấu hình jail.local
+JAIL_LOCAL_FILE="/etc/fail2ban/jail.local"
+# Đường dẫn file filter
+FILTER_FILE="/etc/fail2ban/filter.d/$SERVICE_NAME.conf"
 
-# Lấy tên dịch vụ và cổng từ tham số dòng lệnh
-service_name="$1"
-port="$2"
+# Thêm cấu hình dịch vụ vào jail.local
+echo "Đang thêm dịch vụ '$SERVICE_NAME' vào Fail2Ban..."
 
-# Kiểm tra xem tên dịch vụ và cổng có được cung cấp hay không
-if [ -z "$service_name" ]; then
-  echo "Error: Tên dịch vụ không được cung cấp."
-  exit 1
-fi
-
-if [ -z "$port" ]; then
-  echo "Error: Cổng không được cung cấp."
-  exit 1
-fi
-
-# Tạo cấu hình jail mới
-jail_config="/etc/fail2ban/jail.d/${service_name}.conf"
-
-# Kiểm tra xem tệp cấu hình đã tồn tại để tránh ghi đè
-if [ -f "$jail_config" ]; then
-  echo "Error: Cấu hình jail cho '$service_name' đã tồn tại."
-  exit 1
-fi
-
-# Tạo cấu hình jail
-cat << EOF | tee "$jail_config" > /dev/null
-[${service_name}]
-enabled = true
-port = $port
-filter = ${service_name}
-logpath = /var/log/${service_name}/${service_name}.log
-maxretry = 5
-bantime = 600
-EOF
-
-# Tạo cấu hình filter
-filter_config="/etc/fail2ban/filter.d/${service_name}.conf"
-
-# Kiểm tra xem filter đã tồn tại để tránh ghi đè
-if [ -f "$filter_config" ]; then
-  echo "Error: Cấu hình filter cho '$service_name' đã tồn tại."
-  exit 1
-fi
-
-# Tạo cấu hình filter
-cat << EOF | tee "$filter_config" > /dev/null
-[INCLUDES]
-before = common.conf
-
-[Definition]
-failregex = ^%(__prefix_line)s<HOST> - (.*)
-ignoreregex =
-EOF
-
-# Khởi động lại fail2ban để áp dụng các thay đổi
-if systemctl restart fail2ban; then
-  echo "Dịch vụ mới '$service_name' đã được thêm vào fail2ban thành công!"
+# Kiểm tra nếu dịch vụ đã tồn tại trong jail.local
+if grep -q "^\[$SERVICE_NAME\]" "$JAIL_LOCAL_FILE"; then
+  echo "Dịch vụ $SERVICE_NAME đã tồn tại trong $JAIL_LOCAL_FILE"
 else
-  echo "Error: Khởi động lại fail2ban không thành công."
+  # Thêm cấu hình mới cho dịch vụ vào jail.local
+  echo -e "\n[$SERVICE_NAME]" >> "$JAIL_LOCAL_FILE"
+  echo "enabled = true" >> "$JAIL_LOCAL_FILE"
+  echo "port = $PORT" >> "$JAIL_LOCAL_FILE"
+  echo "filter = $SERVICE_NAME" >> "$JAIL_LOCAL_FILE"
+  echo "logpath = /var/log/$SERVICE_NAME.log" >> "$JAIL_LOCAL_FILE"
+  echo "maxretry = 5" >> "$JAIL_LOCAL_FILE"
+  echo "bantime = 600" >> "$JAIL_LOCAL_FILE"
+  echo "Dịch vụ $SERVICE_NAME đã được thêm vào Fail2Ban."
 fi
+
+# Tạo file filter nếu chưa tồn tại
+if [ ! -f "$FILTER_FILE" ]; then
+  echo "Tạo file filter cho dịch vụ '$SERVICE_NAME'..."
+
+  # Thêm cấu hình mẫu cho filter
+  cat <<EOL > "$FILTER_FILE"
+[Definition]
+
+# Mô tả mẫu log để phát hiện hành vi đáng ngờ cho $SERVICE_NAME
+failregex = ^.*Failed login attempt for .* from <HOST>.*$
+^.*Unusual access from <HOST>.*$
+^.*Invalid access from <HOST>.*$
+
+ignoreregex =
+EOL
+
+  echo "File filter $FILTER_FILE đã được tạo."
+else
+  echo "File filter $FILTER_FILE đã tồn tại."
+fi
+
+# Khởi động lại Fail2Ban để áp dụng thay đổi
+echo "Đang khởi động lại Fail2Ban..."
+sudo systemctl restart fail2ban
+echo "Fail2Ban đã được khởi động lại."
+
+# Xác nhận kết quả
+echo "Dịch vụ $SERVICE_NAME đã được thêm vào danh sách giám sát của Fail2Ban với port $PORT."
