@@ -28,9 +28,8 @@ if grep -q "^\[$SERVICE_NAME\]" "$JAIL_LOCAL_FILE"; then
     echo "Dịch vụ $SERVICE_NAME đã tồn tại trong $JAIL_LOCAL_FILE"
 else
     # Thêm cấu hình mới cho dịch vụ vào jail.local
-    echo -e "\n[$SERVICE_NAME]" >> "$JAIL_LOCAL_FILE"
+    echo -e "\n$SERVICE_NAME" >> "$JAIL_LOCAL_FILE"
     echo "enabled = true" >> "$JAIL_LOCAL_FILE"
-    echo "port = $PORT" >> "$JAIL_LOCAL_FILE"
     echo "filter = $SERVICE_NAME" >> "$JAIL_LOCAL_FILE"
     echo "logpath = /var/log/$SERVICE_NAME.log" >> "$JAIL_LOCAL_FILE"
     echo "maxretry = 5" >> "$JAIL_LOCAL_FILE"
