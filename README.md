@@ -340,110 +340,110 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```
 
 + Kết quả trả về:
-++ Thành công: Pure-FTPd đã được cài đặt thành công.
-++ Nếu Pure-FTPd đã được cài đặt: Error: Pure-FTPd đã được cài đặt.
+  + Thành công: Pure-FTPd đã được cài đặt thành công.
+  + Nếu Pure-FTPd đã được cài đặt: Error: Pure-FTPd đã được cài đặt.
 
-#### FTP Account Management
+### FTP Account Management
 
-Danh sách FTP Account - List accounts:
+#### Danh sách FTP Account - List accounts
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/list_ftp_accounts.sh )
 ```
 
 + Kết quả trả về:
-++ Nếu có tài khoản FTP: List tài khoản FTP:
-[user1]:[password1]
-[user2]:[password2]
-++ Nếu không có tài khoản FTP: No result
+  + Nếu có tài khoản FTP: List tài khoản FTP:
+    [user1]:[password1]
+    [user2]:[password2]
+  + Nếu không có tài khoản FTP: No result
 
-Thêm FTP Account - Add account:
+#### Thêm FTP Account - Add account
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/add_ftp_account.sh ) [username] [password]
 ```
 
 + Kết quả trả về:
-++ Thành công: Tài khoản FTP [username] đã được thêm thành công với đầy đủ quyền.
-++ Nếu tài khoản đã tồn tại: Error: Tài khoản [username] đã tồn tại.
-++ Không đủ tham số: Error: Vui lòng truyền tham số: [default_username] [default_password]
+  + Thành công: Tài khoản FTP [username] đã được thêm thành công với đầy đủ quyền.
+  + Nếu tài khoản đã tồn tại: Error: Tài khoản [username] đã tồn tại.
+  + Không đủ tham số: Error: Vui lòng truyền tham số: [default_username] [default_password]
 
-Xoá FTP Account - Delete account:
+#### Xoá FTP Account - Delete account
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/delete_ftp_account.sh ) [username]
 ```
 
 + Kết quả trả về:
-++ Thành công: Tài khoản [username] đã được xóa.
-++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
-++ Thất bại: Error: Vui lòng cung cấp tên tài khoản để xóa.
-++ Không đủ tham số: Error: Vui lòng cung cấp tên tài khoản để xóa.
+  + Thành công: Tài khoản [username] đã được xóa.
+  + Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
+  + Thất bại: Error: Vui lòng cung cấp tên tài khoản để xóa.
+  + Không đủ tham số: Error: Vui lòng cung cấp tên tài khoản để xóa.
 
-Bật tài khoản FTP - Enable account:
+#### Bật tài khoản FTP - Enable account
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/script/ftp/toggle_ftp_account.sh ) [username] enable
 ```
 
 + Kết quả trả về:
-++ Thành công: Tài khoản [username] đã được bật.
-++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
-++ Truyền sai: Error: Hành động không hợp lệ. Vui lòng sử dụng 'enable' hoặc 'disable'.
+  + Thành công: Tài khoản [username] đã được bật.
+  + Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
+  + Truyền sai: Error: Hành động không hợp lệ. Vui lòng sử dụng 'enable' hoặc 'disable'.
 
-Disable account - Tắt tài khoản FTP:
+#### Disable account - Tắt tài khoản FTP
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/script/ftp/toggle_ftp_account.sh ) [username] disable
 ```
 
 + Kết quả trả về:
-++ Thành công: Tài khoản [username] đã được tắt.
-++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
-++ Truyền sai: Error: Hành động không hợp lệ. Vui lòng sử dụng 'enable' hoặc 'disable'.
+  + Thành công: Tài khoản [username] đã được tắt.
+  + Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
+  + Truyền sai: Error: Hành động không hợp lệ. Vui lòng sử dụng 'enable' hoặc 'disable'.
 
-Set FTP Quota:
+#### Set FTP Quota
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/set_ftp_quota.sh ) [username] [quota]
 ```
 
 + Kết quả trả về:
-++ Thành công: Đã đặt [quota] cho tài khoản FTP [username].
-++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
-++ Không đủ tham số: Error: Vui lòng truyền tham số: [tên_tài_khoản] [quota (MB)]
+  + Thành công: Đã đặt [quota] cho tài khoản FTP [username].
+  + Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
+  + Không đủ tham số: Error: Vui lòng truyền tham số: [tên_tài_khoản] [quota (MB)]
 
-Copy password FTP:
+#### Copy password FTP
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/copy_ftp_password.sh ) [username]
 ```
 
 + Kết quả trả về:
-++ Thành công: Mật khẩu của tài khoản [username] là: [password].
-++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
-++ Không đủ tham số: Error: Vui lòng truyền tham số: [tên_tài_khoản]
+  + Thành công: Mật khẩu của tài khoản [username] là: [password].
+  + Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
+  + Không đủ tham số: Error: Vui lòng truyền tham số: [tên_tài_khoản]
 
-Change password:
+#### Change password
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/change_ftp_pass.sh ) [username] [new_password]
 ```
 
 + Kết quả trả về:
-++ Thành công: Mật khẩu cho tài khoản [username] đã được thay đổi.
-++ Thành công: Mật khẩu cho tài khoản [username] đã được cập nhật trong Pure-FTPd.
-++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
-++ Không đủ tham số: Error: Vui lòng truyền tham số: [tên_tài_khoản] [mật_khẩu_mới]
+  + Thành công: Mật khẩu cho tài khoản [username] đã được thay đổi.
+  + Thành công: Mật khẩu cho tài khoản [username] đã được cập nhật trong Pure-FTPd.
+  + Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
+  + Không đủ tham số: Error: Vui lòng truyền tham số: [tên_tài_khoản] [mật_khẩu_mới]
 
-Change home directory:
+#### Change home directory
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/change_ftp_home_directory.sh ) [username] [new_home_directory]
 ```
 
 + Kết quả trả về:
-++ Thành công: Thư mục [new_home] đã được tạo thành công.
-++ Thành công: Thư mục home cho tài khoản [username] đã được cập nhật trong Pure-FTPd.
-++ Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
-++ Không đủ tham số: Error: Vui lòng truyền tham số: [tên_tài_khoản] [thư_mục_home_mới]
+  + Thành công: Thư mục [new_home_directory] đã được tạo thành công.
+  + Thành công: Thư mục home cho tài khoản [username] đã được cập nhật trong Pure-FTPd.
+  + Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
+  + Không đủ tham số: Error: Vui lòng truyền tham số: [tên_tài_khoản] [thư_mục_home_mới].
