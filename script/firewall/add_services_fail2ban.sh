@@ -19,6 +19,7 @@ SERVICE_NAME=$(echo "$SERVICE_NAME" | tr -d '[]')
 
 # Đường dẫn file cấu hình jail.local
 JAIL_LOCAL_FILE="/etc/fail2ban/jail.local"
+FILTER_CONFIG_FILE="/etc/fail2ban/filter.d/${SERVICE_NAME}.conf"
 
 # Thêm cấu hình dịch vụ vào jail.local
 echo "Đang thêm dịch vụ '$SERVICE_NAME' vào Fail2Ban..."
@@ -35,12 +36,21 @@ else
   echo "maxretry = 5" >> "$JAIL_LOCAL_FILE"
   echo "bantime = 600" >> "$JAIL_LOCAL_FILE"
   echo "Dịch vụ $SERVICE_NAME đã được thêm vào Fail2Ban."
-fi
 
-# Khởi động lại Fail2Ban để áp dụng thay đổi
-echo "Đang khởi động lại Fail2Ban..."
-sudo systemctl restart fail2ban
-echo "Fail2Ban đã được khởi động lại."
+  # Tạo cấu hình filter cho dịch vụ
+  echo "Đang tạo filter cho dịch vụ '$SERVICE_NAME'..."
+  echo "[INCLUDES]" > "$FILTER_CONFIG_FILE"
+  echo "before = common.conf" >> "$FILTER_CONFIG_FILE"
+  echo -e "\n[Definition]" >> "$FILTER_CONFIG_FILE"
+  echo "failregex = Failed login attempt for user: .* from IP: <HOST>" >> "$FILTER_CONFIG_FILE"
+  echo "ignoreregex =" >> "$FILTER_CONFIG_FILE"
+  echo "Filter cho dịch vụ $SERVICE_NAME đã được tạo."
+
+  # Khởi động lại Fail2Ban để áp dụng thay đổi
+  echo "Đang khởi động lại Fail2Ban..."
+  sudo systemctl restart fail2ban
+  echo "Fail2Ban đã được khởi động lại."
+fi
 
 # Xác nhận kết quả
 echo "Dịch vụ $SERVICE_NAME đã được thêm vào danh sách giám sát của Fail2Ban."
