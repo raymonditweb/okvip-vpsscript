@@ -8,10 +8,9 @@ fi
 
 # Kiểm tra tham số đầu vào
 SERVICE_NAME="$1"
-PORT="$2"
 
-if [ -z "$SERVICE_NAME" ] || [ -z "$PORT" ]; then
-  echo "Error: Vui lòng cung cấp tên dịch vụ va port: $0 [tên_dịch_vụ] [port]"
+if [ -z "$SERVICE_NAME" ] then
+  echo "Error: Vui lòng cung cấp tên dịch vụ: $0 [tên_dịch_vụ]"
   exit 1
 fi
 
