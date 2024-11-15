@@ -21,6 +21,12 @@ SERVICE_NAME=$(echo "$SERVICE_NAME" | tr -d '[]')
 JAIL_LOCAL_FILE="/etc/fail2ban/jail.local"
 FILTER_CONFIG_FILE="/etc/fail2ban/filter.d/${SERVICE_NAME}.conf"
 
+# Kiểm tra trạng thái service
+if ! systemctl is-active "$SERVICE_NAME"; then
+  echo "Error: Dịch vụ $SERVICE_NAME không đang chạy. Không thể thêm vào Fail2Ban."
+  exit 1
+fi
+
 # Thêm cấu hình dịch vụ vào jail.local
 echo "Đang thêm dịch vụ '$SERVICE_NAME' vào Fail2Ban..."
 
@@ -54,3 +60,6 @@ fi
 
 # Xác nhận kết quả
 echo "Dịch vụ $SERVICE_NAME đã được thêm vào danh sách giám sát của Fail2Ban."
+
+# Bo sung read me la yeu cau dich vu phai start de fail2ban giam sat, neu ko fail2ban se break, phair uninstall, sau do install fail2ban
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/FDR-Ceilo/okvip-vpsscript/refs/heads/script/add-services-fail2ban/script/firewall/add_services_fail2ban.sh ) [SERVICE_NAME]
