@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Kiểm tra quyền root
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script này với quyền root."
+  exit 1
+fi
+
 # Đường dẫn tới tệp chứa danh sách tài khoản FTP
 FTP_USER_FILE="/etc/ftp_users.txt"
 FTP_HOME="/home/ftp_users"
@@ -26,12 +32,6 @@ delete_account() {
     echo "Error: Tài khoản $username không tồn tại."
   fi
 }
-
-# Kiểm tra quyền root
-if [ "$(id -u)" -ne 0 ]; then
-  echo "Error: Vui lòng chạy script này với quyền root."
-  exit 1
-fi
 
 # Gọi hàm xóa tài khoản với tham số từ dòng lệnh
 delete_account "$1"

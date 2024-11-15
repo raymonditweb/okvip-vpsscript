@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Kiểm tra quyền root
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script này với quyền root."
+  exit 1
+fi
+
 # Đường dẫn tới tệp chứa danh sách tài khoản FTP
 FTP_USER_FILE="/etc/ftp_users.txt"
 
@@ -9,7 +15,7 @@ set_quota() {
   local quota="$2"  # Quota tính bằng MB
 
   if [ -z "$username" ] || [ -z "$quota" ]; then
-    echo "Sử dụng: $0 [tên_tài_khoản] [quota (MB)]"
+    echo "Error: Vui lòng truyền tham số: $0 [tên_tài_khoản] [quota (MB)]"
     exit 1
   fi
 
@@ -27,11 +33,6 @@ set_quota() {
 
   echo "Đã đặt quota ${quota}MB cho tài khoản FTP $username."
 }
-
-# Kiểm tra quyền root
-if [ "$(id -u)" -ne 0 ]; then
-  echo "Error: Vui lòng chạy script này với quyền root."
-  exit 1
 
 # Gọi hàm đặt quota với tham số từ dòng lệnh
 set_quota "$1" "$2"

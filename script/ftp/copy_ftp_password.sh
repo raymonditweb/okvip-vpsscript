@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script với quyền root."
+  exit 1
+fi
+
 # Đường dẫn tới tệp chứa danh sách tài khoản FTP
 FTP_USER_FILE="/etc/ftp_users.txt"
 
@@ -8,7 +14,7 @@ show_password() {
   local username="$1"
 
   if [ -z "$username" ]; then
-    echo "Sử dụng: $0 [tên_tài_khoản]"
+    echo "Error: Vui lòng truyền tham số: $0 [tên_tài_khoản]"
     exit 1
   fi
 
@@ -22,12 +28,6 @@ show_password() {
     exit 1
   fi
 }
-
-# Kiểm tra quyền root
-if [ "$EUID" -ne 0 ]; then
-  echo "Error: Vui lòng chạy script với quyền root."
-  exit 1
-fi
 
 # Gọi hàm hiển thị mật khẩu với tham số từ dòng lệnh
 show_password "$1"
