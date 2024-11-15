@@ -66,12 +66,9 @@ fail2ban-client reload
 fail2ban-client status
 
 # Bảo vệ SSH
-echo "Đảm bảo bảo vệ kết nối SSH đang hoạt động..."
 if ! fail2ban-client status sshd &> /dev/null; then
-  echo "Jail 'sshd' không hoạt động. Đang kích hoạt..."
   systemctl restart fail2ban
 else
-  echo "Jail 'sshd' đang hoạt động."
+  echo 
 fi
 
-echo "Cấu hình Fail2Ban hoàn tất."
