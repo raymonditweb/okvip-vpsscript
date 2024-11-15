@@ -34,9 +34,9 @@ if ! command -v ufw &> /dev/null; then
   exit 1
 fi
 
-# Kích hoạt UFW với tùy chọn --force để tự động chọn [y/n] by y khi cài đặt
+# Kích hoạt UFW khi cài đặt
 echo "Kích hoạt UFW..."
-ufw --force enable
+ufw enable
 
 # Tạo một mảng để lưu trữ các IP bị chặn
 blocked_ips=()
