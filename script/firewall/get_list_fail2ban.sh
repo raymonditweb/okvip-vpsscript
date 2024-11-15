@@ -60,15 +60,16 @@ else
   echo "Cấu hình Fail2Ban mặc định đã tồn tại."
 fi
 
+# Bảo vệ SSH
+echo "Đảm bảo bảo vệ kết nối SSH đang hoạt động..."
+if ! fail2ban-client status sshd &> /dev/null; then
+  echo "Jail 'sshd' không hoạt động. Đang kích hoạt..."
+  systemctl restart fail2ban
+else
+  echo "Jail 'sshd' đang hoạt động."
+fi
+
 # Kiểm tra trạng thái Fail2Ban và danh sách jail
 echo "Kiểm tra trạng thái Fail2Ban và danh sách jail..."
 fail2ban-client reload
-fail2ban-client status
-
-# Bảo vệ SSH
-if ! fail2ban-client status sshd &> /dev/null; then
-  systemctl restart fail2ban
-else
-  echo 
-fi
-
+fail2ban-client status | grep "Jail list:" | sed "s/\`- Jail list://g"
