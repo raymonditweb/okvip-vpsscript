@@ -40,7 +40,7 @@ else
   echo "filter = $SERVICE_NAME" >> "$JAIL_LOCAL_FILE"
   echo "logpath = /var/log/$SERVICE_NAME.log" >> "$JAIL_LOCAL_FILE"
   echo "maxretry = 5" >> "$JAIL_LOCAL_FILE"
-  echo "bantime = 600" >> "$JAIL_LOCAL_FILE"
+  echo "bantime = 3600" >> "$JAIL_LOCAL_FILE"
   echo "Dịch vụ $SERVICE_NAME đã được thêm vào Fail2Ban."
 
   # Tạo cấu hình filter cho dịch vụ
