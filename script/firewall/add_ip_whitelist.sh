@@ -7,7 +7,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Kiểm tra xem có ít nhất một địa chỉ IP được truyền vào hay không
-if [ "$#" -lt 2 ]; then
+if [ "$#" -lt 1 ]; then
   echo "Error: Sử dụng Cú pháp: $0 [ip1] [ip2] ..."
   echo "Ví dụ: $0 [192.168.1.10] [192.168.1.20]"
   exit 1
