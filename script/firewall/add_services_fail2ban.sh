@@ -22,7 +22,7 @@ JAIL_LOCAL_FILE="/etc/fail2ban/jail.local"
 FILTER_CONFIG_FILE="/etc/fail2ban/filter.d/${SERVICE_NAME}.conf"
 
 # Kiểm tra trạng thái service
-if ! systemctl is-active --queit "$SERVICE_NAME"; then
+if ! systemctl is-active --quiet "$SERVICE_NAME"; then
   echo "Error: Dịch vụ $SERVICE_NAME không đang chạy. Không thể thêm vào Fail2Ban."
   exit 1
 fi
