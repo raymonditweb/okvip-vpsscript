@@ -6,66 +6,47 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# Kiểm tra xem có đủ tham số được truyền vào không
+# Kiểm tra xem có ít nhất một địa chỉ IP được truyền vào hay không
 if [ "$#" -lt 2 ]; then
-  echo "Cú pháp: $0 [jail_name] [ip1] [ip2] ..."
-  echo "Ví dụ: $0 sshd 192.168.1.10 192.168.1.20"
+  echo "Error: Sử dụng Cú pháp: $0 [ip1] [ip2] ..."
+  echo "Ví dụ: $0 [192.168.1.10] [192.168.1.20]"
+  exit 1
   exit 1
 fi
 
-# Lấy tên jail từ tham số đầu tiên
-jail_name="$1"
+# File cấu hình của Fail2ban (thường là fail2ban.local hoặc jail.local)
+CONFIG_FILE="/etc/fail2ban/jail.local"
 
-# File cấu hình jail.local
-jail_local="/etc/fail2ban/jail.local"
-
-# Kiểm tra nếu jail.local không tồn tại
-if [ ! -f "$jail_local" ]; then
-  echo "Tệp cấu hình $jail_local không tồn tại. Đang tạo mới..."
-  sudo touch "$jail_local"
-fi
-
-# Kiểm tra xem jail đã tồn tại trong cấu hình chưa
-if ! grep -q "^\[$jail_name\]" "$jail_local"; then
-  echo "Jail $jail_name chưa tồn tại. Đang tạo mới..."
-  # Thêm cấu hình cơ bản cho jail
-  sudo bash -c "cat >> $jail_local" <<EOL
-
-[$jail_name]
-enabled = true
-filter = $jail_name
-logpath = /var/log/auth.log
-bantime = 3600
-findtime = 600
-maxretry = 3
-EOL
-  echo "Đã tạo jail $jail_name với cấu hình mặc định trong $jail_local."
-else
-  echo "Jail $jail_name đã tồn tại."
-fi
-
-# Loại bỏ tham số đầu tiên (jail_name)
-shift
-
-# Vòng lặp qua các địa chỉ IP bắt đầu từ tham số thứ 2
+# Duyệt qua tất cả các tham số (các địa chỉ IP)
 for ip in "$@"; do
-  # Kiểm tra định dạng IP hợp lệ (IPv4 và IPv6)
-  if [[ ! $ip =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ && ! $ip =~ ^([a-fA-F0-9:]+:+)+[a-fA-F0-9]+$ ]]; then
-    echo "Địa chỉ IP không hợp lệ: $ip"
-    continue
+  # Loại bỏ dấu ngoặc vuông []
+  ip=$(echo "$ip" | tr -d '[]')
+
+  # Kiểm tra xem phần [DEFAULT] đã có trong file hay chưa
+  if ! grep -q "\[DEFAULT\]" "$CONFIG_FILE"; then
+    # Nếu chưa có [DEFAULT], thêm nó vào file
+    echo -e "\n[DEFAULT]\n" | sudo tee -a "$CONFIG_FILE" > /dev/null
+    echo "Phần [DEFAULT] đã được thêm vào $CONFIG_FILE."
   fi
 
-  # Thêm IP vào whitelist cho jail
-  echo "Đang thêm IP $ip vào whitelist cho jail: $jail_name..."
-  if fail2ban-client set "$jail_name" addignoreip "$ip"; then
-    echo "Thêm IP $ip thành công."
+  # Kiểm tra xem ignoreip đã có trong file hay chưa
+  if grep -q "ignoreip" "$CONFIG_FILE"; then
+    # Nếu ignoreip đã có, kiểm tra xem IP đã có trong danh sách chưa
+    if ! grep -q "$ip" "$CONFIG_FILE"; then
+        # Thêm IP vào danh sách ignoreip trong file cấu hình mà không tạo thêm dòng mới
+        sudo sed -i "/ignoreip/s/\$/ $ip/" "$CONFIG_FILE"
+        echo "Địa chỉ IP $ip đã được thêm vào whitelist."
+    else
+        echo "Error: Địa chỉ IP $ip đã có trong whitelist."
+    fi
   else
-    echo "Error: Thêm IP $ip thất bại. Kiểm tra cấu hình và thử lại."
+    # Nếu ignoreip chưa có trong file, thêm mới
+    echo -n "ignoreip = $ip" | sudo tee -a "$CONFIG_FILE" > /dev/null
+    echo "Địa chỉ IP $ip đã được thêm vào whitelist."
   fi
 done
 
-# Khởi động lại dịch vụ Fail2ban để áp dụng thay đổi
-echo "Khởi động lại Fail2ban để áp dụng cấu hình..."
+# Khởi động lại Fail2ban để áp dụng thay đổi
 sudo systemctl restart fail2ban
 
-echo "Đã hoàn tất thêm các IP vào whitelist cho jail: $jail_name."
+echo "Các thay đổi đã được áp dụng thành công!"
