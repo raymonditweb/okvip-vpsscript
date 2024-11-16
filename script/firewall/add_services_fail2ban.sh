@@ -7,7 +7,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Kiểm tra tham số đầu vào
-SERVICE_NAME="$1"
+SERVICE_NAME=$1
 
 if [ -z "$SERVICE_NAME" ]; then
   echo "Error: Sử dụng: $0 [tên_dịch_vụ]"
