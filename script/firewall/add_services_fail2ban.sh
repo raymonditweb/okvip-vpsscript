@@ -18,7 +18,7 @@ SERVICE_NAME=$1
 SERVICE_NAME=$(echo "$SERVICE_NAME" | tr -d '[]')
 
 # Kiểm tra xem Service có đang chạy hay không
-if ! systemctl is-active --quiet $SERVICE_NAME; then
+if ! systemctl is-active $SERVICE_NAME; then
   echo "Error: Service '$SERVICE_NAME' không chạy. Không thể thêm vào Fail2Ban."
   exit 1
 fi
