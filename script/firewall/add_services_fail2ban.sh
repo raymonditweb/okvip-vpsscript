@@ -30,6 +30,12 @@ fi
 # Thêm cấu hình dịch vụ vào jail.local
 echo "Đang thêm dịch vụ '$SERVICE_NAME' vào Fail2Ban..."
 
+# Kiểm tra và thêm phần [DEFAULT] nếu chưa có
+if ! grep -q "\[DEFAULT\]" "$JAIL_LOCAL_FILE"; then
+  echo -e "\n[DEFAULT]\n" >> "$JAIL_LOCAL_FILE"
+  echo "Phần [DEFAULT] đã được thêm vào $JAIL_LOCAL_FILE."
+fi
+
 # Kiểm tra nếu dịch vụ đã tồn tại trong jail.local
 if grep -q "^\[$SERVICE_NAME\]" "$JAIL_LOCAL_FILE"; then
   echo "Error: Dịch vụ $SERVICE_NAME đã tồn tại trong $JAIL_LOCAL_FILE"
@@ -38,7 +44,27 @@ else
   echo -e "\n[$SERVICE_NAME]" >> "$JAIL_LOCAL_FILE"
   echo "enabled = true" >> "$JAIL_LOCAL_FILE"
   echo "filter = $SERVICE_NAME" >> "$JAIL_LOCAL_FILE"
-  echo "logpath = /var/log/$SERVICE_NAME.log" >> "$JAIL_LOCAL_FILE"
+
+  # Cập nhật logpath phù hợp với dịch vụ
+  case "$SERVICE_NAME" in
+    sshd)
+      echo "logpath = /var/log/auth.log" >> "$JAIL_LOCAL_FILE"
+      ;;
+    atd)
+      echo "logpath = /var/log/syslog" >> "$JAIL_LOCAL_FILE"
+      ;;
+    apache2)
+      echo "logpath = /var/log/apache2/error.log" >> "$JAIL_LOCAL_FILE"
+      ;;
+    nginx)
+      echo "logpath = /var/log/nginx/error.log" >> "$JAIL_LOCAL_FILE"
+      ;;
+    *)
+      echo "logpath = /var/log/$SERVICE_NAME.log" >> "$JAIL_LOCAL_FILE"
+      echo "Warning: Không xác định logpath cho dịch vụ $SERVICE_NAME. Sử dụng logpath mặc định."
+      ;;
+  esac
+
   echo "maxretry = 5" >> "$JAIL_LOCAL_FILE"
   echo "bantime = 3600" >> "$JAIL_LOCAL_FILE"
   echo "Dịch vụ $SERVICE_NAME đã được thêm vào Fail2Ban."
