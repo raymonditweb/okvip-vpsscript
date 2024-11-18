@@ -128,7 +128,7 @@ cat [file_log]
 ### Thay đổi PHP version - Change PHP version
 
 ```bash
-bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/FDR-Ceilo/okvip-vpsscript/refs/heads/script/add-whitelist/script/others/change_php_version.sh) [PHPVersion]
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/change_php_version.sh) [PHPVersion]
 ```
 
 + Kết quả trả về:
@@ -196,10 +196,19 @@ Liệt kê danh sách fail2ban - List fail2ban status:
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/get_list_fail2ban.sh )
 ```
 
+Re-insatall Fail2ban after break down
+```bash
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/reinstall_fail2ban.sh )
+```
+
++ Kết quả trả về:
+  + Không có root : Error: Vui lòng chạy script với quyền root.
+  + Thành công: Fail2Ban đã được cài đặt lại và khởi động thành công.
+
 Thêm Địa chỉ IP vào Danh sách Whitelist của Fail2ban - Add IP to ignorelist
 
 ```bash
-bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/add-whitelist/script/firewall/add_ip_whitelist.sh) [IP1] [IP2]
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/add_ip_whitelist.sh) [IP1] [IP2]
 ```
 
 + Kết quả trả về:
