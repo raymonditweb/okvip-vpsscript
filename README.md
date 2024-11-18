@@ -125,6 +125,19 @@ cat [file_log]
 /var/log/apache2/error.log: Log lỗi của Apache (nếu cài đặt).
 /var/log/php7.4-fpm.log: Log của PHP-FPM (nếu đang sử dụng PHP).
 
+### Thay đổi PHP version - Change PHP version
+
+```bash
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/FDR-Ceilo/okvip-vpsscript/refs/heads/script/add-whitelist/script/others/change_php_version.sh) [PHPVersion]
+```
+
++ Kết quả trả về:
+  + Không có root : Error: Vui lòng chạy script với quyền root.
+  + Thành công: Thay đổi PHP sang $PHP_VERSION hoàn tất!
+  + Nếu PHP đã tồn tại: PHP $PHP_VERSION đã có sẵn trên hệ thống.
+  + Không đủ tham số: Error: Sử dụng: [phiên_bản_php] (ví dụ: php7.4, php8.1)
+  + Thất bại: Error: Không thể cài đặt PHP $PHP_VERSION. Vui lòng kiểm tra lại.
+
 #### Backup VPS: Backup to google driver
 
 ### Cron Job Management
@@ -186,7 +199,7 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 Thêm Địa chỉ IP vào Danh sách Whitelist của Fail2ban - Add IP to ignorelist
 
 ```bash
-bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/FDR-Ceilo/okvip-vpsscript/refs/heads/script/add-whitelist/script/firewall/add_ip_whitelist.sh) [IP1] [IP2]
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/add-whitelist/script/firewall/add_ip_whitelist.sh) [IP1] [IP2]
 ```
 
 + Kết quả trả về:
