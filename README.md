@@ -1,6 +1,6 @@
 # OKVIP-VPSSCRIPT Documentation
 
-OKVIP-VPSSCRIPT là nền để quản lý và cài đặt website wordpress trên Ubuntu 20.04
+OKVIP-VPSSCRIPT là nền tang để quản lý và cài đặt website wordpress trên Ubuntu 20.04
 [OKVIP-VPSSCRIPT is a management and installation framework for WordPress websites on Ubuntu 20.04]
 
 ## 1. Quản lý Máy Chủ (Server/VPS) - Server/VPS Management
@@ -288,6 +288,20 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/disable-website) <domain*>
 ```
+
+#### Thay đổi site directory - Change website directory
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/change_site_directory.sh) [SITE_NAME] [new_directory]
+```
+
++ Kết quả trả về:
+  + Không có root : Error: Vui lòng chạy script với quyền root.
+  + Thành công: Thành công! Thư mục của site 'SITE_NAME' đã được thay đổi thành: NEW_DIRECTORY
+  + Thiếu tham số: Error: Sử dụng cú pháp: [SITE_NAME] [new_directory]
+                    Ví dụ: example.com /var/www/example_new
+  + Cấu hình không tồn tại: Error: Cấu hình Nginx cho site '$SITE_NAME' không tồn tại.
+  + Thất bại: Error: Cú pháp cấu hình Nginx không hợp lệ, không thể áp dụng thay đổi.
 
 ## 3. WordPress Maintenance
 
