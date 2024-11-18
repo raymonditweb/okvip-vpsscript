@@ -183,6 +183,20 @@ Liệt kê danh sách fail2ban - List fail2ban status:
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/get_list_fail2ban.sh )
 ```
 
+Thêm Địa chỉ IP vào Danh sách Whitelist của Fail2ban - Add IP to ignorelist
+
+```bash
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/FDR-Ceilo/okvip-vpsscript/refs/heads/script/add-whitelist/script/firewall/add_ip_whitelist.sh) [IP1] [IP2]
+```
+
++ Kết quả trả về:
+  + Không có root : Error: Vui lòng chạy script với quyền root.
+  + Thành công: Các thay đổi đã được áp dụng thành công!
+  + Nếu IP đã tồn tại: Error: Địa chỉ IP $ip đã có trong whitelist..
+  + Không đủ tham số:
+    Error: Sử dụng Cú pháp: [ip1] [ip2] ...
+    Ví dụ: [192.168.1.10] [192.168.1.20]
+
 Change SSH port:
 
 ```bash
