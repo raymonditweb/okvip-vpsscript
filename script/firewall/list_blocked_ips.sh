@@ -19,7 +19,7 @@ install_ufw() {
   else
     echo "Error: Không thể xác định trình quản lý gói. Vui lòng cài đặt UFW thủ công."
     exit 1
-fi
+  fi
 }
 
 # Kiểm tra xem UFW có được cài đặt không, nếu không thì cài đặt
@@ -34,7 +34,11 @@ if ! command -v ufw &> /dev/null; then
   exit 1
 fi
 
-# Kích hoạt UFW với tùy chọn --force để tự động chọn [y/n] by y khi cài đặt
+# Thêm quy tắc cho phép SSH trước khi bật UFW
+echo "Thêm quy tắc cho phép SSH trước khi bật UFW..."
+ufw allow ssh
+
+# Kích hoạt UFW sau khi đã cho phép SSH
 echo "Kích hoạt UFW..."
 ufw --force enable
 
