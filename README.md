@@ -131,11 +131,13 @@ cat [file_log]
 bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/change_php_version.sh) [PHPVersion]
 ```
 
+ví dụ: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/change_php_version.sh) 7.0
+
 + Kết quả trả về:
   + Không có root : Error: Vui lòng chạy script với quyền root.
   + Thành công: Thay đổi PHP sang $PHP_VERSION hoàn tất!
   + Nếu PHP đã tồn tại: PHP $PHP_VERSION đã có sẵn trên hệ thống.
-  + Không đủ tham số: Error: Sử dụng: [phiên_bản_php] (ví dụ: php7.4, php8.1)
+  + Không đủ tham số: Error: Sử dụng: phiên_bản_php (ví dụ: 7.4/ 8.1)
   + Thất bại: Error: Không thể cài đặt PHP $PHP_VERSION. Vui lòng kiểm tra lại.
 
 #### Backup VPS: Backup to google driver
