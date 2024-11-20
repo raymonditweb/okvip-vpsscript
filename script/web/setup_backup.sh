@@ -6,19 +6,10 @@ if [ "$EUID" -ne 0 ]; then
   exit 1  # Thoát nếu không chạy với quyền root
 fi
 
-# Kiểm tra số lượng tham số đầu vào
-if [ $# -ne 4 ]; then
-  echo "Error: Sử dụng: $0 domain_name backup_time db_user db_password"
-  echo "Ví dụ: $0 example.com 23:30 dbuser dbpass123"
-  exit 1  # Thoát nếu số tham số không đúng
-fi
-
 # Gán tham số đầu vào vào các biến tương ứng
 DOMAIN=$1
 BACKUP_TIME=$2
-DB_USER=$3
-DB_PASS=$4
-GDRIVE_PATH=$5  # Đường dẫn đến thư mục trên Google Drive
+BACKUP_FREQUENCY=$3  # Tần suất sao lưu
 
 # Kiểm tra định dạng tên miền
 if ! [[ $DOMAIN =~ ^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$ ]]; then
@@ -34,22 +25,20 @@ if ! [[ $BACKUP_TIME =~ ^([01]?[0-9]|2[0-3]):[0-5][0-9]$ ]]; then
   exit 1  # Thoát nếu thời gian không hợp lệ
 fi
 
+# Đọc thông tin đăng nhập từ wp-config.php
+WP_CONFIG="/var/www/$DOMAIN/wp-config.php"
+if [ ! -f "$WP_CONFIG" ]; then
+  echo "Error: Không tìm thấy file wp-config.php tại $WP_CONFIG"
+  exit 1
+fi
+
+DB_USER=$(grep "DB_USER" "$WP_CONFIG" | awk -F "''" '{print $2}')
+DB_PASS=$(grep "DB_PASSWORD" "$WP_CONFIG" | awk -F "''" '{print $2}')
+
 # Kiểm tra thông tin đăng nhập MySQL
 if ! mysql -u"$DB_USER" -p"$DB_PASS" -e "SELECT 1" >/dev/null 2>&1; then
   echo "Error: Không thể kết nối đến MySQL với thông tin đăng nhập đã cung cấp!"
   exit 1  # Thoát nếu không thể kết nối đến MySQL
-fi
-
-# Kiểm tra và cài đặt rclone nếu chưa được cài đặt
-if ! command -v rclone &> /dev/null; then
-  echo "rclone chưa được cài đặt. Đang cài đặt..."
-  if [[ "$(uname)" == "Linux" ]]; then
-    # Cài đặt rclone cho Linux
-    curl https://rclone.org/install.sh | sudo bash
-  else
-    echo "Hệ điều hành không được hỗ trợ!"
-    exit 1
-  fi
 fi
 
 # Các biến môi trường cần thiết cho backup
@@ -73,6 +62,7 @@ chmod 700 "$BACKUP_DIR"  # Thiết lập quyền truy cập cho thư mục backu
 # Tạo file cấu hình bảo mật
 CONFIG_FILE="$BACKUP_DIR/.backup.conf"  # Đường dẫn của file cấu hình
 
+# Ghi thông tin vào file cấu hình
 # Sử dụng 'cat' kết hợp với here document để ghi nội dung vào file cấu hình
 # Lưu tên người dùng cơ sở dữ liệu vào file cấu hình
 # Lưu mật khẩu cơ sở dữ liệu vào file cấu hình
@@ -100,10 +90,28 @@ setup_cron() {
   hour=$(echo "$hour" | sed 's/^0//')
   minute=$(echo "$minute" | sed 's/^0//')
     
+  # Xác định tần suất cho cron
+  local cron_schedule=""
+  case "$BACKUP_FREQUENCY" in
+    daily)
+      cron_schedule="$minute $hour * * *"  # Hàng ngày
+      ;;
+    weekly)
+      cron_schedule="$minute $hour * * 0"  # Hàng tuần (Chủ Nhật)
+      ;;
+    monthly)
+      cron_schedule="$minute $hour 1 * *"  # Hàng tháng (Ngày 1)
+      ;;
+    *)
+      echo "Error: Tần suất không hợp lệ! (daily|weekly|monthly)"
+      exit 1
+      ;;
+  esac
+
   # Tạo mục cron với đường dẫn đến file cấu hình
   local cron_file="/etc/cron.d/backup-$DOMAIN"
   echo "# Backup tự động cho $DOMAIN" > "$cron_file"
-  echo "$minute $hour * * * root $SCRIPT_PATH --backup-only $DOMAIN \"$CONFIG_FILE\" >> $BACKUP_DIR/backup.log 2>&1" >> "$cron_file"
+  echo "$cron_schedule * * * root $SCRIPT_PATH $DOMAIN \"$CONFIG_FILE\" >> $BACKUP_DIR/backup.log 2>&1" >> "$cron_file"
   
   chmod 644 "$cron_file"  # Thiết lập quyền truy cập cho file cron
   log_message "Đã thiết lập cronjob backup hàng ngày lúc $BACKUP_TIME"  # Ghi log thông báo thiết lập cronjob thành công
@@ -188,7 +196,7 @@ check_disk_space() {
   log_message "Dung lượng trống: $available_space"  # Ghi log dung lượng trống
   
   if [ "$disk_space" -gt 90 ]; then  # Cảnh báo nếu dung lượng ổ đĩa còn lại dưới 10%
-    log_message "CẢNH BÁO: Dung lượng ổ đĩa còn lại thấp ($disk_space%)"
+    log_message "Warning: Dung lượng ổ đĩa còn lại thấp ($disk_space%)"
     return 1  # Trả về Error
   fi
   return 0  # Trả về thành công
@@ -204,29 +212,6 @@ show_backup_info() {
   echo "Dung lượng backup source: $(du -sh "$BACKUP_DIR/source/latest-backup.tar.gz" 2>/dev/null | cut -f1)"
   echo "Dung lượng backup database: $(du -sh "$BACKUP_DIR/database/latest-backup.sql.gz" 2>/dev/null | cut -f1)"
   echo "Log file: $BACKUP_DIR/backup.log"
-}
-
-# Hàm sao lưu lên Google Drive
-backup_to_gdrive() {
-  log_message "Bắt đầu sao lưu lên Google Drive..."
-
-  # Sao lưu mã nguồn
-  local source_file="$BACKUP_DIR/source/latest-backup.tar.gz"
-  if [ -f "$source_file" ]; then
-    rclone copy "$source_file" "$GDRIVE_PATH/source/" --progress
-    log_message "Sao lưu thành công mã nguồn lên Google Drive."
-  else
-    log_message "Error: File backup mã nguồn không tồn tại!"
-  fi
-
-  # Sao lưu cơ sở dữ liệu
-  local db_file="$BACKUP_DIR/database/latest-backup.sql.gz"
-  if [ -f "$db_file" ]; then
-    rclone copy "$db_file" "$GDRIVE_PATH/database/" --progress
-    log_message "Sao lưu thành công cơ sở dữ liệu lên Google Drive."
-  else
-    log_message "Error: File backup cơ sở dữ liệu không tồn tại!"
-  fi
 }
 
 # Hàm thực hiện quy trình backup chính
@@ -252,7 +237,7 @@ do_backup() {
     show_backup_info  # Hiển thị thông tin backup
     return 0  # Trả về thành công
   else
-    log_message ">>><<< Backup thất bại! Vui lòng kiểm tra log >>><<<"  # Ghi log Error
+    log_message "Error: Backup thất bại! Vui lòng kiểm tra log >>><<<"  # Ghi log Error
     if [ $source_status -ne 0 ]; then
       log_message "Error: Backup source code bị hỏng với mã lỗi: $source_status"  # Ghi log nếu backup source bị hỏng
     fi
@@ -268,4 +253,3 @@ log_message "Thiết lập backup tự động cho $DOMAIN"  # Ghi log thông b�
 setup_cron  # Gọi hàm thiết lập cronjob
 show_backup_info  # Hiển thị thông tin backup
 do_backup  # Gọi hàm backup chính
-backup_to_gdrive  # Gọi hàm sao lưu lên Google Drive
