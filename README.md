@@ -1,7 +1,7 @@
-# OKVIP-VPSSCRIPT Documentation
+# OKVIP - VPSSCRIPT Documentation
 
-OKVIP-VPSSCRIPT là nền tang để quản lý và cài đặt website wordpress trên Ubuntu 20.04
-[OKVIP-VPSSCRIPT is a management and installation framework for WordPress websites on Ubuntu 20.04]
+OKVIP - VPSSCRIPT là nền tang để quản lý và cài đặt website wordpress trên Ubuntu 20.04
+[OKVIP - VPSSCRIPT is a management and installation framework for WordPress websites on Ubuntu 20.04]
 
 ## 1. Quản lý Máy Chủ (Server/VPS) - Server/VPS Management
 
