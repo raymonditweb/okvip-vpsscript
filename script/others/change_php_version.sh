@@ -81,7 +81,7 @@ if command -v nginx &> /dev/null; then
 fi
 
 # Đăng ký PHP CLI mặc định
-echo "Registering PHP $PHP_VERSION as default PHP CLI..."
+echo "Đăng ký PHP $PHP_VERSION mặc định ..."
 sudo update-alternatives --install /usr/bin/php php $PHP_CLI_PATH 1
 sudo update-alternatives --set php $PHP_CLI_PATH
 
