@@ -114,7 +114,7 @@ setup_cron() {
   echo "$cron_schedule * * * root $SCRIPT_PATH $DOMAIN \"$CONFIG_FILE\" >> $BACKUP_DIR/backup.log 2>&1" >> "$cron_file"
   
   chmod 644 "$cron_file"  # Thiết lập quyền truy cập cho file cron
-  log_message "Đã thiết lập cronjob backup hàng ngày lúc $BACKUP_TIME"  # Ghi log thông báo thiết lập cronjob thành công
+  log_message "Đã thiết lập cronjob backup cho $DOMAIN với tần suất $BACKUP_FREQUENCY lúc $BACKUP_TIME"  # Ghi log thông báo thiết lập cronjob thành công
 }
 
 # Hàm backup mã nguồn
