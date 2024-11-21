@@ -1,7 +1,7 @@
-# OKVIP-VPSSCRIPT Documentation
+# OKVIP - VPSSCRIPT Documentation
 
-OKVIP-VPSSCRIPT là nền tang để quản lý và cài đặt website wordpress trên Ubuntu 20.04
-[OKVIP-VPSSCRIPT is a management and installation framework for WordPress websites on Ubuntu 20.04]
+OKVIP - VPSSCRIPT là nền tang để quản lý và cài đặt website wordpress trên Ubuntu 20.04
+[OKVIP - VPSSCRIPT is a management and installation framework for WordPress websites on Ubuntu 20.04]
 
 ## 1. Quản lý Máy Chủ (Server/VPS) - Server/VPS Management
 
@@ -131,11 +131,13 @@ cat [file_log]
 bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/change_php_version.sh) [PHPVersion]
 ```
 
+ví dụ: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/change_php_version.sh) 7.0
+
 + Kết quả trả về:
   + Không có root : Error: Vui lòng chạy script với quyền root.
   + Thành công: Thay đổi PHP sang $PHP_VERSION hoàn tất!
   + Nếu PHP đã tồn tại: PHP $PHP_VERSION đã có sẵn trên hệ thống.
-  + Không đủ tham số: Error: Sử dụng: [phiên_bản_php] (ví dụ: php7.4, php8.1)
+  + Không đủ tham số: Error: Sử dụng: phiên_bản_php (ví dụ: 7.4/ 8.1)
   + Thất bại: Error: Không thể cài đặt PHP $PHP_VERSION. Vui lòng kiểm tra lại.
 
 #### Backup VPS: Backup to google driver
@@ -288,6 +290,19 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/disable-website) <domain*>
 ```
+
+#### Cấu hình redirect (301, 302..) - Redirect configuration (301, 302, etc.)
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) [domain] [URL-301] [URL-301-target] [URL-302] [URL-302-target] [URL-307] [URL-307-target] [URL-308] [URL-308-target]
+```
+
++ vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) [http://www.example.com/new-page] [/old-page-301] [/new-page-301] [/temporary-page-302] [/new-temporary-page-302] [/temporary-page-307] [/new-temporary-page-307] [/old-permanent-page-308] [/new-permanent-page-308]
+
++ Kết quả trả về:
+  + Không có root : Error: Vui lòng chạy script với quyền root.
+  + Thành công: Redirects đã được cấu hình thành công cho Nginx.
+  + Số lượng tham số không đúng: Error: Cách sử dụng: [domain] [URL-301] [URL-301-target] [URL-302] [URL-302-target] [URL-307] [URL-307-target] [URL-308] [URL-308-target]
 
 #### Thay đổi site directory - Change website directory
 
