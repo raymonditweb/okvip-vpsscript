@@ -1,9 +1,11 @@
 #!/bin/bash
 
+# Biến lưu lỗi
+ERROR_LOG=""
+
 # Kiểm tra quyền root
 if [ "$(id -u)" -ne 0 ]; then
-  echo "Error: Vui lòng chạy script này với quyền root."
-  exit 1
+  ERROR_LOG+="Error: Vui lòng chạy script này với quyền root.\n"
 fi
 
 # Xác định hệ điều hành và trình quản lý gói để cài đặt UFW
@@ -17,8 +19,7 @@ install_ufw() {
     yum install -y epel-release
     yum install -y ufw
   else
-    echo "Error: Không thể xác định trình quản lý gói. Vui lòng cài đặt UFW thủ công."
-    exit 1
+    ERROR_LOG+="Error: Không thể xác định trình quản lý gói. Vui lòng cài đặt UFW thủ công.\n"
   fi
 }
 
@@ -30,8 +31,7 @@ fi
 
 # Kiểm tra lại xem UFW đã cài đặt thành công chưa
 if ! command -v ufw &> /dev/null; then
-  echo "Error: Cài đặt UFW thất bại. Vui lòng kiểm tra lại."
-  exit 1
+  ERROR_LOG+="Error: Cài đặt UFW thất bại. Vui lòng kiểm tra lại.\n"
 fi
 
 # Thêm quy tắc cho phép SSH trước khi bật UFW
@@ -66,4 +66,10 @@ for ip in "${unique_blocked_ips[@]}"; do
   echo "$ip"
 done
 
-exit 0
+# Kiểm tra lỗi và in ra thông báo lỗi nếu có
+if [ -n "$ERROR_LOG" ]; then
+  echo -e "$ERROR_LOG"
+else
+  # Hoàn tất nếu không có lỗi
+  echo "Cài đặt và cấu hình UFW hoàn tất!"
+fi

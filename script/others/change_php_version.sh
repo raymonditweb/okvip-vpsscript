@@ -1,16 +1,17 @@
 #!/bin/bash
 
+# Biến lưu lỗi
+ERROR_LOG=""
+
 # Kiểm tra quyền root
 if [ "$EUID" -ne 0 ]; then
-  echo "Error: Vui lòng chạy script với quyền root."
-  # Không thoát script, chỉ thông báo lỗi
+  ERROR_LOG+="Error: Vui lòng chạy script với quyền root.\n"
 fi
 
 # Kiểm tra tham số đầu vào
 PHP_VERSION="$1"
 if [ -z "$PHP_VERSION" ]; then
-  echo "Error: Sử dụng: $0 [phiên_bản_php] (ví dụ: 7.0)"
-  # Không thoát script, chỉ thông báo lỗi
+  ERROR_LOG+="Error: Sử dụng: $0 [phiên_bản_php] (ví dụ: 7.0)\n"
 fi
 
 # Nhận tham số phiên bản PHP cần chuyển
@@ -21,8 +22,7 @@ if [ -f /etc/os-release ]; then
   . /etc/os-release
   OS=$ID
 else
-  echo "Error: OS không được phát hiện."
-  # Không thoát script, chỉ thông báo lỗi
+  ERROR_LOG+="Error: OS không được phát hiện.\n"
 fi
 
 # Hàm cài đặt PHP nếu chưa có
@@ -38,8 +38,7 @@ install_php() {
     sudo yum module enable php:remi-$PHP_VERSION -y
     sudo yum install -y php php-cli php-fpm
   else
-    echo "Error: Không xác định được trình quản lý gói. Vui lòng cài đặt PHP $PHP_VERSION thủ công."
-    # Không thoát script, chỉ thông báo lỗi
+    ERROR_LOG+="Error: Không xác định được trình quản lý gói. Vui lòng cài đặt PHP $PHP_VERSION thủ công.\n"
   fi
 }
 
@@ -50,8 +49,7 @@ if ! [ -f "$PHP_CLI_PATH" ]; then
 
   # Kiểm tra lại sau khi cài đặt
   if ! [ -f "$PHP_CLI_PATH" ]; then
-    echo "Error: Không thể cài đặt PHP $PHP_VERSION. Vui lòng kiểm tra lại."
-    # Không thoát script, chỉ thông báo lỗi
+    ERROR_LOG+="Error: Không thể cài đặt PHP $PHP_VERSION. Vui lòng kiểm tra lại.\n"
   fi
 else
   echo "PHP $PHP_VERSION đã có sẵn trên hệ thống."
@@ -89,5 +87,10 @@ sudo update-alternatives --set php $PHP_CLI_PATH
 echo "Phiên bản PHP hiện tại:"
 php -v
 
-# Hoàn tất
-echo "Thay đổi PHP sang $PHP_VERSION hoàn tất!"
+# Kiểm tra lỗi và in ra thông báo lỗi nếu có
+if [ -n "$ERROR_LOG" ]; then
+  echo -e "$ERROR_LOG"
+else
+  # Hoàn tất nếu không có lỗi
+  echo "Thay đổi PHP sang $PHP_VERSION hoàn tất!"
+fi
