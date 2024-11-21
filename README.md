@@ -140,7 +140,18 @@ ví dụ: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercont
   + Không đủ tham số: Error: Sử dụng: phiên_bản_php (ví dụ: 7.4/ 8.1)
   + Thất bại: Error: Không thể cài đặt PHP $PHP_VERSION. Vui lòng kiểm tra lại.
 
-#### Backup VPS: Backup to google driver
+#### Backup VPS: Backup to google drive
+```bash
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/sync_backup_to_ggdrive.sh ) DOMAIN GDRIVE_PATH
+```
+
+ví dụ: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/sync_backup_to_ggdrive.sh ) example.com gdrive:/Backups
+
++ Kết quả trả về:
+  + Không có root : Error: Vui lòng chạy script với quyền root.
+  + Thành công: Sao lưu thành công mã nguồn lên Google Drive./Sao lưu thành công cơ sở dữ liệu lên Google Drive.
+  + Nếu thư mục đã tồn tại:: Thư mục lưu trữ backup đã tồn tại: /backup/example.com.
+  + Thất bại: Error: File backup mã nguồn không tồn tại!./Error: File backup cơ sở dữ liệu không tồn tại!
 
 ### Cron Job Management
 
