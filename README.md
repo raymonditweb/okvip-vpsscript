@@ -131,9 +131,7 @@ cat [file_log]
 bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/change_php_version.sh) [PHPVersion]
 ```
 
-`
 ví dụ: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/change_php_version.sh) 7.0
-`
 
 + Kết quả trả về:
   + Không có root : Error: Vui lòng chạy script với quyền root.
@@ -163,24 +161,6 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/remove.sh ) <"* * * * * exec-command"*>
 ```
-
-#### Enable/Disable Cron Job
-
-```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/manage_cron.sh ) <enable|disable> <"* * * * * exec-command"*>
-```
-
-`
-Vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/manage_cron.sh ) enable "0 2 * * * /path/to/script.sh"
-`
-
-+ Kết quả trả về:
-  + Khong có quyền root: Error: Vui lòng chạy script với quyền root.
-  + Sai Tham Số: Error: `Sử dụng: $0 <enable|disable> '<cron_job> / Ví dụ: $0 enable '0 2 * * * /path/to/script.sh`
-  + Cron tồn tại và đang được bật: Error: Cron job đã được bật trước đó.
-  + Cron tồn tại và đang tat: Error: Cron job không tồn tại hoặc đã bị tắt trước đó.
-  + Nếu không tìm thấy cron job, sẽ thông báo lỗi: Error: Hành động không hợp lệ. Sử dụng 'enable' hoặc 'disable'.
-  + Thanh cong: Cập nhật cron hoàn tất!
 
 ### Security Management
 
@@ -317,9 +297,7 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) [domain] [URL-301] [URL-301-target] [URL-302] [URL-302-target] [URL-307] [URL-307-target] [URL-308] [URL-308-target]
 ```
 
-`
-vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) [http://www.example.com/new-page] [/old-page-301] [/new-page-301] [/temporary-page-302] [/new-temporary-page-302] [/temporary-page-307] [/new-temporary-page-307] [/old-permanent-page-308] [/new-permanent-page-308]
-`
++ vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) [http://www.example.com/new-page] [/old-page-301] [/new-page-301] [/temporary-page-302] [/new-temporary-page-302] [/temporary-page-307] [/new-temporary-page-307] [/old-permanent-page-308] [/new-permanent-page-308]
 
 + Kết quả trả về:
   + Không có root : Error: Vui lòng chạy script với quyền root.

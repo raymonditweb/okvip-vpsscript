@@ -55,4 +55,4 @@ esac
 crontab "$TEMP_CRON"
 rm -f "$TEMP_CRON"
 
-echo "Cập nhật cron hoàn tất!"
+echo "Cập nhật cron hoàn tất!" 
