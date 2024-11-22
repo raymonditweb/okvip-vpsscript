@@ -182,6 +182,22 @@ Vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubuserconten
   + Nếu không tìm thấy cron job, sẽ thông báo lỗi: Error: Hành động không hợp lệ. Sử dụng 'enable' hoặc 'disable'.
   + Thanh cong: Cập nhật cron hoàn tất!
 
+#### Excute Cron Job
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/excute.sh ) <"* * * * * exec-command"*>
+```
+
+`
+Vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/excute.sh ) "0 2 * * * /path/to/script.sh"
+`
+
++ Kết quả trả về:
+  + Khong có quyền root: Error: Vui lòng chạy script với quyền root.
+  + Sai Tham Số: Error: `Sử dụng: $0 '<cron_job> / Ví dụ: $0 '0 2 * * * /path/to/script.sh`
+  + Nếu không tìm thấy cron job: "Error: Cronjob khong ton tai: $CRONJOB_COMMAND. Khong the thuc thi!
+  + Thanh cong: Executing cronjob: $CRONJOB_COMMAND
+
 ### Security Management
 
 ### Firewall Rules
