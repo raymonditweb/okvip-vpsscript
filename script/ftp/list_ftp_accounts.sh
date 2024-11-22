@@ -39,7 +39,7 @@ get_ftp_quota() {
 # Hàm để lấy FTP directory
 get_ftp_directory() {
   local username=$1
-  local dir=$(pure-pw show use1 2>/dev/null | grep "Directory" | awk '{print $3}' | sed 's|/./||g')
+  local dir=$(pure-pw show "$username" 2>/dev/null | grep "Directory" | awk '{print $3}' | sed 's|/./||g')
   if [ -z "$dir" ]; then
     echo "/home/$username"
   else
