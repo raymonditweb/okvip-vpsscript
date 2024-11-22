@@ -500,7 +500,7 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 #### Bật tài khoản FTP - Enable account
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/script/ftp/toggle_ftp_account.sh ) [username] enable
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/toggle_ftp_account.sh ) [username] enable
 ```
 
 + Kết quả trả về:

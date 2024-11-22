@@ -28,7 +28,7 @@ check_ftp_status() {
 # Hàm để lấy FTP quota
 get_ftp_quota() {
   local username=$1
-  local quota=$(pure-pw show "$username" 2>/dev/null | grep "Quota:" | awk '{print $2}')
+  local quota=$(show "$username" 2>/dev/null | awk '/Ratio/ {split($3,a,":"); print a[1]}')
   if [ -z "$quota" ] || [ "$quota" = "none" ]; then
     echo "Unlimited"
   else
