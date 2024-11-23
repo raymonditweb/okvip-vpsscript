@@ -326,6 +326,24 @@ vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubuserconten
   + Thành công: Redirects đã được cấu hình thành công cho Nginx.
   + Số lượng tham số không đúng: Error: Cách sử dụng: [domain] [URL-301] [URL-301-target] [URL-302] [URL-302-target] [URL-307] [URL-307-target] [URL-308] [URL-308-target]
 
+#### Export DB
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/export_db.sh ) [domain]
+```
+
+`
+vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/export_db.sh ) example.com
+`
+
++ Kết quả trả về:
+  + Không có root : Error: Vui lòng chạy script với quyền root.
+  + Khi thiếu tham số: Error: Vui lòng truyền tham số: [tên_domain]. Ví dụ đúng: example.com
+  + Thành công: Export database example_com thành công! File: backup_example_com.sql
+  + Thất bại: Error: Có lỗi khi xuất dữ liệu từ database example_com. / Vui lòng kiểm tra thông tin kết nối hoặc database có tồn tại không.
+  + Khi file wp-config.php không tồn tại: Error: Không tìm thấy file wp-config.php tại /var/www/example.com/wp-config.php.
+  + Khi không lấy được thông tin kết nối MySQL từ wp-config.php: Error: Không thể lấy thông tin kết nối từ /var/www/example.com/wp-config.php.
+
 #### Thay đổi site directory - Change website directory
 
 ```bash
