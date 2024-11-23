@@ -511,7 +511,7 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 #### Disable account - Tắt tài khoản FTP
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/script/ftp/toggle_ftp_account.sh ) [username] disable
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/toggle_ftp_account.sh ) [username] disable
 ```
 
 + Kết quả trả về:
