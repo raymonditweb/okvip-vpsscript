@@ -32,8 +32,10 @@ if [ ! -f "$WP_CONFIG" ]; then
   exit 1
 fi
 
-DB_USER=$(grep "DB_USER" "$WP_CONFIG" | awk -F "''" '{print $2}')
-DB_PASS=$(grep "DB_PASSWORD" "$WP_CONFIG" | awk -F "''" '{print $2}')
+DB_USER=$(grep "DB_USER" "$WP_CONFIG" | sed -E "s/define\('DB_USER',\s*'([^']+)'.*/\1/")
+echo "$DB_USER"
+DB_PASS=$(grep "DB_PASS" "$WP_CONFIG" | sed -E "s/define\('DB_PASS',\s*'([^']+)'.*/\1/")
+echo "$DB_PASS"
 
 # Kiểm tra thông tin đăng nhập MySQL
 if ! mysql -u"$DB_USER" -p"$DB_PASS" -e "SELECT 1" >/dev/null 2>&1; then
