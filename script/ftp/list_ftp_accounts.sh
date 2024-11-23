@@ -12,15 +12,19 @@ FTP_USER_FILE="/etc/ftp_users.txt"
 # Hàm để kiểm tra status của FTP user
 check_ftp_status() {
   local username=$1
-  # Kiểm tra xem user có trong pure-ftpd database
+
+  # Kiểm tra xem user có tồn tại trong Pure-FTPd database không
   if pure-pw show "$username" &>/dev/null; then
-    # Kiểm tra xem account có bị khóa không
-    if pure-pw show "$username" 2>/dev/null | grep -q "Status: suspended"; then
-      echo "Suspended"
+    # Kiểm tra shell hệ thống để xác định trạng thái
+    local shell
+    shell=$(getent passwd "$username" | cut -d: -f7)
+    if [[ "$shell" == "/sbin/nologin" ]]; then
+      echo "Inactive"
     else
       echo "Active"
     fi
   else
+    # Không tìm thấy trong Pure-FTPd database
     echo "Inactive"
   fi
 }
