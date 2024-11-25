@@ -43,6 +43,28 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 
 ### System Monitoring
 
+#### VPS Monitoring
+
+```bash
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/vpsscript/vps_monitoring.sh ) <today|yesterday|7day|30day|range start_date end_date*>
+```
+
+`
+ví dụ:
+thong tin cho today/yesterday/7day/30day truyen tham so tuong ung:
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/vpsscript/vps_monitoring.sh ) today
+`
+`
+thong tin cho range date start_date va end_date: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/vpsscript/vps_monitoring.sh ) range "2024-11-01" "2024-11-25"
+`
+
++ Kết quả trả về:
+  + Không có root : Error: Vui lòng chạy script với quyền root.
+  + Thành công: In ra các thông số đã thu thập được sau mỗi sample. Hoàn Tất
+  + Nếu PHP đã tồn tại: PHP $PHP_VERSION đã có sẵn trên hệ thống.
+  + Không đung tham số: Error: Sử dụng: ./script.sh {today|yesterday|7day|30day|range start_date end_date}
+  + Thất bại: Error: Không thể lấy dữ liệu CPU./Error: Không thể lấy dữ liệu Memory usage.
+
 #### Theo dõi thông số server - Memory Information
 
 ```bash
