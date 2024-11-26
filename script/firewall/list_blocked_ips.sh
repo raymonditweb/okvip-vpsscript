@@ -6,32 +6,33 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
+# Biến lưu lỗi
+ERROR_LOG=""
+
 # Xác định hệ điều hành và trình quản lý gói để cài đặt UFW
 install_ufw() {
-  if command -v apt-get &> /dev/null; then
+  if command -v apt-get &>/dev/null; then
     echo "Cài đặt UFW bằng apt-get trên hệ thống dựa trên Debian/Ubuntu..."
     apt-get update
     apt-get install -y ufw
-  elif command -v yum &> /dev/null; then
+  elif command -v yum &>/dev/null; then
     echo "Cài đặt UFW bằng yum trên hệ thống dựa trên CentOS/RHEL..."
     yum install -y epel-release
     yum install -y ufw
   else
-    echo "Error: Không thể xác định trình quản lý gói. Vui lòng cài đặt UFW thủ công."
-    exit 1
+    ERROR_LOG+="Error: Không thể xác định trình quản lý gói. Vui lòng cài đặt UFW thủ công.\n"
   fi
 }
 
 # Kiểm tra xem UFW có được cài đặt không, nếu không thì cài đặt
-if ! command -v ufw &> /dev/null; then
+if ! command -v ufw &>/dev/null; then
   echo "UFW không được cài đặt. Đang tiến hành cài đặt UFW..."
   install_ufw
 fi
 
 # Kiểm tra lại xem UFW đã cài đặt thành công chưa
-if ! command -v ufw &> /dev/null; then
-  echo "Error: Cài đặt UFW thất bại. Vui lòng kiểm tra lại."
-  exit 1
+if ! command -v ufw &>/dev/null; then
+  ERROR_LOG+="Error: Cài đặt UFW thất bại. Vui lòng kiểm tra lại.\n"
 fi
 
 # Thêm quy tắc cho phép SSH trước khi bật UFW
@@ -66,4 +67,10 @@ for ip in "${unique_blocked_ips[@]}"; do
   echo "$ip"
 done
 
-exit 0
+# Kiểm tra lỗi và in ra thông báo lỗi nếu có
+if [ -n "$ERROR_LOG" ]; then
+  echo -e "$ERROR_LOG"
+else
+  # Hoàn tất nếu không có lỗi
+  echo "Cài đặt và cấu hình UFW hoàn tất!"
+fi

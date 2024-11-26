@@ -6,11 +6,13 @@ if [ "$EUID" -ne 0 ]; then
   # Không thoát script, chỉ thông báo lỗi
 fi
 
+# Biến lưu lỗi
+ERROR_LOG=""
+
 # Kiểm tra tham số đầu vào
 PHP_VERSION="$1"
 if [ -z "$PHP_VERSION" ]; then
-  echo "Error: Sử dụng: $0 [phiên_bản_php] (ví dụ: 7.0)"
-  # Không thoát script, chỉ thông báo lỗi
+  ERROR_LOG+="Error: Sử dụng: $0 [phiên_bản_php] (ví dụ: 7.0)\n"
 fi
 
 # Nhận tham số phiên bản PHP cần chuyển
@@ -21,25 +23,23 @@ if [ -f /etc/os-release ]; then
   . /etc/os-release
   OS=$ID
 else
-  echo "Error: OS không được phát hiện."
-  # Không thoát script, chỉ thông báo lỗi
+  ERROR_LOG+="Error: OS không được phát hiện.\n"
 fi
 
 # Hàm cài đặt PHP nếu chưa có
 install_php() {
   echo "Đang kiểm tra và cài đặt PHP $PHP_VERSION..."
-  if command -v apt-get &> /dev/null; then
+  if command -v apt-get &>/dev/null; then
     sudo apt update
     sudo apt install -y php$PHP_VERSION php$PHP_VERSION-cli php$PHP_VERSION-fpm libapache2-mod-php$PHP_VERSION
-  elif command -v yum &> /dev/null; then
+  elif command -v yum &>/dev/null; then
     sudo yum install -y epel-release
     sudo yum install -y https://rpms.remirepo.net/enterprise/remi-release-$(rpm -E %rhel).rpm
     sudo yum module reset php -y
     sudo yum module enable php:remi-$PHP_VERSION -y
     sudo yum install -y php php-cli php-fpm
   else
-    echo "Error: Không xác định được trình quản lý gói. Vui lòng cài đặt PHP $PHP_VERSION thủ công."
-    # Không thoát script, chỉ thông báo lỗi
+    ERROR_LOG+="Error: Không xác định được trình quản lý gói. Vui lòng cài đặt PHP $PHP_VERSION thủ công.\n"
   fi
 }
 
@@ -50,15 +50,14 @@ if ! [ -f "$PHP_CLI_PATH" ]; then
 
   # Kiểm tra lại sau khi cài đặt
   if ! [ -f "$PHP_CLI_PATH" ]; then
-    echo "Error: Không thể cài đặt PHP $PHP_VERSION. Vui lòng kiểm tra lại."
-    # Không thoát script, chỉ thông báo lỗi
+    ERROR_LOG+="Error: Không thể cài đặt PHP $PHP_VERSION. Vui lòng kiểm tra lại.\n"
   fi
 else
   echo "PHP $PHP_VERSION đã có sẵn trên hệ thống."
 fi
 
 # Cấu hình cho Apache (nếu có)
-if command -v apache2ctl &> /dev/null; then
+if command -v apache2ctl &>/dev/null; then
   echo "Configuring Apache để sử dụng $PHP_VERSION..."
   sudo a2dismod php*
   sudo a2enmod php$PHP_VERSION
@@ -67,7 +66,7 @@ if command -v apache2ctl &> /dev/null; then
 fi
 
 # Cấu hình cho Nginx (nếu có)
-if command -v nginx &> /dev/null; then
+if command -v nginx &>/dev/null; then
   echo "Configuring Nginx để sử dụng PHP $PHP_VERSION..."
   # Dừng các dịch vụ PHP hiện tại
   sudo systemctl stop php*-fpm
@@ -89,5 +88,10 @@ sudo update-alternatives --set php $PHP_CLI_PATH
 echo "Phiên bản PHP hiện tại:"
 php -v
 
-# Hoàn tất
-echo "Thay đổi PHP sang $PHP_VERSION hoàn tất!"
+# Kiểm tra lỗi và in ra thông báo lỗi nếu có
+if [ -n "$ERROR_LOG" ]; then
+  echo -e "$ERROR_LOG"
+else
+  # Hoàn tất nếu không có lỗi
+  echo "Thay đổi PHP sang $PHP_VERSION hoàn tất!"
+fi
