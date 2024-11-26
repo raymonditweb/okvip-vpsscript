@@ -11,7 +11,7 @@ MYSQL_ROOT_PASSWORD=$1
 DOMAIN=$2
 TEMPLATE_URL=$3
 WEB_ROOT="/var/www/$DOMAIN"
-DB_NAME=$(echo "$DOMAIN" | cut -d '.' -f 1)
+DB_NAME="${DOMAIN//./_}" # Tên cơ sở dữ liệu, thay thế dấu chấm bằng dấu gạch dưới
 DB_USER=$DB_NAME"_user"
 DB_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
 
