@@ -43,6 +43,28 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 
 ### System Monitoring
 
+#### VPS Monitoring
+
+```bash
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/vpsscript/vps_monitoring.sh ) <today|yesterday|7day|30day|range start_date end_date*>
+```
+
+`
+ví dụ:
+thong tin cho today/yesterday/7day/30day truyen tham so tuong ung:
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/vpsscript/vps_monitoring.sh ) today
+`
+`
+thong tin cho range date start_date va end_date: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/vpsscript/vps_monitoring.sh ) range "2024-11-01" "2024-11-25"
+`
+
++ Kết quả trả về:
+  + Không có root : Error: Vui lòng chạy script với quyền root.
+  + Thành công: In ra các thông số đã thu thập được sau mỗi sample. Hoàn Tất
+  + Nếu PHP đã tồn tại: PHP $PHP_VERSION đã có sẵn trên hệ thống.
+  + Không đung tham số: Error: Sử dụng: ./script.sh {today|yesterday|7day|30day|range start_date end_date}
+  + Thất bại: Error: Không thể lấy dữ liệu CPU./Error: Không thể lấy dữ liệu Memory usage.
+
 #### Theo dõi thông số server - Memory Information
 
 ```bash
@@ -131,7 +153,7 @@ cat [file_log]
 bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/change_php_version.sh) [PHPVersion]
 ```
 
-ví dụ: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/change_php_version.sh) 7.0
+`ví dụ: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/change_php_version.sh) 7.0`
 
 + Kết quả trả về:
   + Không có root : Error: Vui lòng chạy script với quyền root.
@@ -141,6 +163,18 @@ ví dụ: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercont
   + Thất bại: Error: Không thể cài đặt PHP $PHP_VERSION. Vui lòng kiểm tra lại.
 
 #### Backup VPS: Backup to google driver
+
+```bash
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/sync_backup_to_ggdrive.sh ) DOMAIN GDRIVE_PATH
+```
+
+`ví dụ: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/sync_backup_to_ggdrive.sh ) example.com gdrive:/Backups`
+
++ Kết quả trả về:
+  + Không có root : Error: Vui lòng chạy script với quyền root.
+  + Thành công: Sao lưu thành công mã nguồn lên Google Drive./Sao lưu thành công cơ sở dữ liệu lên Google Drive.
+  + Nếu thư mục đã tồn tại:: Thư mục lưu trữ backup đã tồn tại: /backup/example.com.
+  + Thất bại: Error: File backup mã nguồn không tồn tại!./Error: File backup cơ sở dữ liệu không tồn tại!
 
 ### Cron Job Management
 
@@ -161,6 +195,40 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/remove.sh ) <"* * * * * exec-command"*>
 ```
+
+#### Enable/Disable Cron Job
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/manage_cron.sh ) <enable|disable> <"* * * * * exec-command"*>
+```
+
+`
+Vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/manage_cron.sh ) enable "0 2 * * * /path/to/script.sh"
+`
+
++ Kết quả trả về:
+  + Khong có quyền root: Error: Vui lòng chạy script với quyền root.
+  + Sai Tham Số: Error: `Sử dụng: $0 <enable|disable> '<cron_job> / Ví dụ: $0 enable '0 2 * * * /path/to/script.sh`
+  + Cron tồn tại và đang được bật: Error: Cron job đã được bật trước đó.
+  + Cron tồn tại và đang tat: Error: Cron job không tồn tại hoặc đã bị tắt trước đó.
+  + Nếu không tìm thấy cron job, sẽ thông báo lỗi: Error: Hành động không hợp lệ. Sử dụng 'enable' hoặc 'disable'.
+  + Thanh cong: Cập nhật cron hoàn tất!
+
+#### Excute Cron Job
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/excute.sh ) <"* * * * * exec-command"*>
+```
+
+`
+Vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/cronjob/excute.sh ) "0 2 * * * /path/to/script.sh"
+`
+
++ Kết quả trả về:
+  + Khong có quyền root: Error: Vui lòng chạy script với quyền root.
+  + Sai Tham Số: Error: `Sử dụng: $0 '<cron_job> / Ví dụ: $0 '0 2 * * * /path/to/script.sh`
+  + Nếu không tìm thấy cron job: "Error: Cronjob khong ton tai: $CRONJOB_COMMAND. Khong the thuc thi!
+  + Thanh cong: Executing cronjob: $CRONJOB_COMMAND
 
 ### Security Management
 
@@ -297,12 +365,30 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) [domain] [URL-301] [URL-301-target] [URL-302] [URL-302-target] [URL-307] [URL-307-target] [URL-308] [URL-308-target]
 ```
 
-+ vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) [http://www.example.com/new-page] [/old-page-301] [/new-page-301] [/temporary-page-302] [/new-temporary-page-302] [/temporary-page-307] [/new-temporary-page-307] [/old-permanent-page-308] [/new-permanent-page-308]
+`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) [http://www.example.com/new-page] [/old-page-301] [/new-page-301] [/temporary-page-302] [/new-temporary-page-302] [/temporary-page-307] [/new-temporary-page-307] [/old-permanent-page-308] [/new-permanent-page-308]`
 
 + Kết quả trả về:
   + Không có root : Error: Vui lòng chạy script với quyền root.
   + Thành công: Redirects đã được cấu hình thành công cho Nginx.
   + Số lượng tham số không đúng: Error: Cách sử dụng: [domain] [URL-301] [URL-301-target] [URL-302] [URL-302-target] [URL-307] [URL-307-target] [URL-308] [URL-308-target]
+
+#### Export DB
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/export_db.sh ) [domain]
+```
+
+`
+vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/export_db.sh ) example.com
+`
+
++ Kết quả trả về:
+  + Không có root : Error: Vui lòng chạy script với quyền root.
+  + Khi thiếu tham số: Error: Vui lòng truyền tham số: [tên_domain]. Ví dụ đúng: example.com
+  + Thành công: Export database example_com thành công! File: backup_example_com.sql
+  + Thất bại: Error: Có lỗi khi xuất dữ liệu từ database example_com. / Vui lòng kiểm tra thông tin kết nối hoặc database có tồn tại không.
+  + Khi file wp-config.php không tồn tại: Error: Không tìm thấy file wp-config.php tại /var/www/example.com/wp-config.php.
+  + Khi không lấy được thông tin kết nối MySQL từ wp-config.php: Error: Không thể lấy thông tin kết nối từ /var/www/example.com/wp-config.php.
 
 #### Thay đổi site directory - Change website directory
 
@@ -317,6 +403,40 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
                     Ví dụ: example.com /var/www/example_new
   + Cấu hình không tồn tại: Error: Cấu hình Nginx cho site '$SITE_NAME' không tồn tại.
   + Thất bại: Error: Cú pháp cấu hình Nginx không hợp lệ, không thể áp dụng thay đổi.
+
+#### Backup website
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_backup.sh) DOMAIN BACKUP_TIME BACKUP_FREQUENCY
+```
+
++ Kết quả trả về:
+  + Không có root : Error: Vui lòng chạy script với quyền root.
+  + Tên miền không hợp lệ:
+    ++ Error: Domain không hợp lệ!
+    ++ Ví dụ đúng: example.com
+  + Thời gian không hợp lệ:
+    ++ Error: Thời gian không hợp lệ!
+    ++ Vui lòng sử dụng định dạng HH:MM (ví dụ: 23:30)
+  + Thành công: Thành công! Thư mục của site 'SITE_NAME' đã được thay đổi thành: NEW_DIRECTORY
+  + Không tìm thấy file wp-config.php: Error: Không tìm thấy file wp-config.php tại /var/www/$DOMAIN/wp-config.php
+  + Không thể kết nối đến MySQL: Error: Không thể kết nối đến MySQL với thông tin đăng nhập đã cung cấp!
+  + Thiết lập cronjob thành công: Đã thiết lập cronjob backup cho $DOMAIN với tần suất $BACKUP_FREQUENCY lúc $BACKUP_TIME
+  + Bắt đầu quy trình backup: >>><<< Bắt đầu quy trình backup cho $DOMAIN >>><<<
+  + Backup thành công: >>><<< Backup hoàn tất thành công >>><<<
+  + thông tin backup sẽ được hiển thị:
+    ++ >>><<< Thông tin Backup >>><<<
+    ++ Domain: example.com
+    ++ Database: example_com
+    ++ Thời gian backup: HH:MM
+    ++ Thư mục backup: /backup/example.com
+    ++ Dung lượng backup source: ...
+    ++ Dung lượng backup database: ...
+    ++ Log file: /backup/example.com/backup.log
+  + Backup thất bại: Error: Backup thất bại! Vui lòng kiểm tra log >>><<<
+  + Phần thông báo lỗi có thể bao gồm:
+    ++ Error: Backup source code bị hỏng với mã lỗi: ...
+    ++ Error: Backup cơ sở dữ liệu bị hỏng với mã lỗi: ...
 
 ## 3. WordPress Maintenance
 
@@ -462,7 +582,7 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 #### Bật tài khoản FTP - Enable account
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/script/ftp/toggle_ftp_account.sh ) [username] enable
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/toggle_ftp_account.sh ) [username] enable
 ```
 
 + Kết quả trả về:
@@ -473,7 +593,7 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 #### Disable account - Tắt tài khoản FTP
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/script/ftp/toggle_ftp_account.sh ) [username] disable
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/ftp/toggle_ftp_account.sh ) [username] disable
 ```
 
 + Kết quả trả về:
