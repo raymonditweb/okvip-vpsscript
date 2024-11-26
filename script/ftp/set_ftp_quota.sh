@@ -9,10 +9,13 @@ fi
 # Đường dẫn tới tệp chứa danh sách tài khoản FTP
 FTP_USER_FILE="/etc/ftp_users.txt"
 
+# Giá trị max quota
+MAX_QUOTA=500
+
 # Hàm để đặt quota cho tài khoản FTP
 set_quota() {
   local username="$1"
-  local quota="$2"  # Quota tính bằng MB
+  local quota="$2" # Quota tính bằng MB
 
   if [ -z "$username" ] || [ -z "$quota" ]; then
     echo "Error: Vui lòng truyền tham số: $0 [tên_tài_khoản] [quota (MB)]"
@@ -22,6 +25,12 @@ set_quota() {
   # Kiểm tra xem tài khoản có tồn tại không
   if ! grep -q "^$username:" "$FTP_USER_FILE"; then
     echo "Error: Tài khoản $username không tồn tại."
+    exit 1
+  fi
+
+  # Kiểm tra quota và max quota
+  if [[ "$quota" -gt "$MAX_QUOTA" ]]; then
+    echo "Error: Quota ($quota MB) không được lớn hơn max quota ($MAX_QUOTA MB)."
     exit 1
   fi
 
