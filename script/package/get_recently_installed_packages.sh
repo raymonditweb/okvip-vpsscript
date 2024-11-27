@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Kiểm tra quyền root
-if [ "$EUID" -ne 0 ]; then
+if [ "$(id -u)" -ne 0 ]; then
   echo "Error: Vui lòng chạy script này với quyền root."
   exit 1
 fi
