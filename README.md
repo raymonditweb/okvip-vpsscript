@@ -529,8 +529,18 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 #### Lấy danh sách package đã cài gần đây
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/package/get_recently_installed_packages.sh )
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/package/get_recently_installed_packages.sh ) <all|number>
 ```
+
+`Vi du: Lay tat ca: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/package/get_recently_installed_packages.sh ) all`
+
+`vi du: Lay 20 items: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/package/get_recently_installed_packages.sh ) 20`
+
++ Kết quả trả về:
+  + Không có root : Error: Vui lòng chạy script với quyền root.
+  + Thành công: List thoong tin packages.
+  + Thất bại: Error: Không thể tìm thấy thông tin về: $package.
+  + Tham số sai: Error: không hợp lệ. Vui lòng nhập một số hoặc 'all'.
 
 #### Install Pure-FTPd
 
