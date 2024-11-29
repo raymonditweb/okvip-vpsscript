@@ -410,6 +410,10 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_backup.sh) DOMAIN BACKUP_TIME BACKUP_FREQUENCY
 ```
 
+Lưu ý:
+BACKUP_TIME: là tham số có thể truyền dạng 24h như 01:00 / 02:00 / 23:30
+BACKUP_FREQUENCY là tham số có 3 option để truyền là: daily / weekly / monthly
+
 + Kết quả trả về:
   + Không có root : Error: Vui lòng chạy script với quyền root.
   + Tên miền không hợp lệ:
