@@ -61,8 +61,7 @@ thong tin cho range date start_date va end_date: bash <(curl -k -H "Cache-Contro
 + Kết quả trả về:
   + Không có root : Error: Vui lòng chạy script với quyền root.
   + Thành công: In ra các thông số đã thu thập được sau mỗi sample. Hoàn Tất
-  + Nếu PHP đã tồn tại: PHP $PHP_VERSION đã có sẵn trên hệ thống.
-  + Không đung tham số: Error: Sử dụng: ./script.sh {today|yesterday|7day|30day|range start_date end_date}
+  + Không đung tham số: Error: Sử dụng tham so: {today|yesterday|7day|30day|range start_date end_date}
   + Thất bại: Error: Không thể lấy dữ liệu CPU./Error: Không thể lấy dữ liệu Memory usage.
 
 #### Theo dõi thông số server - Memory Information
