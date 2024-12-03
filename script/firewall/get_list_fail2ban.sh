@@ -40,4 +40,4 @@ fi
 
 # Liệt kê các jail (quy tắc) của Fail2Ban
 echo "Danh sách các jail của Fail2Ban:"
-fail2ban-client status | grep "Jail list:" | sed "s/\`- Jail list://g" || { echo "Error: Không thể lấy danh sách các jail."; exit 1; }
+fail2ban-client status | grep "Jail list:" | sed "s/\`- Jail list://g" || { echo "Error: Không thể lấy danh sách các jail."; }
