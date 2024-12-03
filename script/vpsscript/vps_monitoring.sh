@@ -109,7 +109,7 @@ collect_system_stats() {
   check_error "Error: Không thể lấy dữ liệu Process details"
 }
 
-# Xử lý tham số range
+# Xử lý tham số range (tăng dần từ cũ đến mới)
 if [[ "$1" == "range" ]]; then
   total_seconds=$(seconds_between "$start_date" "$end_date") # Tính số giây giữa hai ngày
   interval_seconds=$((total_seconds / (num_samples - 1)))    # Chia đều thời gian
@@ -135,9 +135,9 @@ else
         sample_date=$(date -d "yesterday $sample_time" "+%Y-%m-%d $sample_time")
       fi
     elif [[ "$1" == "7day" ]]; then
-      sample_date=$(date -d "$((i - 1)) days ago" "+%Y-%m-%d")
+      sample_date=$(date -d "$((num_samples - i)) days ago" "+%Y-%m-%d") # Tăng dần từ ngày cũ đến mới
     elif [[ "$1" == "30day" ]]; then
-      sample_date=$(date -d "$(((i - 1) * 4)) days ago" "+%Y-%m-%d")
+      sample_date=$(date -d "$(((num_samples - i) * 4)) days ago" "+%Y-%m-%d") # Tăng dần từ ngày cũ đến mới
     else
       sample_date="Sample #$i"
     fi
