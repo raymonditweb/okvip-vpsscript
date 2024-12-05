@@ -61,6 +61,36 @@ if [ -z "$ERROR_LOG" ]; then
     nginx)
       echo "logpath = /var/log/nginx/error.log" >>"$JAIL_LOCAL_FILE"
       ;;
+    vsftpd|proftpd)
+      echo "logpath = /var/log/vsftpd.log" >>"$JAIL_LOCAL_FILE"
+      ;;
+    dovecot)
+      echo "logpath = /var/log/dovecot.log" >>"$JAIL_LOCAL_FILE"
+      ;;
+    postfix)
+      echo "logpath = /var/log/mail.log" >>"$JAIL_LOCAL_FILE"
+      ;;
+    mysql)
+      echo "logpath = /var/log/mysql/error.log" >>"$JAIL_LOCAL_FILE"
+      ;;
+    pure-ftpd)
+      echo "logpath = /var/log/pure-ftpd.log" >>"$JAIL_LOCAL_FILE"
+      ;;
+    sudo)
+      echo "logpath = /var/log/sudo.log" >>"$JAIL_LOCAL_FILE"
+      ;;
+    redis)
+      echo "logpath = /var/log/redis/redis-server.log" >>"$JAIL_LOCAL_FILE"
+      ;;
+    vnc)
+      echo "logpath = /var/log/vnc.log" >>"$JAIL_LOCAL_FILE"
+      ;;
+    rsync)
+      echo "logpath = /var/log/rsyncd.log" >>"$JAIL_LOCAL_FILE"
+      ;;
+    cifs|samba)
+      echo "logpath = /var/log/samba/log.smbd" >>"$JAIL_LOCAL_FILE"
+      ;;
     *)
       echo "logpath = /var/log/$SERVICE_NAME.log" >>"$JAIL_LOCAL_FILE"
       echo "Warning: Không xác định logpath cho dịch vụ $SERVICE_NAME. Sử dụng logpath mặc định."
