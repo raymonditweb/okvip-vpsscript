@@ -659,3 +659,40 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
   + Thành công: Thư mục home cho tài khoản [username] đã được cập nhật trong Pure-FTPd.
   + Nếu tài khoản không tồn tại: Error: Tài khoản [username] không tồn tại.
   + Không đủ tham số: Error: Vui lòng truyền tham số: [tên_tài_khoản] [thư_mục_home_mới].
+
+## 7. Monitor delete - list deleted - backup
+
+### Monitor delete file/folder - show list deleted - restore file/folder
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/monitor_delete_restore.sh.sh ) {delete|list|restore} <folder-or-file-path>
+```
+
+Cách dùng
+
+`1. Xóa file/folder:`
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/monitor_delete_restore.sh.sh ) delete /var/www/html/old_website
+```
+
++ delete: Là hành động mà bạn muốn thực hiện (di chuyển thư mục hoặc file vào thư mục backup).
++ /var/www/html/old_website: Là đường dẫn đến thư mục hoặc file bạn muốn xóa.
+
+`2. Hiển thị các file và thư mục đã di chuyển vào thư mục sao lưu (list):`
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/monitor_delete_restore.sh.sh ) list
+```
+
+`3. Phục hồi file hoặc thư mục từ thư mục sao lưu (restore):`
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/monitor_delete_restore.sh.sh ) restore old_website
+```
+
++ restore: Là hành động mà bạn muốn thực hiện (phục hồi file hoặc thư mục từ thư mục backup).
++ old_website: Là tên của file hoặc thư mục bạn muốn phục hồi (tên này phải trùng với tên thư mục hoặc file trong thư mục backup).
+
+Ví dụ:
+`Phục hồi thư mục old_website từ thư mục backup về lại thư mục /var/www/html.`
