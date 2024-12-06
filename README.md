@@ -665,12 +665,12 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ### Monitor delete file/folder - show list deleted - restore file/folder
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/monitor_delete_restore.sh.sh ) {delete|list|restore} <folder-or-file-path>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/monitor_delete_restore.sh.sh ) {delete|delete-permanent|deleted-all|list|restore|restore-all} <folder-or-file-path>
 ```
 
 Cách dùng
 
-`1. Xóa file/folder:`
+`Xóa file/folder(chuyển vào recycle bin):`
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/monitor_delete_restore.sh.sh ) delete /var/www/html/old_website
@@ -679,13 +679,25 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 + delete: Là hành động mà bạn muốn thực hiện (di chuyển thư mục hoặc file vào thư mục backup).
 + /var/www/html/old_website: Là đường dẫn đến thư mục hoặc file bạn muốn xóa.
 
-`2. Hiển thị các file và thư mục đã di chuyển vào thư mục sao lưu (list):`
+`Xóa hoàn toàn file trong recycle bin:`
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/monitor_delete_restore.sh.sh ) delete-permanent /var/www/html/old_website
+```
+
+`Xóa tất cả trong recycle bin:`
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/monitor_delete_restore.sh.sh ) deleted-all
+```
+
+`Hiển thị các file và thư mục đã di chuyển vào thư mục sao lưu (list):`
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/monitor_delete_restore.sh.sh ) list
 ```
 
-`3. Phục hồi file hoặc thư mục từ thư mục sao lưu (restore):`
+`Phục hồi file hoặc thư mục từ thư mục sao lưu (restore):`
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/monitor_delete_restore.sh.sh ) restore old_website
@@ -696,3 +708,9 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 
 Ví dụ:
 `Phục hồi thư mục old_website từ thư mục backup về lại thư mục /var/www/html.`
+
+`Phục hồi tất cả từ thư mục sao lưu (restore):`
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/monitor_delete_restore.sh.sh ) restore-all
+```
