@@ -8,7 +8,17 @@ fi
 
 # Định nghĩa thư mục recycle bin và file log
 RECYCLE_BIN_DIR="/var/www/recycle"
-LOG_FILE="/var/www/recycle/log/move_activity.log"
+LOG_FILE="/var/www/log/move_activity.log"
+
+# Kiểm tra và tạo thư mục chứa file log nếu chưa tồn tại
+if [ ! -d "$(dirname "$LOG_FILE")" ]; then
+  mkdir -p "$(dirname "$LOG_FILE")"
+fi
+
+# Tạo file log nếu chưa tồn tại
+if [ ! -f "$LOG_FILE" ]; then
+  touch "$LOG_FILE"
+fi
 
 # Kiểm tra nếu thư mục recycle bin tồn tại, nếu không thì tạo mới
 if [ ! -d "$RECYCLE_BIN_DIR" ]; then
@@ -18,9 +28,17 @@ fi
 
 # Hàm ghi log
 log_action() {
-  local message=$1
+  local action=$1
+  local source=$2
+  local target=$3
   local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-  echo "$timestamp - $message" >>"$LOG_FILE"
+  echo "$timestamp|$action|$source|$target" >>"$LOG_FILE"
+}
+
+# Hàm khôi phục vị trí cũ từ file log
+restore_original_path() {
+  local item=$1
+  grep "|delete|.*/$item|" "$LOG_FILE" | tail -n 1 | awk -F'|' '{print $3}'
 }
 
 case $1 in
@@ -28,11 +46,11 @@ case $1 in
   # Di chuyển file hoặc thư mục vào thư mục recycle bin
   SOURCE_PATH="$2"
   if [ -e "$SOURCE_PATH" ]; then
-    mv "$SOURCE_PATH" "$RECYCLE_BIN_DIR/"
-    log_action "Moved '$SOURCE_PATH' to recycle bin folder '$RECYCLE_BIN_DIR'."
+    ITEM_NAME=$(basename "$SOURCE_PATH")
+    mv "$SOURCE_PATH" "$RECYCLE_BIN_DIR/$ITEM_NAME"
+    log_action "delete" "$SOURCE_PATH" "$RECYCLE_BIN_DIR/$ITEM_NAME"
     echo "'$SOURCE_PATH' đã được di chuyển vào thư mục recycle bin."
   else
-    log_action "Attempted to move non-existing source '$SOURCE_PATH'."
     echo "Error: File hoặc thư mục '$SOURCE_PATH' không tồn tại."
   fi
   ;;
@@ -41,10 +59,9 @@ case $1 in
   DELETE_ITEM="$2"
   if [ -e "$RECYCLE_BIN_DIR/$DELETE_ITEM" ]; then
     rm -rf "$RECYCLE_BIN_DIR/$DELETE_ITEM"
-    log_action "Permanently deleted '$DELETE_ITEM' from recycle bin."
+    log_action "delete-permanent" "$RECYCLE_BIN_DIR/$DELETE_ITEM" ""
     echo "'$DELETE_ITEM' đã bị xóa hoàn toàn khỏi thư mục recycle bin."
   else
-    log_action "Attempted to delete non-existing item '$DELETE_ITEM' from recycle bin."
     echo "Error: File hoặc thư mục '$DELETE_ITEM' không tồn tại trong thư mục recycle bin."
   fi
   ;;
@@ -52,41 +69,55 @@ case $1 in
   # Xóa tất cả file trong thư mục recycle bin
   if [ "$(ls -A $RECYCLE_BIN_DIR)" ]; then
     rm -rf "$RECYCLE_BIN_DIR/"*
-    log_action "Deleted all items in recycle bin folder '$RECYCLE_BIN_DIR'."
+    log_action "deleted-all" "$RECYCLE_BIN_DIR" ""
     echo "Tất cả file trong thư mục recycle bin đã bị xóa hoàn toàn."
   else
-    echo "Thư mục recycle bin trống, không có gì để xóa."
+    echo "Error: Thư mục recycle bin trống, không có gì để xóa."
   fi
   ;;
 "restore")
   # Khôi phục file hoặc thư mục từ thư mục recycle bin
   RESTORE_ITEM="$2"
   if [ -e "$RECYCLE_BIN_DIR/$RESTORE_ITEM" ]; then
-    mv "$RECYCLE_BIN_DIR/$RESTORE_ITEM" "/var/www/$RESTORE_ITEM"
-    log_action "Restored '$RESTORE_ITEM' from recycle bin folder '$RECYCLE_BIN_DIR'."
-    echo "'$RESTORE_ITEM' đã được khôi phục từ thư mục recycle bin."
+    ORIGINAL_PATH=$(restore_original_path "$RESTORE_ITEM")
+    if [ -n "$ORIGINAL_PATH" ]; then
+      mkdir -p "$(dirname "$ORIGINAL_PATH")"
+      mv "$RECYCLE_BIN_DIR/$RESTORE_ITEM" "$ORIGINAL_PATH"
+      log_action "restore" "$RECYCLE_BIN_DIR/$RESTORE_ITEM" "$ORIGINAL_PATH"
+      echo "'$RESTORE_ITEM' đã được khôi phục về '$ORIGINAL_PATH'."
+    else
+      echo "Error: Không thể tìm thấy vị trí gốc của '$RESTORE_ITEM'."
+    fi
   else
-    log_action "Attempted to restore non-existing item '$RESTORE_ITEM' from recycle bin."
     echo "Error: File hoặc thư mục '$RESTORE_ITEM' không tồn tại trong thư mục recycle bin."
   fi
   ;;
 "restore-all")
   # Khôi phục tất cả file trong thư mục recycle bin
   if [ "$(ls -A $RECYCLE_BIN_DIR)" ]; then
-    mv "$RECYCLE_BIN_DIR/"* "/var/www/"
-    log_action "Restored all items from recycle bin folder '$RECYCLE_BIN_DIR'."
-    echo "Tất cả file đã được khôi phục từ thư mục recycle bin."
+    for ITEM in "$RECYCLE_BIN_DIR"/*; do
+      ITEM_NAME=$(basename "$ITEM")
+      ORIGINAL_PATH=$(restore_original_path "$ITEM_NAME")
+      if [ -n "$ORIGINAL_PATH" ]; then
+        mkdir -p "$(dirname "$ORIGINAL_PATH")"
+        mv "$ITEM" "$ORIGINAL_PATH"
+        log_action "restore" "$ITEM" "$ORIGINAL_PATH"
+        echo "'$ITEM_NAME' đã được khôi phục về '$ORIGINAL_PATH'."
+      else
+        echo "Error: Không thể tìm thấy vị trí gốc của '$ITEM_NAME'."
+      fi
+    done
   else
-    echo "Thư mục recycle bin trống, không có gì để khôi phục."
+    echo "Error: Thư mục recycle bin trống, không có gì để khôi phục."
   fi
   ;;
 "list")
-  # Hiển thị các file và thư mục đã di chuyển
-  if [ -d "$RECYCLE_BIN_DIR" ]; then
-    echo "Danh sách file trong thư mục recycle bin '$RECYCLE_BIN_DIR':"
-    ls -l "$RECYCLE_BIN_DIR"
+  # Hiển thị các file và thư mục đã di chuyển (chỉ tên)
+  if [ -d "$RECYCLE_BIN_DIR" ] && [ "$(ls -A $RECYCLE_BIN_DIR)" ]; then
+    echo "Danh sách file trong thư mục recycle bin:"
+    ls "$RECYCLE_BIN_DIR"
   else
-    echo "Error: Thư mục recycle bin '$RECYCLE_BIN_DIR' không tồn tại."
+    echo "Error: Thư mục recycle bin trống hoặc không tồn tại."
   fi
   ;;
 *)
