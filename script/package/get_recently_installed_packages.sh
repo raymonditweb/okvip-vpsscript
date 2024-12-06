@@ -81,6 +81,6 @@ for package in $recent_packages; do
     echo "$service_status"
     echo
   else
-    echo "Error: Không thể tìm thấy thông tin về: $package"
+    echo "Warning: Không thể tìm thấy thông tin về: $package"
   fi
 done
