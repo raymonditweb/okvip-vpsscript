@@ -23,6 +23,33 @@ SERVICE_NAME=$(echo "$SERVICE_NAME" | tr -d '[]')
 JAIL_LOCAL_FILE="/etc/fail2ban/jail.local"
 FILTER_CONFIG_FILE="/etc/fail2ban/filter.d/${SERVICE_NAME}.conf"
 
+# Hàm kiểm tra logpath
+check_logpath() {
+  case "$SERVICE_NAME" in
+    sshd) echo "/var/log/auth.log" ;;
+    atd) echo "/var/log/syslog" ;;
+    apache2) echo "/var/log/apache2/error.log" ;;
+    nginx) echo "/var/log/nginx/error.log" ;;
+    vsftpd|proftpd) echo "/var/log/vsftpd.log" ;;
+    dovecot) echo "/var/log/dovecot.log" ;;
+    postfix) echo "/var/log/mail.log" ;;
+    mysql) echo "/var/log/mysql/error.log" ;;
+    pure-ftpd) echo "/var/log/syslog" ;;
+    sudo) echo "/var/log/auth.log" ;;
+    redis) echo "/var/log/redis/redis-server.log" ;;
+    vnc) echo "/var/log/vnc.log" ;;
+    rsync) echo "/var/log/rsyncd.log" ;;
+    cifs|samba) echo "/var/log/samba/log.smbd" ;;
+    *) echo "/var/log/$SERVICE_NAME.log" ;;
+  esac
+}
+
+# Lấy logpath và kiểm tra tồn tại
+LOGPATH=$(check_logpath)
+if [ ! -f "$LOGPATH" ]; then
+  ERROR_LOG+="Error: File logpath '$LOGPATH' không tồn tại. Vui lòng kiểm tra cấu hình dịch vụ $SERVICE_NAME.\n"
+fi
+
 # Kiểm tra trạng thái service
 if ! systemctl is-active --quiet "$SERVICE_NAME"; then
   ERROR_LOG+="Error: Dịch vụ $SERVICE_NAME không đang chạy. Không thể thêm vào Fail2Ban.\n"
@@ -46,57 +73,7 @@ if [ -z "$ERROR_LOG" ]; then
     echo -e "\n[$SERVICE_NAME]" >>"$JAIL_LOCAL_FILE"
     echo "enabled = true" >>"$JAIL_LOCAL_FILE"
     echo "filter = $SERVICE_NAME" >>"$JAIL_LOCAL_FILE"
-
-    # Cập nhật logpath phù hợp với dịch vụ
-    case "$SERVICE_NAME" in
-    sshd)
-      echo "logpath = /var/log/auth.log" >>"$JAIL_LOCAL_FILE"
-      ;;
-    atd)
-      echo "logpath = /var/log/syslog" >>"$JAIL_LOCAL_FILE"
-      ;;
-    apache2)
-      echo "logpath = /var/log/apache2/error.log" >>"$JAIL_LOCAL_FILE"
-      ;;
-    nginx)
-      echo "logpath = /var/log/nginx/error.log" >>"$JAIL_LOCAL_FILE"
-      ;;
-    vsftpd|proftpd)
-      echo "logpath = /var/log/vsftpd.log" >>"$JAIL_LOCAL_FILE"
-      ;;
-    dovecot)
-      echo "logpath = /var/log/dovecot.log" >>"$JAIL_LOCAL_FILE"
-      ;;
-    postfix)
-      echo "logpath = /var/log/mail.log" >>"$JAIL_LOCAL_FILE"
-      ;;
-    mysql)
-      echo "logpath = /var/log/mysql/error.log" >>"$JAIL_LOCAL_FILE"
-      ;;
-    pure-ftpd)
-      echo "logpath = /var/log/pure-ftpd.log" >>"$JAIL_LOCAL_FILE"
-      ;;
-    sudo)
-      echo "logpath = /var/log/sudo.log" >>"$JAIL_LOCAL_FILE"
-      ;;
-    redis)
-      echo "logpath = /var/log/redis/redis-server.log" >>"$JAIL_LOCAL_FILE"
-      ;;
-    vnc)
-      echo "logpath = /var/log/vnc.log" >>"$JAIL_LOCAL_FILE"
-      ;;
-    rsync)
-      echo "logpath = /var/log/rsyncd.log" >>"$JAIL_LOCAL_FILE"
-      ;;
-    cifs|samba)
-      echo "logpath = /var/log/samba/log.smbd" >>"$JAIL_LOCAL_FILE"
-      ;;
-    *)
-      echo "logpath = /var/log/$SERVICE_NAME.log" >>"$JAIL_LOCAL_FILE"
-      echo "Warning: Không xác định logpath cho dịch vụ $SERVICE_NAME. Sử dụng logpath mặc định."
-      ;;
-    esac
-
+    echo "logpath = $LOGPATH" >>"$JAIL_LOCAL_FILE"
     echo "maxretry = 5" >>"$JAIL_LOCAL_FILE"
     echo "bantime = 3600" >>"$JAIL_LOCAL_FILE"
     echo "Dịch vụ $SERVICE_NAME đã được thêm vào Fail2Ban."
