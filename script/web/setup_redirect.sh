@@ -2,7 +2,7 @@
 
 # Kiểm tra xem người dùng có quyền root không
 if [[ $EUID -ne 0 ]]; then
-  echo "Error: Vui lòng chạy script này với quyền root." 
+  echo "Error: Vui lòng chạy script này với quyền root."
   exit 1
 fi
 
@@ -30,14 +30,19 @@ ANOTHER_PAGE_307="$7"
 PERMANENT_PAGE_308="$8"
 ANOTHER_PERMANENT_PAGE_308="$9"
 
-# Đường dẫn đến tệp cấu hình Nginx
-NGINX_CONF="/etc/nginx/nginx.conf"  # Địa chỉ cho các bản phân phối khác có thể khác nhau
+# Đường dẫn tệp cấu hình riêng (thay vì ghi vào /etc/nginx/nginx.conf)
+NGINX_CONF="/etc/nginx/conf.d/${DOMAIN}.conf"
 
-# Thêm redirect vào tệp cấu hình Nginx
+# Sao lưu tệp cũ (nếu có)
+if [ -f "$NGINX_CONF" ]; then
+  cp "$NGINX_CONF" "${NGINX_CONF}.bak_$(date +%F_%T)"
+fi
+
+# Thêm cấu hình vào tệp cấu hình Nginx
 {
   echo "server {"
   echo "    listen 80;"
-  echo "    server_name $DOMAIN;"  # Sử dụng tên miền từ tham số đầu vào
+  echo "    server_name $DOMAIN;"
   echo "    # Redirect 301"
   echo "    location $OLD_PAGE_301 {"
   echo "        return 301 $NEW_PAGE_301;"
@@ -55,9 +60,13 @@ NGINX_CONF="/etc/nginx/nginx.conf"  # Địa chỉ cho các bản phân phối k
   echo "        return 308 $ANOTHER_PERMANENT_PAGE_308;"
   echo "    }"
   echo "}"
-} >> "$NGINX_CONF"
+} >"$NGINX_CONF"
 
-# Khởi động lại dịch vụ Nginx để áp dụng thay đổi
-systemctl restart nginx
-
-echo "Redirects đã được cấu hình thành công cho Nginx."
+# Kiểm tra cấu hình Nginx
+if nginx -t; then
+  systemctl restart nginx
+  echo "Redirects đã được cấu hình thành công cho Nginx và Nginx đã khởi động lại thành công."
+else
+  echo "Error: Cấu hình Nginx không hợp lệ. Khôi phục bản sao lưu."
+  cp "${NGINX_CONF}.bak_$(date +%F_%T)" "$NGINX_CONF"
+fi

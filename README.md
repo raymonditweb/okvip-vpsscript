@@ -364,7 +364,14 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) [domain] [URL-301] [URL-301-target] [URL-302] [URL-302-target] [URL-307] [URL-307-target] [URL-308] [URL-308-target]
 ```
 
-`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) [http://www.example.com/new-page] [/old-page-301] [/new-page-301] [/temporary-page-302] [/new-temporary-page-302] [/temporary-page-307] [/new-temporary-page-307] [/old-permanent-page-308] [/new-permanent-page-308]`
+`vi du: "example.com" "/oldpage" "https://example.com/newpage" "/temp" "https://example.com/tempnew" "/postpage" "https://example.com/newpost" "/permanentpage" "https://example.com/newperm"`
+
++ Giải thích các tham số:
+example.com: Tên miền cần cấu hình redirect.
+/oldpage -> https://example.com/newpage: Chuyển hướng 301 từ /oldpage sang /newpage.
+/temp -> https://example.com/tempnew: Chuyển hướng 302 từ /temp sang /tempnew.
+/postpage -> https://example.com/newpost: Chuyển hướng 307 từ /postpage sang /newpost.
+/permanentpage -> https://example.com/newperm: Chuyển hướng 308 từ /permanentpage sang /newperm.
 
 + Kết quả trả về:
   + Không có root : Error: Vui lòng chạy script với quyền root.
