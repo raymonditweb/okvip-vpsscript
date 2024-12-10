@@ -2,7 +2,7 @@
 
 # Kiểm tra quyền root
 if [ "$EUID" -ne 0 ]; then
-  echo "Error: Vui lòng chạy với quyền root."
+  echo "Error: Vui lòng chạy với quyền root"
   exit 1
 fi
 
@@ -11,22 +11,18 @@ OS=$(lsb_release -si)
 VERSION=$(lsb_release -sr)
 
 if [[ "$OS" != "Ubuntu" || ( "$VERSION" != "20.04" && "$VERSION" != "22.04" ) ]]; then
-  echo "Error: Script này chỉ hỗ trợ Ubuntu 20.04 đến 22.04"
+  echo "Error: Script này chỉ hỗ trợ Ubuntu 20.04 và 22.04. Phiên bản hiện tại là $OS $VERSION."
   exit 1
 fi
 
 set -e
+trap 'echo "Đã xảy ra lỗi trong quá trình cài đặt. Vui lòng kiểm tra các thông báo lỗi phía trên."' ERR
 
 # Lấy địa chỉ IP server
 SERVER_IP=$(hostname -I | awk '{print $1}')
 
 # Đọc mật khẩu MySQL từ tham số dòng lệnh hoặc tạo ngẫu nhiên nếu không có
-MYSQL_ROOT_PASSWORD=$1
-
-if [ -z "$MYSQL_ROOT_PASSWORD" ]; then
-  # Tạo mật khẩu ngẫu nhiên nếu không được truyền vào
-  MYSQL_ROOT_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
-fi
+MYSQL_ROOT_PASSWORD=${1:-$(tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 32)}
 
 # Đọc domain từ tham số dòng lệnh hoặc dùng mặc định
 DOMAIN=${2:-"vpsscript.demo"}
@@ -40,24 +36,28 @@ apt update && apt upgrade -y
 
 # Cài đặt LEMP
 echo "Cài đặt LEMP..."
-apt install nginx mysql-server php-fpm php-mysql -y
+apt install -y nginx mysql-server php-fpm php-mysql unzip
 
 # Mở full cổng firewall cho Nginx
-ufw allow 'Nginx Full'
+if ufw status | grep -q "inactive"; then
+  echo "Cảnh báo: Firewall UFW đang tắt, bạn cần bật thủ công (sudo ufw enable)."
+else
+  ufw allow 'Nginx Full'
+fi
 
-# Cài đặt MySQL Server thay vì MariaDB
-#echo "Cài đặt mật khẩu cho MySQL..."
-#mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '$MYSQL_ROOT_PASSWORD';"
+# Khởi động MySQL nếu chưa chạy
+systemctl start mysql
 
+# Cài đặt mật khẩu cho MySQL root
 echo "Cài đặt mật khẩu cho MySQL root..."
 mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';"
 
-# Áp dụng thay đổi ngay lập tức
-#mysql -e "FLUSH PRIVILEGES;"
-
 # Kiểm tra mật khẩu đã được thiết lập thành công
 echo "Xác minh cài đặt mật khẩu MySQL root..."
-mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "SELECT 'MySQL root password đã được thiết lập thành công.';"
+if ! mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "SELECT 'MySQL root password đã được thiết lập thành công.';"; then
+  echo "Lỗi: Không thể kết nối với MySQL bằng mật khẩu root."
+  exit 1
+fi
 
 # Tạo database với tên từ domain không có phần mở rộng
 echo "Tạo database có tên $DB_NAME..."
@@ -65,20 +65,17 @@ mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE $DB_NAME
 
 # Cài đặt PHP 7.4 và các module cần thiết
 echo "Cài đặt PHP 7.4..."
-apt install php7.4-fpm php7.4-mysql php7.4-cli php7.4-curl php7.4-json php7.4-mbstring php7.4-xml php7.4-zip php7.4-gd -y
+apt install -y php7.4-fpm php7.4-mysql php7.4-cli php7.4-curl php7.4-json php7.4-mbstring php7.4-xml php7.4-zip php7.4-gd
 
 # Lấy phiên bản PHP
-PHP_VERSION=$(php -v | head -n 1 | cut -d ' ' -f 2)
+PHP_VERSION=$(php -v | head -n 1 | grep -oP '\d+\.\d+')
 
-#cài đặt wp cli
+# Cài đặt wp-cli
+echo "Cài đặt WP-CLI..."
 curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 php wp-cli.phar --info
 chmod +x wp-cli.phar
-sudo mv wp-cli.phar /usr/local/bin/wp
-
-#cài đặt zip
-apt install unzip -y
-
+mv wp-cli.phar /usr/local/bin/wp
 
 # Cài đặt phpMyAdmin
 echo "Cài đặt phpMyAdmin..."
@@ -95,29 +92,29 @@ ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
 echo "Cấu hình Nginx cho phpMyAdmin trên cổng $PHPMYADMIN_PORT..."
 cat > /etc/nginx/sites-available/phpmyadmin <<EOL
 server {
-    listen $PHPMYADMIN_PORT;
-    server_name $SERVER_IP;
+  listen $PHPMYADMIN_PORT;
+  server_name $SERVER_IP;
 
-    root /usr/share/phpmyadmin;
-    index index.php index.html index.htm;
+  root /usr/share/phpmyadmin;
+  index index.php index.html index.htm;
 
-    location / {
-        try_files \$uri \$uri/ =404;
-    }
+  location / {
+    try_files \$uri \$uri/ =404;
+  }
 
-    location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-        include fastcgi_params;
-    }
+  location ~ \.php$ {
+    include snippets/fastcgi-php.conf;
+    fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+    include fastcgi_params;
+  }
 
-    location ~ /\.ht {
-        deny all;
-    }
+  location ~ /\.ht {
+    deny all;
+  }
 
-    error_log /var/log/nginx/phpmyadmin-error.log;
-    access_log /var/log/nginx/phpmyadmin-access.log;
+  error_log /var/log/nginx/phpmyadmin-error.log;
+  access_log /var/log/nginx/phpmyadmin-access.log;
 }
 EOL
 
@@ -132,7 +129,6 @@ systemctl restart nginx
 
 # Mở cổng cho phpMyAdmin
 ufw allow $PHPMYADMIN_PORT/tcp
-
 
 # Khởi động lại các dịch vụ
 systemctl restart nginx
@@ -153,31 +149,32 @@ chown -R www-data:www-data $WEB_ROOT
 chmod -R 755 $WEB_ROOT
 
 # Cấu hình Nginx cho website
+echo "Cấu hình Nginx cho website $DOMAIN..."
 cat > /etc/nginx/sites-available/$DOMAIN <<EOL
 server {
-    listen 80;
-    server_name $DOMAIN;
-    root $WEB_ROOT;
+  listen 80;
+  server_name $DOMAIN;
+  root $WEB_ROOT;
 
-    index index.php index.html index.htm;
+  index index.php index.html index.htm;
 
-    location / {
-        try_files \$uri \$uri/ =404;
-    }
+  location / {
+    try_files \$uri \$uri/ =404;
+  }
 
-    location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
-        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-        include fastcgi_params;
-    }
+  location ~ \.php$ {
+    include snippets/fastcgi-php.conf;
+    fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+    include fastcgi_params;
+  }
 
-    location ~ /\.ht {
-        deny all;
-    }
+  location ~ /\.ht {
+    deny all;
+  }
 
-    error_log /var/log/nginx/$DOMAIN-error.log;
-    access_log /var/log/nginx/$DOMAIN-access.log;
+  error_log /var/log/nginx/$DOMAIN-error.log;
+  access_log /var/log/nginx/$DOMAIN-access.log;
 }
 EOL
 
@@ -190,10 +187,13 @@ nginx -t
 # Khởi động lại Nginx để áp dụng cấu hình mới
 systemctl restart nginx
 
-# Thêm domain vào /etc/hosts
-echo "127.0.0.1 $DOMAIN" >> /etc/hosts
+# Thêm domain vào /etc/hosts nếu chưa tồn tại
+if ! grep -q "127.0.0.1 $DOMAIN" /etc/hosts; then
+  echo "127.0.0.1 $DOMAIN" >> /etc/hosts
+fi
 
 # Ghi thông tin cấu hình ra file vpsscript.conf
+NGINX_VERSION=$(nginx -v 2>&1 | grep -oP 'nginx/\K[^ ]+')
 cat > "/home/vpsscript.conf" <<END
 serverip="$SERVER_IP"
 current_os_version="$VERSION"
