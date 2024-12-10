@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Kiểm tra quyền root
+# Đảm bảo rằng script chạy với quyền root
 if [ "$EUID" -ne 0 ]; then
-  echo "Error: Vui lòng chạy với quyền root"
+  echo "Error: Vui lòng chạy với quyền root."
   exit 1
 fi
 
@@ -15,6 +15,7 @@ if [[ "$OS" != "Ubuntu" || ( "$VERSION" != "20.04" && "$VERSION" != "22.04" ) ]]
   exit 1
 fi
 
+# Bật chế độ báo lỗi sớm (nếu có lỗi sẽ dừng script)
 set -e
 trap 'echo "Đã xảy ra lỗi trong quá trình cài đặt. Vui lòng kiểm tra các thông báo lỗi phía trên."' ERR
 
@@ -32,13 +33,14 @@ DB_NAME=$(echo "$DOMAIN" | cut -d '.' -f 1)
 echo "Bắt đầu cài đặt LEMP stack trên Ubuntu 20.04 với domain $DOMAIN..."
 
 # Cập nhật và nâng cấp hệ thống
-apt update && apt upgrade -y
+echo "Cập nhật và nâng cấp hệ thống..."
+apt-get update && apt-get upgrade -y
 
 # Cài đặt LEMP
-echo "Cài đặt LEMP..."
-apt install -y nginx mysql-server php-fpm php-mysql unzip
+echo "Cài đặt LEMP stack..."
+apt-get install -y nginx mysql-server php-fpm php-mysql unzip curl
 
-# Mở full cổng firewall cho Nginx
+# Kiểm tra trạng thái firewall và mở cổng cho Nginx
 if ufw status | grep -q "inactive"; then
   echo "Cảnh báo: Firewall UFW đang tắt, bạn cần bật thủ công (sudo ufw enable)."
 else
@@ -65,12 +67,12 @@ mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE $DB_NAME
 
 # Cài đặt PHP 7.4 và các module cần thiết
 echo "Cài đặt PHP 7.4..."
-apt install -y php7.4-fpm php7.4-mysql php7.4-cli php7.4-curl php7.4-json php7.4-mbstring php7.4-xml php7.4-zip php7.4-gd
+apt-get install -y php7.4-fpm php7.4-mysql php7.4-cli php7.4-curl php7.4-json php7.4-mbstring php7.4-xml php7.4-zip php7.4-gd
 
 # Lấy phiên bản PHP
 PHP_VERSION=$(php -v | head -n 1 | grep -oP '\d+\.\d+')
 
-# Cài đặt wp-cli
+# Cài đặt WP-CLI
 echo "Cài đặt WP-CLI..."
 curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
 php wp-cli.phar --info
@@ -79,7 +81,7 @@ mv wp-cli.phar /usr/local/bin/wp
 
 # Cài đặt phpMyAdmin
 echo "Cài đặt phpMyAdmin..."
-DEBIAN_FRONTEND=noninteractive apt install phpmyadmin -y
+DEBIAN_FRONTEND=noninteractive apt-get install -y phpmyadmin
 
 # Lấy phiên bản phpMyAdmin
 PHPMYADMIN_VERSION=$(dpkg -l | grep phpmyadmin | awk '{print $3}')
@@ -88,7 +90,7 @@ PHPMYADMIN_VERSION=$(dpkg -l | grep phpmyadmin | awk '{print $3}')
 PHPMYADMIN_PORT=8080
 ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
 
-# Cấu hình Nginx để chạy phpMyAdmin trên cổng 8080
+# Cấu hình Nginx cho phpMyAdmin trên cổng 8080
 echo "Cấu hình Nginx cho phpMyAdmin trên cổng $PHPMYADMIN_PORT..."
 cat > /etc/nginx/sites-available/phpmyadmin <<EOL
 server {
@@ -129,11 +131,6 @@ systemctl restart nginx
 
 # Mở cổng cho phpMyAdmin
 ufw allow $PHPMYADMIN_PORT/tcp
-
-# Khởi động lại các dịch vụ
-systemctl restart nginx
-systemctl restart mysql
-systemctl restart php7.4-fpm
 
 # Tạo một site demo với domain truyền vào hoặc mặc định vpsscript.demo
 echo "Tạo site mẫu $DOMAIN..."
