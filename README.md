@@ -308,6 +308,26 @@ bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/ra
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/change-ssh-port.sh ) <new_ssh_port*>
 ```
 
+#### Limit ssh login
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/limit_ssh_login.sh ) <MAX_FAILED_ATTEMPTS*> <BLOCK_TIME*>
+```
+
+`Vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/limit_ssh_login.sh ) 3 300`
+
+Giải thích:
+Cho phép tối đa 3 lần đăng nhập sai trước khi khóa.
+Khóa sẽ kéo dài 300 giây (5 phút).
+
++ Kết quả trả về:
+  ++ Đúng tham số: Đã thiết lập giới hạn đăng nhập SSH thất bại: 3 lần trong 300 giây.
+                   Cấu hình iptables đã được lưu.
+                   Cấu hình SSH đã được cập nhật và SSH đã được khởi động lại.
+  ++ Không đủ tham số: Error: Sử dụng: <MAX_FAILED_ATTEMPTS> <BLOCK_TIME>Ví dụ: $0 3 300 (giới hạn 3 lần đăng nhập sai, khóa trong 300 giây)
+  ++ Thanh cong: Cấu hình SSH đã được cập nhật và SSH đã được khởi động lại.
+  ++ That bai: Đã thiết lập giới hạn đăng nhập SSH thất bại/
+
 #### Change root password
 
 ```bash
