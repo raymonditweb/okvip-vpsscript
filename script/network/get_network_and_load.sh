@@ -24,7 +24,7 @@ install_tools() {
         yum install net-tools ifstat -y
     else
         echo "Error: Trình quản lý gói không được hỗ trợ. Vui lòng cài đặt ifconfig và ifstat theo cách thủ công."
-        exit 1
+        return 1
     fi
 }
 

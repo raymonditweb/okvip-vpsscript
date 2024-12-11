@@ -61,7 +61,7 @@ total_load=0
 check_error() {
   if [ $? -ne 0 ]; then
     log_message "Error: $1  - Vui lòng kiểm tra lại."
-    exit 1
+    return 1
   fi
 }
 

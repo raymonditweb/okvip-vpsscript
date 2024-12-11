@@ -16,7 +16,7 @@ delete_account() {
 
   if [ -z "$username" ]; then
     echo "Error: Vui lòng cung cấp tên tài khoản để xóa."
-    exit 1
+    return 1
   fi
 
   # Kiểm tra xem tài khoản có tồn tại trong hệ thống không

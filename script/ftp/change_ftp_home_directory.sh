@@ -16,13 +16,13 @@ change_home() {
 
   if [ -z "$username" ] || [ -z "$new_home" ]; then
     echo "Error: Vui lòng truyền tham số: $0 [tên_tài_khoản] [thư_mục_home_mới]"
-    exit 1
+    return 1
   fi
 
   # Kiểm tra xem tài khoản có tồn tại không trong tệp
   if ! grep -q "^$username:" "$FTP_USER_FILE"; then
     echo "Error: Tài khoản $username không tồn tại."
-    exit 1
+    return 1
   fi
 
   # Kiểm tra xem thư mục mới có tồn tại không
@@ -33,7 +33,7 @@ change_home() {
       echo "Thư mục $new_home đã được tạo thành công."
     else
       echo "Error: Không thể tạo thư mục $new_home. Kiểm tra quyền truy cập."
-      exit 1
+      return 1
     fi
   fi
 

@@ -16,13 +16,13 @@ change_password() {
 
   if [ -z "$username" ] || [ -z "$new_password" ]; then
     echo "Error: Vui lòng truyền tham số: $0 [tên_tài_khoản] [mật_khẩu_mới]"
-    exit 1
+    return 1
   fi
 
   # Kiểm tra xem tài khoản có tồn tại không trong tệp
   if ! grep -q "^$username:" "$FTP_USER_FILE"; then
     echo "Error: Tài khoản $username không tồn tại."
-    exit 1
+    return 1
   fi
 
   # Thay đổi mật khẩu trong tệp

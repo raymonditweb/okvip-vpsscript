@@ -14,7 +14,7 @@ usage() {
   echo "Error: Sử dụng: $0 <username> <action>"
   echo "  <username>   : Tên người dùng FTP cần quản lý"
   echo "  <action>     : 'activate' để kích hoạt hoặc 'deactivate' để vô hiệu hóa"
-  exit 1
+  return 1
 }
 
 # Kiểm tra đầu vào
@@ -28,7 +28,7 @@ ACTION=$2
 # Kiểm tra xem người dùng có tồn tại không
 if ! id "$USERNAME" &>/dev/null; then
   echo "Error: Người dùng '$USERNAME' không tồn tại!"
-  exit 2
+  exit 1
 fi
 
 # Đường dẫn shell bị khóa (để vô hiệu hóa tài khoản)

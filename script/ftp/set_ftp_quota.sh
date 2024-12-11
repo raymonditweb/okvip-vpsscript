@@ -19,19 +19,19 @@ set_quota() {
 
   if [ -z "$username" ] || [ -z "$quota" ]; then
     echo "Error: Vui lòng truyền tham số: $0 [tên_tài_khoản] [quota (MB)]"
-    exit 1
+    return 1
   fi
 
   # Kiểm tra xem tài khoản có tồn tại không
   if ! grep -q "^$username:" "$FTP_USER_FILE"; then
     echo "Error: Tài khoản $username không tồn tại."
-    exit 1
+    return 1
   fi
 
   # Kiểm tra quota và max quota
   if [[ "$quota" -gt "$MAX_QUOTA" ]]; then
     echo "Error: Quota ($quota MB) không được lớn hơn max quota ($MAX_QUOTA MB)."
-    exit 1
+    return 1
   fi
 
   # Thiết lập quota bằng Pure-FTPd (sử dụng pure-pw)

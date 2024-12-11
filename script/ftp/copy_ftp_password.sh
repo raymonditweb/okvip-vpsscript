@@ -15,7 +15,7 @@ show_password() {
 
   if [ -z "$username" ]; then
     echo "Error: Vui lòng truyền tham số: $0 [tên_tài_khoản]"
-    exit 1
+    return 1
   fi
 
   # Kiểm tra xem tài khoản có tồn tại không
@@ -25,7 +25,7 @@ show_password() {
     echo "Mật khẩu của tài khoản $username là: $password"
   else
     echo "Error: Tài khoản $username không tồn tại."
-    exit 1
+    return 1
   fi
 }
 
