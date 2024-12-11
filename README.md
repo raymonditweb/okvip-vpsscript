@@ -361,7 +361,7 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 #### Thêm addon domain
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/addon-domain) <primary-domain*> <addon-domain*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/addon-domain.sh) <primary-domain*> <addon-domain*>
 ```
 
 #### Xoá website: yêu cầu có mysql root password để remove db - Remove Website
