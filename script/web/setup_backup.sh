@@ -106,7 +106,7 @@ setup_cron() {
     ;;
   *)
     echo "Error: Tần suất không hợp lệ! (daily|weekly|monthly)"
-    exit 1
+    return 1
     ;;
   esac
 

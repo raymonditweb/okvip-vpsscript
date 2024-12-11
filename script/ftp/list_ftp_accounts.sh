@@ -93,7 +93,7 @@ check_requirements() {
     if ! command -v "$cmd" &>/dev/null; then
       echo "Error: Lệnh '$cmd' chưa được cài đặt."
       echo "Vui lòng cài đặt Pure-FTPD và các gói cần thiết."
-      exit 1
+      return 1
     fi
   done
 }
