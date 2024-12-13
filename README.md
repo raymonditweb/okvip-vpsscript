@@ -459,40 +459,17 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 #### Backup website
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_backup.sh) DOMAIN BACKUP_TIME BACKUP_FREQUENCY
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_backup.sh) DOMAIN BACKUP_DIR BACKUP_TIME BACKUP_INTERVAL_DAYS
 ```
+
+`Vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_backup.sh) example.com /path/to/backup 03:00 2
+`
+
+`- Tạo một backup vào 3 giờ sáng mỗi 2 ngày.`
 
 Lưu ý:
 BACKUP_TIME: là tham số có thể truyền dạng 24h như 01:00 / 02:00 / 23:30
-BACKUP_FREQUENCY là tham số có 3 option để truyền là: daily / weekly / monthly
-
-+ Kết quả trả về:
-  + Không có root : Error: Vui lòng chạy script với quyền root.
-  + Tên miền không hợp lệ:
-    ++ Error: Domain không hợp lệ!
-    ++ Ví dụ đúng: example.com
-  + Thời gian không hợp lệ:
-    ++ Error: Thời gian không hợp lệ!
-    ++ Vui lòng sử dụng định dạng HH:MM (ví dụ: 23:30)
-  + Thành công: Thành công! Thư mục của site 'SITE_NAME' đã được thay đổi thành: NEW_DIRECTORY
-  + Không tìm thấy file wp-config.php: Error: Không tìm thấy file wp-config.php tại /var/www/$DOMAIN/wp-config.php
-  + Không thể kết nối đến MySQL: Error: Không thể kết nối đến MySQL với thông tin đăng nhập đã cung cấp!
-  + Thiết lập cronjob thành công: Đã thiết lập cronjob backup cho $DOMAIN với tần suất $BACKUP_FREQUENCY lúc $BACKUP_TIME
-  + Bắt đầu quy trình backup: >>><<< Bắt đầu quy trình backup cho $DOMAIN >>><<<
-  + Backup thành công: >>><<< Backup hoàn tất thành công >>><<<
-  + thông tin backup sẽ được hiển thị:
-    ++ >>><<< Thông tin Backup >>><<<
-    ++ Domain: example.com
-    ++ Database: example_com
-    ++ Thời gian backup: HH:MM
-    ++ Thư mục backup: /backup/example.com
-    ++ Dung lượng backup source: ...
-    ++ Dung lượng backup database: ...
-    ++ Log file: /backup/example.com/backup.log
-  + Backup thất bại: Error: Backup thất bại! Vui lòng kiểm tra log >>><<<
-  + Phần thông báo lỗi có thể bao gồm:
-    ++ Error: Backup source code bị hỏng với mã lỗi: ...
-    ++ Error: Backup cơ sở dữ liệu bị hỏng với mã lỗi: ...
+BACKUP_INTERVAL_DAYS là tham số so ngay: 1 / 2 /
 
 ## 3. WordPress Maintenance
 
