@@ -6,21 +6,13 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-# Kiểm tra tham số đầu vào
-if [ "$#" -ne 9 ]; then
-  echo "Error: Sử dụng: $0 [domain] [URL-301] [URL-301-target] [URL-302] [URL-302-target] [URL-307] [URL-307-target] [URL-308] [URL-308-target]"
+# Kiểm tra tên miền hợp lệ
+DOMAIN="$1"
+if [[ ! "$DOMAIN" =~ ^[a-zA-Z0-9.-]+$ ]]; then
+  echo "Error: DOMAIN không hợp lệ. Tên miền chỉ có thể chứa chữ, số, dấu gạch ngang và dấu chấm."
   exit 1
 fi
 
-# 301 Moved Permanently: This redirect is permanent. It's used when a resource has been permanently moved to a new location. Search engines will update their indexes to the new URL.
-
-# 302 Found (Previously "Moved Temporarily"): This redirect is temporary. It's used when a resource is temporarily located at a different URL. Search engines will continue to index the old URL.
-
-# 307 Temporary Redirect: This is similar to a 302 redirect but enforces the HTTP method used (POST, GET, etc.), meaning that if a user sends a POST request to the original URL, they must use a POST request to the new URL.
-
-# 308 Permanent Redirect: This is similar to a 301 redirect, but like the 307, it also preserves the HTTP method used.
-
-DOMAIN="$1"
 OLD_PAGE_301="$2"
 NEW_PAGE_301="$3"
 TEMPORARY_PAGE_302="$4"
@@ -33,9 +25,11 @@ ANOTHER_PERMANENT_PAGE_308="$9"
 # Đường dẫn tệp cấu hình riêng (thay vì ghi vào /etc/nginx/nginx.conf)
 NGINX_CONF="/etc/nginx/conf.d/${DOMAIN}.conf"
 
-# Sao lưu tệp cũ (nếu có)
+# Sao lưu tệp cũ (nếu có) và lưu tên tệp sao lưu
 if [ -f "$NGINX_CONF" ]; then
-  cp "$NGINX_CONF" "${NGINX_CONF}.bak_$(date +%F_%T)"
+  BACKUP_FILE="${NGINX_CONF}.bak_$(date +%F_%T)"
+  cp "$NGINX_CONF" "$BACKUP_FILE"
+  echo "Đã tạo bản sao lưu của tệp cấu hình Nginx: $BACKUP_FILE"
 fi
 
 # Thêm cấu hình vào tệp cấu hình Nginx
@@ -43,24 +37,41 @@ fi
   echo "server {"
   echo "    listen 80;"
   echo "    server_name $DOMAIN;"
-  echo "    # Redirect 301"
-  echo "    location $OLD_PAGE_301 {"
-  echo "        return 301 $NEW_PAGE_301;"
-  echo "    }"
-  echo "    # Redirect 302"
-  echo "    location $TEMPORARY_PAGE_302 {"
-  echo "        return 302 $ANOTHER_PAGE_302;"
-  echo "    }"
-  echo "    # Redirect 307"
-  echo "    location $TEMPORARY_PAGE_307 {"
-  echo "        return 307 $ANOTHER_PAGE_307;"
-  echo "    }"
-  echo "    # Redirect 308"
-  echo "    location $PERMANENT_PAGE_308 {"
-  echo "        return 308 $ANOTHER_PERMANENT_PAGE_308;"
-  echo "    }"
+  
+  # Redirect 301
+  if [ -n "$OLD_PAGE_301" ] && [ -n "$NEW_PAGE_301" ]; then
+    echo "    # Redirect 301"
+    echo "    location $OLD_PAGE_301 {"
+    echo "        return 301 $NEW_PAGE_301;"
+    echo "    }"
+  fi
+  
+  # Redirect 302
+  if [ -n "$TEMPORARY_PAGE_302" ] && [ -n "$ANOTHER_PAGE_302" ]; then
+    echo "    # Redirect 302"
+    echo "    location $TEMPORARY_PAGE_302 {"
+    echo "        return 302 $ANOTHER_PAGE_302;"
+    echo "    }"
+  fi
+  
+  # Redirect 307
+  if [ -n "$TEMPORARY_PAGE_307" ] && [ -n "$ANOTHER_PAGE_307" ]; then
+    echo "    # Redirect 307"
+    echo "    location $TEMPORARY_PAGE_307 {"
+    echo "        return 307 $ANOTHER_PAGE_307;"
+    echo "    }"
+  fi
+  
+  # Redirect 308
+  if [ -n "$PERMANENT_PAGE_308" ] && [ -n "$ANOTHER_PERMANENT_PAGE_308" ]; then
+    echo "    # Redirect 308"
+    echo "    location $PERMANENT_PAGE_308 {"
+    echo "        return 308 $ANOTHER_PERMANENT_PAGE_308;"
+    echo "    }"
+  fi
+  
   echo "}"
-} >"$NGINX_CONF"
+} > "$NGINX_CONF"
 
 # Kiểm tra cấu hình Nginx
 if nginx -t; then
@@ -68,5 +79,5 @@ if nginx -t; then
   echo "Redirects đã được cấu hình thành công cho Nginx và Nginx đã khởi động lại thành công."
 else
   echo "Error: Cấu hình Nginx không hợp lệ. Khôi phục bản sao lưu."
-  cp "${NGINX_CONF}.bak_$(date +%F_%T)" "$NGINX_CONF"
+  cp "$BACKUP_FILE" "$NGINX_CONF" && echo "Khôi phục thành công cấu hình Nginx từ bản sao lưu."
 fi
