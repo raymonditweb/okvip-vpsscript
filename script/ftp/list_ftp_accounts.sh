@@ -45,9 +45,9 @@ get_ftp_directory() {
   local username=$1
   local dir=$(pure-pw show "$username" 2>/dev/null | grep "Directory" | awk '{print $3}' | sed 's|/./||g')
   if [ -z "$dir" ]; then
-    echo "/home/$username"
+    echo "/var/www/$username"
   else
-    echo "$dir"
+    echo "/var/www$dir"
   fi
 }
 
