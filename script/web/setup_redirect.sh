@@ -7,33 +7,36 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 # Kiểm tra tham số đầu vào
-if [ "$#" -ne 9 ]; then
-  echo "Error: Sử dụng: $0 [domain] [URL-301] [URL-301-target] [URL-302] [URL-302-target] [URL-307] [URL-307-target] [URL-308] [URL-308-target]"
+if [ "$#" -lt 3 ] || [ "$#" -gt 4 ]; then
+  echo "Error: Sử dụng: $0 [domain] [path] [redirect-type] [target]"
+  echo "  - domain: Tên miền (vd: domain.com) (có thể bỏ trống)"
+  echo "  - path: Đường dẫn path (định dạng /path/*) (có thể bỏ trống)"
+  echo "  - redirect-type: Loại redirect (301, 302, 307, 308)"
+  echo "  - target: URL đích tới (vd: https://domain-dich.com/$1)"
   exit 1
 fi
 
-# 301 Moved Permanently: This redirect is permanent. It's used when a resource has been permanently moved to a new location. Search engines will update their indexes to the new URL.
-
-# 302 Found (Previously "Moved Temporarily"): This redirect is temporary. It's used when a resource is temporarily located at a different URL. Search engines will continue to index the old URL.
-
-# 307 Temporary Redirect: This is similar to a 302 redirect but enforces the HTTP method used (POST, GET, etc.), meaning that if a user sends a POST request to the original URL, they must use a POST request to the new URL.
-
-# 308 Permanent Redirect: This is similar to a 301 redirect, but like the 307, it also preserves the HTTP method used.
-
 DOMAIN="$1"
-OLD_PAGE_301="$2"
-NEW_PAGE_301="$3"
-TEMPORARY_PAGE_302="$4"
-ANOTHER_PAGE_302="$5"
-TEMPORARY_PAGE_307="$6"
-ANOTHER_PAGE_307="$7"
-PERMANENT_PAGE_308="$8"
-ANOTHER_PERMANENT_PAGE_308="$9"
+PATH="$2"
+REDIRECT_TYPE="$3"
+TARGET="$4"
 
-# Đường dẫn tệp cấu hình riêng (thay vì ghi vào /etc/nginx/nginx.conf)
-NGINX_CONF="/etc/nginx/conf.d/${DOMAIN}.conf"
+# Kiểm tra redirect type hợp lệ
+if ! [[ "$REDIRECT_TYPE" =~ ^(301|302|307|308)$ ]]; then
+  echo "Error: Loại redirect không hợp lệ. Vui lòng chọn một trong: 301, 302, 307, 308."
+  exit 1
+fi
 
-# Sao lưu tệp cũ (nếu có)
+# Đểm bảo rằng tên miền hoặc đường dẫn phải được cung cấp
+if [ -z "$DOMAIN" ] && [ -z "$PATH" ]; then
+  echo "Error: Phải có tối thiểu tên miền hoặc đường dẫn."
+  exit 1
+fi
+
+# Đường dẫn tệp cấu hình Nginx (tạo cấu hình riêng cho từng domain)
+NGINX_CONF="/etc/nginx/conf.d/${DOMAIN:-default}.conf"
+
+# Sao lưu tệp củ (nếu có)
 if [ -f "$NGINX_CONF" ]; then
   cp "$NGINX_CONF" "${NGINX_CONF}.bak_$(date +%F_%T)"
 fi
@@ -42,30 +45,21 @@ fi
 {
   echo "server {"
   echo "    listen 80;"
-  echo "    server_name $DOMAIN;"
-  echo "    # Redirect 301"
-  echo "    location $OLD_PAGE_301 {"
-  echo "        return 301 $NEW_PAGE_301;"
-  echo "    }"
-  echo "    # Redirect 302"
-  echo "    location $TEMPORARY_PAGE_302 {"
-  echo "        return 302 $ANOTHER_PAGE_302;"
-  echo "    }"
-  echo "    # Redirect 307"
-  echo "    location $TEMPORARY_PAGE_307 {"
-  echo "        return 307 $ANOTHER_PAGE_307;"
-  echo "    }"
-  echo "    # Redirect 308"
-  echo "    location $PERMANENT_PAGE_308 {"
-  echo "        return 308 $ANOTHER_PERMANENT_PAGE_308;"
-  echo "    }"
+  if [ -n "$DOMAIN" ]; then
+    echo "    server_name $DOMAIN;"
+  fi
+  if [ -n "$PATH" ]; then
+    echo "    location $PATH {"
+    echo "        return $REDIRECT_TYPE $TARGET;"
+    echo "    }"
+  fi
   echo "}"
 } >"$NGINX_CONF"
 
 # Kiểm tra cấu hình Nginx
 if nginx -t; then
   systemctl restart nginx
-  echo "Redirects đã được cấu hình thành công cho Nginx và Nginx đã khởi động lại thành công."
+  echo "Redirect đã được cấu hình thành công cho Nginx và Nginx đã khởi động lại thành công."
 else
   echo "Error: Cấu hình Nginx không hợp lệ. Khôi phục bản sao lưu."
   cp "${NGINX_CONF}.bak_$(date +%F_%T)" "$NGINX_CONF"
