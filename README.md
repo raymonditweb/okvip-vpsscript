@@ -404,18 +404,20 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/disable-website) <domain*>
 ```
 
-#### Cấu hình redirect (301, 302..) - Redirect configuration (301, 302, etc.)
+#### Cấu hình redirect (301, 302) - Redirect configuration (301, 302, etc.)
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) <domain/path> <redirect-type> <target>
 ```
 
-`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) example.com 301 http://b.com`
+`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) example.com 301 http://b1.com`
+
+`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) example.com 302 http://b2.com`
 
 + Giải thích các tham số:
 domain: Tên miền (ví dụ: domain.com) hoac path: Đường dẫn (ví dụ: /path/*)
-redirect-type: Loại redirect (có thể là 301, 302, 307 hoặc 308)
-target: URL đích tới (ví dụ: https://domain-dich.com/$1)
+redirect-type: Loại redirect (có thể là 301, 302)
+target: URL đích tới (ví dụ: https://domain-dich.com)
 
 #### Export DB
 

@@ -1,66 +1,53 @@
 #!/bin/bash
 
-# Kiểm tra xem người dùng có quyền root không
-if [[ $EUID -ne 0 ]]; then
-  echo "Error: Vui lòng chạy script này với quyền root."
+# Kiểm tra xem có đủ tham số hay không
+if [ "$#" -ne 3 ]; then
+  echo "Usage: $0 <domain_or_path> <redirect_type> <target>"
   exit 1
 fi
 
-# Kiểm tra tham số đầu vào
-if [ "$#" -lt 3 ] || [ "$#" -gt 4 ]; then
-  echo "Error: Sử dụng: $0 [domain] [path] [redirect-type] [target]"
-  echo "  - domain: Tên miền (vd: domain.com) (có thể bỏ trống)"
-  echo "  - path: Đường dẫn path (định dạng /path/*) (có thể bỏ trống)"
-  echo "  - redirect-type: Loại redirect (301, 302, 307, 308)"
-  echo "  - target: URL đích tới (vd: https://domain-dich.com/$1)"
-  exit 1
+DOMAIN_OR_PATH=$1
+REDIRECT_TYPE=$2
+TARGET=$3
+
+# Kiểm tra quyền ghi tệp
+CONFIG_FILE="/etc/nginx/sites-available/$DOMAIN_OR_PATH.conf"
+
+if [ ! -f "$CONFIG_FILE" ]; then
+  echo "Tạo tệp cấu hình: $CONFIG_FILE"
+  touch "$CONFIG_FILE"
 fi
 
-DOMAIN="$1"
-PATH="$2"
-REDIRECT_TYPE="$3"
-TARGET="$4"
+# Tạo bản sao lưu của tệp cấu hình
+cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
 
-# Kiểm tra redirect type hợp lệ
-if ! [[ "$REDIRECT_TYPE" =~ ^(301|302|307|308)$ ]]; then
-  echo "Error: Loại redirect không hợp lệ. Vui lòng chọn một trong: 301, 302, 307, 308."
-  exit 1
-fi
+# Kiểm tra và ghi tệp
+if ! grep -q "server_name $DOMAIN_OR_PATH;" "$CONFIG_FILE"; then
+  cat <<EOL >> "$CONFIG_FILE"
 
-# Đểm bảo rằng tên miền hoặc đường dẫn phải được cung cấp
-if [ -z "$DOMAIN" ] && [ -z "$PATH" ]; then
-  echo "Error: Phải có tối thiểu tên miền hoặc đường dẫn."
-  exit 1
-fi
+server {
+    listen 80;
+    server_name $DOMAIN_OR_PATH;
 
-# Đường dẫn tệp cấu hình Nginx (tạo cấu hình riêng cho từng domain)
-NGINX_CONF="/etc/nginx/conf.d/${DOMAIN:-default}.conf"
-
-# Sao lưu tệp củ (nếu có)
-if [ -f "$NGINX_CONF" ]; then
-  cp "$NGINX_CONF" "${NGINX_CONF}.bak_$(date +%F_%T)"
-fi
-
-# Thêm cấu hình vào tệp cấu hình Nginx
-{
-  echo "server {"
-  echo "    listen 80;"
-  if [ -n "$DOMAIN" ]; then
-    echo "    server_name $DOMAIN;"
-  fi
-  if [ -n "$PATH" ]; then
-    echo "    location $PATH {"
-    echo "        return $REDIRECT_TYPE $TARGET;"
-    echo "    }"
-  fi
-  echo "}"
-} >"$NGINX_CONF"
-
-# Kiểm tra cấu hình Nginx
-if nginx -t; then
-  systemctl restart nginx
-  echo "Redirect đã được cấu hình thành công cho Nginx và Nginx đã khởi động lại thành công."
+    location /$REDIRECT_TYPE {
+        return $REDIRECT_TYPE $TARGET;
+    }
+}
+EOL
 else
-  echo "Error: Cấu hình Nginx không hợp lệ. Khôi phục bản sao lưu."
-  cp "${NGINX_CONF}.bak_$(date +%F_%T)" "$NGINX_CONF"
+  if ! grep -q "location /$REDIRECT_TYPE {" "$CONFIG_FILE"; then
+    sed -i "/server_name $DOMAIN_OR_PATH;/a \ \ \ \ location /$REDIRECT_TYPE {\n        return $REDIRECT_TYPE $TARGET;\n    }" "$CONFIG_FILE"
+  else
+    sed -i "/location \/$REDIRECT_TYPE {/!b;n;s/return [0-9]* .*/return $REDIRECT_TYPE $TARGET;/" "$CONFIG_FILE"
+  fi
 fi
+
+# Kiểm tra lỗi cấu hình Nginx
+if ! nginx -t; then
+  echo "Lỗi cấu hình Nginx. Khôi phục bản sao lưu."
+  mv "$CONFIG_FILE.bak" "$CONFIG_FILE"
+  exit 1
+fi
+
+# Tải lại Nginx
+systemctl reload nginx
