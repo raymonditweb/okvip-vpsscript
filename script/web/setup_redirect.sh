@@ -1,8 +1,14 @@
 #!/bin/bash
 
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script với quyền root."
+  exit 1
+fi
+
 # Kiểm tra xem có đủ tham số hay không
 if [ "$#" -ne 3 ]; then
-  echo "Usage: $0 <domain_or_path> <redirect_type> <target>"
+  echo "Error: Su dung: $0 <domain_or_path> <redirect_type> <target>"
   exit 1
 fi
 
@@ -26,12 +32,12 @@ if ! grep -q "server_name $DOMAIN_OR_PATH;" "$CONFIG_FILE"; then
   cat <<EOL >> "$CONFIG_FILE"
 
 server {
-    listen 80;
-    server_name $DOMAIN_OR_PATH;
+  listen 80;
+  server_name $DOMAIN_OR_PATH;
 
-    location /$REDIRECT_TYPE {
-        return $REDIRECT_TYPE $TARGET;
-    }
+  location /$REDIRECT_TYPE {
+    return $REDIRECT_TYPE $TARGET;
+  }
 }
 EOL
 else
@@ -44,7 +50,7 @@ fi
 
 # Kiểm tra lỗi cấu hình Nginx
 if ! nginx -t; then
-  echo "Lỗi cấu hình Nginx. Khôi phục bản sao lưu."
+  echo "Error: Lỗi cấu hình Nginx. Khôi phục bản sao lưu."
   mv "$CONFIG_FILE.bak" "$CONFIG_FILE"
   exit 1
 fi
