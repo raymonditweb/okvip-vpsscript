@@ -14,7 +14,7 @@ if ! command -v expect &>/dev/null; then
   elif [ -x "$(command -v yum)" ]; then
     yum install -y expect # Trên CentOS/RHEL
   else
-    echo "Error: : Không thể xác định trình quản lý gói để cài đặt expect."
+    echo "Error: Không thể xác định trình quản lý gói để cài đặt expect."
     exit 1
   fi
 fi
@@ -29,42 +29,75 @@ FTP_HOME="/home/ftp_users"
 add_account() {
   local username="${1:-$DEFAULT_USERNAME}"
   local password="${2:-$DEFAULT_PASSWORD}"
+  local directory="${3:-$FTP_HOME/$username}"
+
+  # Đảm bảo đường dẫn là tuyệt đối
+  if [[ "$directory" != /* ]]; then
+    directory="/$directory"
+  fi
 
   # Kiểm tra xem tài khoản đã tồn tại chưa
   if grep -q "^$username:" "$FTP_USER_FILE"; then
     echo "Error: Tài khoản $username đã tồn tại."
-  else
-    # Tạo tài khoản hệ thống và thiết lập thư mục FTP riêng
-    useradd -m -d "$FTP_HOME/$username" -s /sbin/nologin "$username"
-
-    # Tự động nhập mật khẩu cho lệnh chpasswd
-    echo "$username:$password" | chpasswd
-
-    # Thêm tài khoản vào tệp theo dõi tài khoản FTP
-    echo "$username:$password" >>"$FTP_USER_FILE"
-
-    # Thiết lập quyền thư mục
-    mkdir -p "$FTP_HOME/$username"
-    chown "$username:$username" "$FTP_HOME/$username"
-    chmod 755 "$FTP_HOME/$username"
-
-    # Tạo tài khoản FTP trong cơ sở dữ liệu Pure-FTPd bằng expect
-    expect -c "
-    spawn pure-pw useradd $username -u $username -d $FTP_HOME/$username
-    expect \"Password:\"
-    send \"$password\r\"
-    expect \"Repeat password:\"
-    send \"$password\r\"
-    expect eof
-    "
-
-    # Cập nhật cơ sở dữ liệu của Pure-FTPd
-    sudo pure-pw mkdb
-
-    # Kích hoạt tài khoản FTP
-    echo "Tài khoản FTP $username đã được thêm thành công với đầy đủ quyền."
+    return 1
   fi
+
+  # Tạo tài khoản hệ thống và thiết lập thư mục FTP riêng
+  if ! useradd -m -d "$directory" -s /sbin/bash "$username"; then
+    echo "Error: Không thể tạo tài khoản hệ thống $username."
+    return 1
+  fi
+
+  # Tự động nhập mật khẩu cho lệnh chpasswd
+  if ! echo "$username:$password" | chpasswd; then
+    echo "Error: Không thể đặt mật khẩu cho tài khoản $username."
+    return 1
+  fi
+
+  # Thêm tài khoản vào tệp theo dõi tài khoản FTP
+  echo "$username:$password" >>"$FTP_USER_FILE"
+
+  # Thiết lập quyền thư mục
+  if ! mkdir -p "$directory"; then
+    echo "Error: Không thể tạo thư mục $directory."
+    return 1
+  fi
+
+  if ! chown "$username:$username" "$directory"; then
+    echo "Error: Không thể gán quyền sở hữu thư mục $directory cho tài khoản $username."
+    return 1
+  fi
+
+  if ! chmod 755 "$directory"; then
+    echo "Error: Không thể đặt quyền thư mục $directory."
+    return 1
+  fi
+
+  # Tạo tài khoản FTP trong cơ sở dữ liệu Pure-FTPd bằng expect
+  uid=$(id -u "$username")
+  gid=$(id -g "$username")
+
+  expect -c "
+  spawn pure-pw useradd $username -u $uid -g $gid -d $directory
+  expect \"Password:\"
+  send \"$password\r\"
+  expect \"Repeat password:\"
+  send \"$password\r\"
+  expect eof
+  " || {
+    echo "Error: Không thể thêm tài khoản FTP $username vào Pure-FTPd."
+    return 1
+  }
+
+  # Cập nhật cơ sở dữ liệu của Pure-FTPd
+  if ! pure-pw mkdb; then
+    echo "Error: Không thể cập nhật cơ sở dữ liệu của Pure-FTPd."
+    return 1
+  fi
+
+  # Kích hoạt tài khoản FTP
+  echo "Tài khoản FTP $username đã được thêm thành công với đầy đủ quyền."
 }
 
 # Gọi hàm thêm tài khoản với tham số từ dòng lệnh
-add_account "$1" "$2"
+add_account "$1" "$2" "$3"
