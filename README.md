@@ -404,25 +404,20 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/disable-website) <domain*>
 ```
 
-#### Cấu hình redirect (301, 302..) - Redirect configuration (301, 302, etc.)
+#### Cấu hình redirect (301, 302) - Redirect configuration (301, 302, etc.)
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) [domain] [URL-301] [URL-301-target] [URL-302] [URL-302-target] [URL-307] [URL-307-target] [URL-308] [URL-308-target]
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) <domain/path> <redirect-type> <target>
 ```
 
-`vi du: "example.com" "/oldpage" "https://example.com/newpage" "/temp" "https://example.com/tempnew" "/postpage" "https://example.com/newpost" "/permanentpage" "https://example.com/newperm"`
+`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) example.com 301 http://b1.com`
+
+`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/setup_redirect.sh ) example.com 302 http://b2.com`
 
 + Giải thích các tham số:
-example.com: Tên miền cần cấu hình redirect.
-/oldpage -> https://example.com/newpage: Chuyển hướng 301 từ /oldpage sang /newpage.
-/temp -> https://example.com/tempnew: Chuyển hướng 302 từ /temp sang /tempnew.
-/postpage -> https://example.com/newpost: Chuyển hướng 307 từ /postpage sang /newpost.
-/permanentpage -> https://example.com/newperm: Chuyển hướng 308 từ /permanentpage sang /newperm.
-
-+ Kết quả trả về:
-  + Không có root : Error: Vui lòng chạy script với quyền root.
-  + Thành công: Redirects đã được cấu hình thành công cho Nginx.
-  + Số lượng tham số không đúng: Error: Cách sử dụng: [domain] [URL-301] [URL-301-target] [URL-302] [URL-302-target] [URL-307] [URL-307-target] [URL-308] [URL-308-target]
+domain: Tên miền (ví dụ: domain.com) hoac path: Đường dẫn (ví dụ: /path/*)
+redirect-type: Loại redirect (có thể là 301, 302)
+target: URL đích tới (ví dụ: https://domain-dich.com)
 
 #### Export DB
 
