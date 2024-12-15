@@ -164,16 +164,17 @@ bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/ra
 #### Backup VPS: Backup to google driver
 
 ```bash
-bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/sync_backup_to_ggdrive.sh ) DOMAIN GDRIVE_PATH
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/sync_backup_to_ggdrive.sh ) BACKUP_DIR REMOTE_NAME REMOTE_DIR START_TIME BACKUP_INTERVAL_DAYS
 ```
 
-`ví dụ: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/sync_backup_to_ggdrive.sh ) example.com gdrive:/Backups`
+`ví dụ: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/sync_backup_to_ggdrive.sh ) "/path/to/backup_dir" "gdrive" "backup_folder_on_drive" "03:00" 7`
 
-+ Kết quả trả về:
-  + Không có root : Error: Vui lòng chạy script với quyền root.
-  + Thành công: Sao lưu thành công mã nguồn lên Google Drive./Sao lưu thành công cơ sở dữ liệu lên Google Drive.
-  + Nếu thư mục đã tồn tại:: Thư mục lưu trữ backup đã tồn tại: /backup/example.com.
-  + Thất bại: Error: File backup mã nguồn không tồn tại!./Error: File backup cơ sở dữ liệu không tồn tại!
+/path/to/backup_dir: Đường dẫn tới thư mục cần đồng bộ.
+"gdrive": Neu Không cung cấp tên remote, script sẽ mặc định sử dụng gdrive.
+backup_folder_on_drive: Tên thư mục trên Google Drive.
+03:00: Thời gian bắt đầu đồng bộ (định dạng HH:MM).
+7: Tần suất đồng bộ (số ngày).
+
 
 ### Cron Job Management
 
