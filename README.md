@@ -161,6 +161,14 @@ bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/ra
   + Không đủ tham số: Error: Sử dụng: phiên_bản_php (ví dụ: 7.4/ 8.1)
   + Thất bại: Error: Không thể cài đặt PHP $PHP_VERSION. Vui lòng kiểm tra lại.
 
+#### Install Rclone for sync backup to gdrive
+
+```bash
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/install_rclone_gdrive.sh )
+```
+
+`Cach dung Rclone tao link authen: https://docs.google.com/document/d/1LRuq7TwaSb1Nx4X6mYsQyAnIzi65SM8dfy7deWpO0To/edit?tab=t.0#heading=h.2mmclmb880qr`
+
 #### Backup VPS: Backup to google driver
 
 ```bash
