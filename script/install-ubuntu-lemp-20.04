@@ -115,10 +115,23 @@ ufw allow $PHPMYADMIN_PORT/tcp # Mở cổng cho phpMyAdmin
 # Tạo trang demo
 echo "Tạo site mẫu $DOMAIN..."
 mkdir -p "$WEB_ROOT" # Tạo thư mục gốc cho website
-echo "<?php phpinfo(); ?>" > "$WEB_ROOT/index.php" # Tạo file index.php mẫu
 chown -R www-data:www-data "$WEB_ROOT" # Cấp quyền sở hữu cho www-data
 chmod -R 755 "$WEB_ROOT" # Cấp quyền đọc và thực thi cho thư mục
 configure_nginx "$DOMAIN" "$WEB_ROOT" # Cấu hình Nginx cho website demo
+
+# Cài đặt WP-CLI
+echo "Cài đặt WP-CLI..."
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+chmod +x wp-cli.phar
+mv wp-cli.phar /usr/local/bin/wp
+
+# Kiểm tra WP-CLI
+if ! command -v wp &> /dev/null; then
+  echo "Error: WP-CLI không được cài đặt đúng cách. Vui lòng kiểm tra."
+  exit 1
+fi
+
+echo "WP-CLI đã được cài đặt thành công!"
 
 # Kiểm tra cấu hình Nginx và khởi động dịch vụ
 nginx -t # Kiểm tra cấu hình Nginx
