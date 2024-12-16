@@ -6,41 +6,42 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-echo "Bắt đầu gỡ bỏ Nginx và MariaDB..."
+echo "Bắt đầu gỡ bỏ Nginx, MariaDB và MySQL..."
 
-# Dừng các dịch vụ Nginx và MariaDB
-echo "Dừng dịch vụ Nginx và MariaDB..."
+# Dừng các dịch vụ Nginx, MariaDB và MySQL
+echo "Dừng dịch vụ Nginx, MariaDB và MySQL..."
 systemctl stop nginx
 systemctl stop mariadb
+systemctl stop mysql
 
-# Gỡ bỏ các gói Nginx và MariaDB
-echo "Gỡ bỏ các gói Nginx và MariaDB..."
-apt purge nginx* mariadb-server* -y
+# Gỡ bỏ các gói Nginx, MariaDB và MySQL
+echo "Gỡ bỏ các gói Nginx, MariaDB và MySQL..."
+apt purge nginx* mariadb-server* mysql-server* mysql-client* mysql-common* -y
 
 # Xóa các cấu hình và dữ liệu còn lại
 echo "Xóa các cấu hình và dữ liệu còn lại..."
-rm -rf /etc/nginx
-rm -rf /var/www/html/phpmyadmin
-rm -rf /var/www/*
-rm -rf /var/lib/mysql
-rm -rf /var/log/nginx
-rm -rf /home/vpsscript.conf
+rm -rf /etc/nginx           # Cấu hình Nginx
+rm -rf /var/www/*           # Toàn bộ thư mục web
+rm -rf /var/lib/mysql       # Dữ liệu MySQL/MariaDB
+rm -rf /var/log/nginx       # Log Nginx
+rm -rf /var/log/mysql       # Log MySQL/MariaDB
+rm -rf /etc/mysql           # Cấu hình MySQL
+rm -rf /home/vpsscript.conf # File cấu hình script
 
 # Xóa các gói không cần thiết
 echo "Xóa các gói không cần thiết..."
 apt autoremove -y
 
-# Xóa các bản sao lưu của MariaDB và Nginx
+# Xóa các bản sao lưu của Nginx, MariaDB và MySQL
 echo "Xóa các bản sao lưu cũ..."
 rm -rf /var/backups/nginx
 rm -rf /var/backups/mariadb
+rm -rf /var/backups/mysql
 
 # Xóa các người dùng và nhóm liên quan nếu có
 echo "Xóa các người dùng và nhóm liên quan..."
-deluser --remove-home www-data
-delgroup www-data
-
-echo "Gỡ bỏ Nginx và MariaDB hoàn tất."
+deluser --remove-home www-data || true
+delgroup www-data || true
 
 # Cập nhật hệ thống
 apt update

@@ -28,7 +28,6 @@ check_logpath() {
   case "$SERVICE_NAME" in
     sshd) echo "/var/log/auth.log" ;;
     atd) echo "/var/log/syslog" ;;
-    apache2) echo "/var/log/apache2/error.log" ;;
     nginx) echo "/var/log/nginx/error.log" ;;
     vsftpd|proftpd) echo "/var/log/vsftpd.log" ;;
     dovecot) echo "/var/log/dovecot.log" ;;
