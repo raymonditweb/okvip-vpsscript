@@ -9,87 +9,79 @@ fi
 # Kiểm tra phiên bản Ubuntu
 OS=$(lsb_release -si)
 VERSION=$(lsb_release -sr)
-
 if [[ "$OS" != "Ubuntu" || ( "$VERSION" != "20.04" && "$VERSION" != "22.04" ) ]]; then
-  echo "Error: Script này chỉ hỗ trợ Ubuntu 20.04 và 22.04. Phiên bản hiện tại là $OS $VERSION."
+  echo "Error: Script này chỉ hỗ trợ Ubuntu 20.04 và 22.04. Phiên bản hiện tại: $OS $VERSION."
   exit 1
 fi
 
 set -e
 trap 'echo "Đã xảy ra lỗi trong quá trình cài đặt. Vui lòng kiểm tra các thông báo lỗi phía trên."' ERR
 
-# Lấy địa chỉ IP server
-SERVER_IP=$(hostname -I | awk '{print $1}')
+# Biến toàn cục
+SERVER_IP=$(hostname -I | awk '{print $1}') # Lấy địa chỉ IP của server
+MYSQL_ROOT_PASSWORD=${1:-$(openssl rand -base64 32)} # Mật khẩu root MySQL (ngẫu nhiên nếu không truyền vào)
+DOMAIN=${2:-"vpsscript.demo"} # Domain mặc định là vpsscript.demo nếu không truyền vào
+WEB_ROOT="/var/www/$DOMAIN" # Thư mục gốc cho website
+DB_NAME=$(echo "$DOMAIN" | sed 's/\./_/g') # Tạo tên database từ domain, thay . bang _
+PHPMYADMIN_PORT=8080 # Port mặc định cho phpMyAdmin
 
-# Đọc mật khẩu MySQL từ tham số dòng lệnh hoặc tạo ngẫu nhiên nếu không có
-MYSQL_ROOT_PASSWORD=${1:-$(tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 32)}
+# Hàm hỗ trợ
+function configure_nginx {
+  # Hàm cấu hình Nginx cho một domain cụ thể
+  local domain=$1
+  local web_root=$2
+  cat > "/etc/nginx/sites-available/$domain" <<EOL
+server {
+  listen 80;
+  server_name $domain;
+  root $web_root;
 
-# Đọc domain từ tham số dòng lệnh hoặc dùng mặc định
-DOMAIN=${2:-"vpsscript.demo"}
-WEB_ROOT="/var/www/$DOMAIN"
-DB_NAME=$(echo "$DOMAIN" | cut -d '.' -f 1)
+  index index.php index.html index.htm;
 
-echo "Bắt đầu cài đặt LEMP stack trên Ubuntu 20.04 với domain $DOMAIN..."
+  location / {
+    try_files \$uri \$uri/ =404;
+  }
 
-# Cập nhật và nâng cấp hệ thống
-apt update && apt upgrade -y
+  location ~ \.php$ {
+    include snippets/fastcgi-php.conf;
+    fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+    fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+    include fastcgi_params;
+  }
 
-# Cài đặt LEMP
-echo "Cài đặt LEMP..."
-apt install -y nginx mysql-server php-fpm php-mysql unzip
+  location ~ /\.ht {
+    deny all;
+  }
 
-# Mở full cổng firewall cho Nginx
-if ufw status | grep -q "inactive"; then
-  echo "Cảnh báo: Firewall UFW đang tắt, bạn cần bật thủ công (sudo ufw enable)."
-else
-  ufw allow 'Nginx Full'
-fi
+  error_log /var/log/nginx/$domain-error.log;
+  access_log /var/log/nginx/$domain-access.log;
+}
+EOL
+  # Tạo symbolic link để kích hoạt cấu hình Nginx cho domain
+  ln -s "/etc/nginx/sites-available/$domain" /etc/nginx/sites-enabled/
+}
 
-# Khởi động MySQL nếu chưa chạy
-systemctl start mysql
+function restart_services {
+  # Hàm khởi động lại các dịch vụ cần thiết
+  systemctl restart nginx mysql php7.4-fpm
+}
 
-# Cài đặt mật khẩu cho MySQL root
-echo "Cài đặt mật khẩu cho MySQL root..."
-mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';"
+# Cài đặt gói cần thiết
+echo "Cập nhật và cài đặt các gói cần thiết..."
+apt update && apt upgrade -y # Cập nhật hệ thống
+apt install -y nginx mysql-server php-fpm php-mysql unzip php7.4-{fpm,mysql,cli,curl,json,mbstring,xml,zip,gd} # Cài đặt LEMP stack và các module PHP
 
-# Kiểm tra mật khẩu đã được thiết lập thành công
-echo "Xác minh cài đặt mật khẩu MySQL root..."
-if ! mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "SELECT 'MySQL root password đã được thiết lập thành công.';"; then
-  echo "Lỗi: Không thể kết nối với MySQL bằng mật khẩu root."
-  exit 1
-fi
-
-# Tạo database với tên từ domain không có phần mở rộng
-echo "Tạo database có tên $DB_NAME..."
-mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-
-# Cài đặt PHP 7.4 và các module cần thiết
-echo "Cài đặt PHP 7.4..."
-apt install -y php7.4-fpm php7.4-mysql php7.4-cli php7.4-curl php7.4-json php7.4-mbstring php7.4-xml php7.4-zip php7.4-gd
-
-# Lấy phiên bản PHP
-PHP_VERSION=$(php -v | head -n 1 | grep -oP '\d+\.\d+')
-
-# Cài đặt wp-cli
-echo "Cài đặt WP-CLI..."
-curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-php wp-cli.phar --info
-chmod +x wp-cli.phar
-mv wp-cli.phar /usr/local/bin/wp
+# Cấu hình MySQL
+echo "Cấu hình MySQL root password..."
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';" # Thiết lập mật khẩu cho user root
+mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" # Tạo database mới
 
 # Cài đặt phpMyAdmin
 echo "Cài đặt phpMyAdmin..."
-DEBIAN_FRONTEND=noninteractive apt install phpmyadmin -y
+DEBIAN_FRONTEND=noninteractive apt install -y phpmyadmin # Cài đặt phpMyAdmin
+ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin # Tạo symbolic link cho phpMyAdmin
 
-# Lấy phiên bản phpMyAdmin
-PHPMYADMIN_VERSION=$(dpkg -l | grep phpmyadmin | awk '{print $3}')
-
-# Cấu hình phpMyAdmin với Nginx và mở cổng
-PHPMYADMIN_PORT=8080
-ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
-
-# Cấu hình Nginx để chạy phpMyAdmin trên cổng 8080
-echo "Cấu hình Nginx cho phpMyAdmin trên cổng $PHPMYADMIN_PORT..."
+# Cấu hình phpMyAdmin trong Nginx
 cat > /etc/nginx/sites-available/phpmyadmin <<EOL
 server {
   listen $PHPMYADMIN_PORT;
@@ -117,96 +109,46 @@ server {
   access_log /var/log/nginx/phpmyadmin-access.log;
 }
 EOL
+ln -s /etc/nginx/sites-available/phpmyadmin /etc/nginx/sites-enabled/ # Kích hoạt cấu hình phpMyAdmin
+ufw allow $PHPMYADMIN_PORT/tcp # Mở cổng cho phpMyAdmin
 
-# Kích hoạt cấu hình phpMyAdmin
-ln -s /etc/nginx/sites-available/phpmyadmin /etc/nginx/sites-enabled/
-
-# Kiểm tra cấu hình Nginx
-nginx -t
-
-# Khởi động lại Nginx để áp dụng cấu hình mới
-systemctl restart nginx
-
-# Mở cổng cho phpMyAdmin
-ufw allow $PHPMYADMIN_PORT/tcp
-
-# Khởi động lại các dịch vụ
-systemctl restart nginx
-systemctl restart mysql
-systemctl restart php7.4-fpm
-
-# Tạo một site demo với domain truyền vào hoặc mặc định vpsscript.demo
+# Tạo trang demo
 echo "Tạo site mẫu $DOMAIN..."
+mkdir -p "$WEB_ROOT" # Tạo thư mục gốc cho website
+chown -R www-data:www-data "$WEB_ROOT" # Cấp quyền sở hữu cho www-data
+chmod -R 755 "$WEB_ROOT" # Cấp quyền đọc và thực thi cho thư mục
+configure_nginx "$DOMAIN" "$WEB_ROOT" # Cấu hình Nginx cho website demo
 
-# Tạo thư mục cho website
-mkdir -p $WEB_ROOT
+# Cài đặt WP-CLI
+echo "Cài đặt WP-CLI..."
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+chmod +x wp-cli.phar
+mv wp-cli.phar /usr/local/bin/wp
 
-# Tạo một trang index.php mẫu
-echo "<?php phpinfo(); ?>" > $WEB_ROOT/index.php
-
-# Chuyển quyền thư mục
-chown -R www-data:www-data $WEB_ROOT
-chmod -R 755 $WEB_ROOT
-
-# Cấu hình Nginx cho website
-echo "Cấu hình Nginx cho website $DOMAIN..."
-cat > /etc/nginx/sites-available/$DOMAIN <<EOL
-server {
-  listen 80;
-  server_name $DOMAIN;
-  root $WEB_ROOT;
-
-  index index.php index.html index.htm;
-
-  location / {
-    try_files \$uri \$uri/ =404;
-  }
-
-  location ~ \.php$ {
-    include snippets/fastcgi-php.conf;
-    fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
-    fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
-    include fastcgi_params;
-  }
-
-  location ~ /\.ht {
-    deny all;
-  }
-
-  error_log /var/log/nginx/$DOMAIN-error.log;
-  access_log /var/log/nginx/$DOMAIN-access.log;
-}
-EOL
-
-# Kích hoạt cấu hình website
-ln -s /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
-
-# Kiểm tra cấu hình Nginx
-nginx -t
-
-# Khởi động lại Nginx để áp dụng cấu hình mới
-systemctl restart nginx
-
-# Thêm domain vào /etc/hosts nếu chưa tồn tại
-if ! grep -q "127.0.0.1 $DOMAIN" /etc/hosts; then
-  echo "127.0.0.1 $DOMAIN" >> /etc/hosts
+# Kiểm tra WP-CLI
+if ! command -v wp &> /dev/null; then
+  echo "Error: WP-CLI không được cài đặt đúng cách. Vui lòng kiểm tra."
+  exit 1
 fi
 
-# Ghi thông tin cấu hình ra file vpsscript.conf
-NGINX_VERSION=$(nginx -v 2>&1 | grep -oP 'nginx/\K[^ ]+')
+echo "WP-CLI đã được cài đặt thành công!"
+
+# Kiểm tra cấu hình Nginx và khởi động dịch vụ
+nginx -t # Kiểm tra cấu hình Nginx
+restart_services # Khởi động lại các dịch vụ cần thiết
+
+# Lưu thông tin cài đặt
 cat > "/home/vpsscript.conf" <<END
 serverip="$SERVER_IP"
 current_os_version="$VERSION"
-nginx_version="$NGINX_VERSION"
-php_version="$PHP_VERSION"
-mainsite="$DOMAIN"
 mysql_root_password="$MYSQL_ROOT_PASSWORD"
-phpmyadmin_version="$PHPMYADMIN_VERSION"
-priport="$PHPMYADMIN_PORT"
+mainsite="$DOMAIN"
+database_name="$DB_NAME"
+phpmyadmin_port="$PHPMYADMIN_PORT"
 END
 
-echo "Thông tin cài đặt đã được lưu trong /home/vpsscript.conf"
-echo "Website demo đã được khởi tạo thành công tại http://$DOMAIN!"
-echo "Database $DB_NAME đã được tạo!"
-echo "Bạn có thể truy cập phpMyAdmin tại http://$SERVER_IP:$PHPMYADMIN_PORT"
-echo "Mật khẩu root: $MYSQL_ROOT_PASSWORD"
+# Hiển thị thông báo hoàn tất
+echo "Cài đặt hoàn tất!"
+echo "Website demo: http://$DOMAIN"
+echo "phpMyAdmin: http://$SERVER_IP:$PHPMYADMIN_PORT"
+echo "MySQL root password: $MYSQL_ROOT_PASSWORD"
