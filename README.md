@@ -475,6 +475,18 @@ Lưu ý:
 BACKUP_TIME: là tham số có thể truyền dạng 24h như 01:00 / 02:00 / 23:30
 BACKUP_INTERVAL_DAYS là tham số so ngay: 1 / 2 /
 
+#### Restore website
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/restore_backup.sh <file_backup> <thư_mục_khôi_phục>
+```
+
+vi du:
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/restore_backup.sh /backup/domain_14062024120000.zip /var/www/domain.com
+```
+
 ## 3. WordPress Maintenance
 
 ### Cập nhật plugin and Wordpress core- Update WordPress Core and Plugins
