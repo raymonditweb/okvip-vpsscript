@@ -9,6 +9,22 @@ fi
 # Đường dẫn tới tệp chứa danh sách tài khoản FTP
 FTP_USER_FILE="/etc/ftp_users.txt"
 
+# Hàm cài đặt Pure-FTPD nếu chưa có
+install_pureftpd() {
+  if ! command -v pure-pw &>/dev/null; then
+    echo "Pure-FTPD chưa được cài đặt. Đang tiến hành cài đặt..."
+    if command -v apt-get &>/dev/null; then
+      apt-get update && apt-get install -y pure-ftpd
+    elif command -v yum &>/dev/null; then
+      yum install -y pure-ftpd
+    else
+      echo "Error: Không xác định được hệ quản lý gói. Vui lòng cài đặt Pure-FTPD thủ công."
+      exit 1
+    fi
+    echo "Cài đặt Pure-FTPD hoàn tất."
+  fi
+}
+
 # Hàm để kiểm tra status của FTP user
 check_ftp_status() {
   local username=$1
@@ -97,6 +113,9 @@ check_requirements() {
     fi
   done
 }
+
+# Kiểm tra và cài đặt Pure-FTPD nếu cần
+install_pureftpd
 
 # Kiểm tra yêu cầu trước khi chạy
 check_requirements
