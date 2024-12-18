@@ -13,7 +13,7 @@ TEMPLATE_URL=$3
 WEB_ROOT="/var/www/$DOMAIN"
 DB_NAME="${DOMAIN//./_}" # Tên cơ sở dữ liệu, thay thế dấu chấm bằng dấu gạch dưới
 DB_USER=$DB_NAME"_user"
-DB_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
+DB_PASSWORD=${4:-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)}
 
 # Kiểm tra nếu không nhập template URL thì báo lỗi
 if [ -z "$TEMPLATE_URL" ]; then
