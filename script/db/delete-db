@@ -17,10 +17,15 @@ MYSQL_ROOT_PASSWORD=$1
 # Nhập tên database muốn xóa
 # read -p "Nhập tên database muốn xóa: " DB_NAME
 
+# Kiểm tra tham số tên database
+if [ -z "$2" ]; then
+  echo "Error: Vui lòng truyền tên database muốn xóa."
+  exit 1
+fi
 DB_NAME=$2
 
 # Xóa database
-mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;" -y
+mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;"
 
 if [ $? -eq 0 ]; then
     echo "Database '$DB_NAME' đã được xóa thành công."
