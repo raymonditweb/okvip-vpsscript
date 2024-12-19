@@ -8,17 +8,32 @@ fi
 
 # Kiểm tra tham số mật khẩu MySQL root
 if [ -z "$1" ]; then
-  echo "Error: Vui lòng truyền mật khẩu MySQL root."
+  echo "Vui lòng truyền mật khẩu MySQL root."
   exit 1
 fi
 
 MYSQL_ROOT_PASSWORD=$1
 
 # Nhập tên database muốn xóa
-read -p "Nhập tên database muốn xóa: " DB_NAME
+# read -p "Nhập tên database muốn xóa: " DB_NAME
+
+# Kiểm tra tham số tên database
+if [ -z "$2" ]; then
+  echo "Vui lòng truyền tên database muốn xóa."
+  exit 1
+fi
+DB_NAME=$2
+
+# Kiểm tra sự tồn tại của database
+DB_EXISTS=$(mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DB_NAME';" 2>/dev/null | grep -w "$DB_NAME")
+
+if [ -z "$DB_EXISTS" ]; then
+  echo "Database '$DB_NAME' không tồn tại."
+  exit 1
+fi
 
 # Xóa database
-mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;" -y
+mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;"
 
 if [ $? -eq 0 ]; then
     echo "Database '$DB_NAME' đã được xóa thành công."
