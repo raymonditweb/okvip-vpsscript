@@ -24,6 +24,14 @@ if [ -z "$2" ]; then
 fi
 DB_NAME=$2
 
+# Kiểm tra sự tồn tại của database
+DB_EXISTS=$(mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DB_NAME';" 2>/dev/null | grep -w "$DB_NAME")
+
+if [ -z "$DB_EXISTS" ]; then
+  echo "Error: Database '$DB_NAME' không tồn tại."
+  exit 1
+fi
+
 # Xóa database
 mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;"
 
