@@ -15,7 +15,9 @@ fi
 MYSQL_ROOT_PASSWORD=$1
 
 # Nhập tên database muốn xóa
-read -p "Nhập tên database muốn xóa: " DB_NAME
+# read -p "Nhập tên database muốn xóa: " DB_NAME
+
+DB_NAME=$2
 
 # Xóa database
 mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;" -y
