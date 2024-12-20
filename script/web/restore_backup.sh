@@ -55,12 +55,7 @@ if [ ! -f "$WP_CONFIG" ]; then
   exit 1
 fi
 
-#DB_USER=$(grep "DB_USER" "$WP_CONFIG" | sed -E "s/.*define\('DB_USER',\s*'([^']+)'\).*/\1/")
-#DB_PASS=$(grep "DB_PASSWORD" "$WP_CONFIG" | sed -E "s/.*define\('DB_PASSWORD',\s*'([^']+)'\).*/\1/")
-
 DB_USER=$(grep "define(\"DB_USER" $WP_CONFIG | awk -F"'" '{print $2}')
-
-# Trích xuất giá trị của DB_PASSWORD
 DB_PASS=$(grep "define(\"DB_PASSWORD" $WP_CONFIG | awk -F"'" '{print $2}')
 
 if [ -z "$DB_USER" ] || [ -z "$DB_PASS" ]; then
