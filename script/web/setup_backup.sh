@@ -37,13 +37,32 @@ fi
 
 # Cài đặt
 WWW_DIR="/var/www/$DOMAIN" # Thư mục chứa mã nguồn web
-DB_NAME="${DOMAIN//./_}"   # Tên cơ sở dữ liệu, thay thế dấu chấm bằng dấu gạch dưới
+DB_NAME=$(echo "$DOMAIN" | sed -E 's/\./_/g')
+log "Tên database được xác định: $DB_NAME"
 
 # Đọc thông tin đăng nhập từ wp-config.php
 WP_CONFIG="$WWW_DIR/wp-config.php"
-DB_USER=$(grep "DB_USER" "$WP_CONFIG" | sed -E "s/define\('DB_USER',\s*'([^']+)'.*/\1/")
-DB_PASS=$(grep "DB_PASS" "$WP_CONFIG" | sed -E "s/define\('DB_PASS',\s*'([^']+)'.*/\1/")
+log "Tên tệp wp-config.php được xác định: $WP_CONFIG"
 
+DB_USER=$(grep "define(\"DB_USER" $WP_CONFIG | awk -F"'" '{print $2}')
+DB_PASS=$(grep "define(\"DB_PASSWORD" $WP_CONFIG | awk -F"'" '{print $2}')
+
+if [ -z "$DB_USER" ] || [ -z "$DB_PASS" ]; then
+  log "Error: Không thể đọc thông tin đăng nhập từ wp-config.php!"
+  exit 1
+fi
+
+log "Thông tin đăng nhập được lấy từ wp-config.php:"
+log "  DB_USER: $DB_USER"
+log "  DB_PASS: $DB_PASS"
+
+# Tạo tệp cấu hình MySQL
+echo "[client]" >~/.my.cnf
+echo "user=$DB_USER" >>~/.my.cnf
+echo "password=$DB_PASS" >>~/.my.cnf
+chmod 600 ~/.my.cnf # Bảo mật tệp cấu hình
+
+# Giới hạn số lượng file backup
 MAX_BACKUPS=7 # Số lượng file backup tối đa được giữ lại
 
 # Thời gian hiện tại
@@ -70,7 +89,11 @@ fi
 log "Backup database $DB_NAME..."
 SQL_BACKUP_FILE="/tmp/${DB_NAME}.sql"
 mysqldump -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "$SQL_BACKUP_FILE"
-log "Backup database hoàn tất."
+if [ $? -eq 0 ]; then
+  log "Backup database hoàn tất."
+else
+  log "ERROR: Lỗi khi backup database."
+fi
 
 # Thêm file backup database vào file zip
 zip -j "$BACKUP_FILE" "$SQL_BACKUP_FILE" >/dev/null 2>&1
@@ -83,7 +106,7 @@ BACKUP_COUNT=$(ls -1t "$BACKUP_DIR" | grep "${DOMAIN}_" | wc -l)
 
 if [ "$BACKUP_COUNT" -gt "$MAX_BACKUPS" ]; then
   log "Xóa các backup cũ..."
-  ls -1t "$BACKUP_DIR" | grep "${DOMAIN}_" | tail -n +$(($MAX_BACKUPS + 1)) | while read OLD_BACKUP; do
+  ls -1t "$BACKUP_DIR" | grep "${DOMAIN}_" | tail -n +$(($MAX_BACKUPS)) | while read OLD_BACKUP; do
     rm "$BACKUP_DIR/$OLD_BACKUP"
     log "Đã xóa backup cũ: $OLD_BACKUP"
   done
@@ -97,4 +120,5 @@ BACKUP_INTERVAL_MINUTES=$((BACKUP_INTERVAL_DAYS * 24 * 60))
   echo "$START_TIME */$BACKUP_INTERVAL_MINUTES * * * /bin/bash $(realpath $0) $DOMAIN $BACKUP_DIR $START_TIME $BACKUP_INTERVAL_DAYS"
 ) | crontab -
 
+log "Backup file: $BACKUP_FILE"
 log "Thiết lập backup tự động cho $DOMAIN tại $BACKUP_DIR"
