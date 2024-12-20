@@ -14,54 +14,69 @@ if [ -z "$1" ]; then
 fi
 
 NEW_SSH_PORT=$1
-
-# Kiểm tra xem cổng có hợp lệ không (trong khoảng từ 1 đến 65535)
-if ! [[ $NEW_SSH_PORT =~ ^[0-9]+$ ]] || [ "$NEW_SSH_PORT" -lt 1 ] || [ "$NEW_SSH_PORT" -gt 65535 ]; then
-  echo "Error: Cổng không hợp lệ. Vui lòng chọn một giá trị từ 1 đến 65535."
-  exit 1
-fi
-
-# Đường dẫn tệp cấu hình SSH
+SAFE_PORT_RANGE=(1024 49151)
 SSH_CONFIG_FILE="/etc/ssh/sshd_config"
 BACKUP_FILE="/etc/ssh/sshd_config.bak"
 
-# Backup tệp cấu hình SSH trước khi thay đổi
+# Kiểm tra tệp cấu hình SSH
+if [ ! -f "$SSH_CONFIG_FILE" ]; then
+  echo "Error: Không tìm thấy tệp cấu hình SSH tại $SSH_CONFIG_FILE."
+  exit 1
+fi
+
+# Kiểm tra xem cổng có hợp lệ không
+if ! [[ $NEW_SSH_PORT =~ ^[0-9]+$ ]] || [ "$NEW_SSH_PORT" -lt 1 ] || [ "$NEW_SSH_PORT" -gt 65535 ]; then
+  echo "Error: Cổng không hợp lệ. Vui lòng chọn một giá trị từ 1 đến 65535."
+  exit 1
+elif ([ "$NEW_SSH_PORT" -lt ${SAFE_PORT_RANGE[0]} ] || [ "$NEW_SSH_PORT" -gt ${SAFE_PORT_RANGE[1]} ]) && [ "$NEW_SSH_PORT" -ne 22 ]; then
+  echo "Error: Cổng nằm ngoài dải an toàn (${SAFE_PORT_RANGE[0]}-${SAFE_PORT_RANGE[1]}), trừ cổng 22."
+  exit 1
+fi
+
+# Sao lưu tệp cấu hình SSH
 if [ ! -f "$BACKUP_FILE" ]; then
-  cp $SSH_CONFIG_FILE $BACKUP_FILE
-  echo "Đã tạo bản sao lưu của $SSH_CONFIG_FILE thành $BACKUP_FILE"
+  cp "$SSH_CONFIG_FILE" "$BACKUP_FILE" || {
+    echo "Error: Không thể sao lưu tệp cấu hình SSH."
+    exit 1
+  }
+  echo "Đã tạo bản sao lưu của $SSH_CONFIG_FILE thành $BACKUP_FILE."
 fi
 
-# Lấy cổng SSH hiện tại (mặc định là 22 nếu chưa thay đổi)
-CURRENT_SSH_PORT=$(grep "^Port" $SSH_CONFIG_FILE | awk '{print $2}')
-if [ -z "$CURRENT_SSH_PORT" ]; then
-  CURRENT_SSH_PORT=22
-fi
-echo "Cổng SSH hiện tại là $CURRENT_SSH_PORT"
+# Lấy cổng SSH hiện tại
+CURRENT_SSH_PORT=$(grep "^Port" "$SSH_CONFIG_FILE" | awk '{print $2}')
+CURRENT_SSH_PORT=${CURRENT_SSH_PORT:-22}
 
-# Thay đổi cổng SSH trong tệp cấu hình
-if grep -q "^#Port" $SSH_CONFIG_FILE; then
-  sed -i "s/^#Port.*/Port $NEW_SSH_PORT/" $SSH_CONFIG_FILE
-elif grep -q "^Port" $SSH_CONFIG_FILE; then
-  sed -i "s/^Port.*/Port $NEW_SSH_PORT/" $SSH_CONFIG_FILE
+# Mở cổng mới trong tường lửa
+if ufw status | grep -q "Status: active"; then
+  if ! ufw allow "$NEW_SSH_PORT/tcp"; then
+    echo "Error: Không thể mở cổng $NEW_SSH_PORT trong tường lửa."
+    exit 1
+  fi
+  echo "Cổng $NEW_SSH_PORT đã được mở trong tường lửa."
+fi
+
+# Thay đổi cổng SSH
+if grep -q "^#Port" "$SSH_CONFIG_FILE"; then
+  sed -i "s/^#Port.*/Port $NEW_SSH_PORT/" "$SSH_CONFIG_FILE"
+elif grep -q "^Port" "$SSH_CONFIG_FILE"; then
+  sed -i "s/^Port.*/Port $NEW_SSH_PORT/" "$SSH_CONFIG_FILE"
 else
-  echo "Port $NEW_SSH_PORT" >> $SSH_CONFIG_FILE
+  echo "Port $NEW_SSH_PORT" >>"$SSH_CONFIG_FILE"
 fi
-echo "Cổng SSH đã được thay đổi thành $NEW_SSH_PORT trong $SSH_CONFIG_FILE"
 
-# Xóa quy tắc cổng SSH hiện tại khỏi tường lửa
-echo "Xóa cổng SSH hiện tại ($CURRENT_SSH_PORT) khỏi tường lửa..."
-ufw delete allow $CURRENT_SSH_PORT/tcp
+# Xóa cổng cũ khỏi tường lửa
+if [ "$CURRENT_SSH_PORT" -ne "$NEW_SSH_PORT" ] && ufw status | grep -q "Status: active"; then
+  ufw delete allow "$CURRENT_SSH_PORT/tcp" || echo "Warning: Không thể xóa cổng $CURRENT_SSH_PORT khỏi tường lửa."
+fi
 
-# Cập nhật tường lửa để cho phép cổng SSH mới
-echo "Cập nhật tường lửa để cho phép cổng SSH mới..."
-ufw allow $NEW_SSH_PORT/tcp
-echo "Cổng $NEW_SSH_PORT đã được mở trong tường lửa."
-
-# Khởi động lại dịch vụ SSH để áp dụng thay đổi
-echo "Khởi động lại dịch vụ SSH..."
-systemctl restart ssh
-
-# Kiểm tra trạng thái dịch vụ SSH
-systemctl status ssh
-
-echo "Cổng SSH đã được thay đổi thành công. Vui lòng sử dụng cổng $NEW_SSH_PORT để kết nối SSH từ lần sau."
+# Khởi động lại SSH
+if systemctl restart ssh; then
+  echo "Cổng SSH đã được thay đổi thành $NEW_SSH_PORT. Vui lòng kiểm tra kết nối."
+else
+  echo "Error: Không thể khởi động lại dịch vụ SSH. Khôi phục cấu hình ban đầu..."
+  cp "$BACKUP_FILE" "$SSH_CONFIG_FILE"
+  ufw delete allow "$NEW_SSH_PORT/tcp"
+  ufw allow "$CURRENT_SSH_PORT/tcp"
+  systemctl restart ssh
+  echo "Đã khôi phục cấu hình ban đầu. Sử dụng cổng $CURRENT_SSH_PORT."
+fi
