@@ -78,7 +78,7 @@ echo "Tạo database và user MySQL cho WordPress..."
 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
 
 # Kiểm tra phiên bản MySQL
-MYSQL_VERSION=$(mysql -V | grep -o -E '[0-9]+\.[0-9]+\.[0-9]+')
+MYSQL_VERSION=$(mysql -V | grep -o -E '[4-9]+\.[0-9]+\.[0-9]+')
 
 # Xử lý tạo user tùy thuộc vào phiên bản MySQL
 if [[ "$MYSQL_VERSION" =~ ^8.* ]]; then
