@@ -1,8 +1,14 @@
 #!/bin/bash
 
+LOG_FILE="/var/log/remove-website.log"
+
+log() {
+  echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" | tee -a "$LOG_FILE"
+}
+
 # Kiểm tra quyền root
 if [ "$EUID" -ne 0 ]; then
-  echo "Error: Vui lòng chạy với quyền root."
+  log "Error: Vui lòng chạy với quyền root."
   exit 1
 fi
 
@@ -11,70 +17,113 @@ DOMAIN=$1
 MYSQL_ROOT_PASSWORD=$2
 
 if [ -z "$DOMAIN" ] || [ -z "$MYSQL_ROOT_PASSWORD" ]; then
-  echo "Error: Sử dụng: ./remove-website.sh <domain> <mysql_root_password>"
+  log "Error: Sử dụng: <domain> <mysql_root_password>"
   exit 1
 fi
 
-# Lấy tên database từ domain (phần trước dấu chấm)
 DB_NAME="${DOMAIN//./_}" # Tên cơ sở dữ liệu, thay thế dấu chấm bằng dấu gạch dưới
 DB_USER="${DB_NAME}_user"
+WEB_ROOT="/var/www/$DOMAIN"
+BACKUP_DIR="/backup/$DOMAIN"
 
-# Xóa tệp cấu hình Nginx
+log "Bắt đầu quá trình xóa website cho domain: $DOMAIN"
+
+# Tạo thư mục sao lưu
+mkdir -p "$BACKUP_DIR" && log "Đã tạo thư mục sao lưu: $BACKUP_DIR"
+
+# Sao lưu cấu hình Nginx
 if [ -f "/etc/nginx/sites-available/$DOMAIN" ]; then
-  rm /etc/nginx/sites-available/$DOMAIN
-  echo "Đã xóa tệp cấu hình Nginx trong sites-available."
-else
-  echo "Tệp cấu hình không tồn tại trong sites-available."
+  cp "/etc/nginx/sites-available/$DOMAIN" "$BACKUP_DIR/"
+  log "Đã sao lưu cấu hình Nginx."
 fi
 
-# Xóa liên kết tượng trưng
-if [ -L "/etc/nginx/sites-enabled/$DOMAIN" ]; then
-  rm /etc/nginx/sites-enabled/$DOMAIN
-  echo "Đã xóa liên kết tượng trưng trong sites-enabled."
-else
-  echo "Liên kết tượng trưng không tồn tại trong sites-enabled."
+# Sao lưu thư mục web
+if [ -d "$WEB_ROOT" ]; then
+  tar -czf "$BACKUP_DIR/webroot.tar.gz" "$WEB_ROOT"
+  log "Đã sao lưu thư mục web tại $BACKUP_DIR/webroot.tar.gz."
 fi
 
-# Kiểm tra và xóa database MySQL
+# Kiểm tra và cài đặt mysqldump nếu cần
+if ! command -v mysqldump &>/dev/null; then
+  log "mysqldump không có sẵn. Đang cố gắng cài đặt..."
+  if [ -f "/etc/debian_version" ]; then
+    apt update && apt install -y mysql-client && log "Đã cài đặt mysql-client." || {
+      log "Error: Không thể cài đặt mysql-client."
+      exit 1
+    }
+  elif [ -f "/etc/redhat-release" ]; then
+    yum install -y mysql && log "Đã cài đặt mysql." || {
+      log "Error: Không thể cài đặt mysql client."
+      exit 1
+    }
+  else
+    log "Không thể xác định hệ điều hành. Vui lòng cài đặt mysqldump thủ công."
+    exit 1
+  fi
+fi
+
+# Sao lưu database
 if mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DB_NAME';" | grep -q "$DB_NAME"; then
-  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;"
-  echo "Đã xóa database MySQL cho domain $DOMAIN."
+  mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" "$DB_NAME" >"$BACKUP_DIR/$DB_NAME.sql" &&
+    log "Đã sao lưu database tại $BACKUP_DIR/$DB_NAME.sql." || {
+    log "Error: Không thể sao lưu database bằng mysqldump."
+    exit 1
+  }
 else
-  echo "Database không tồn tại hoặc không thể truy cập."
+  log "Database không tồn tại hoặc không thể truy cập."
 fi
 
-# Kiểm tra và xóa người dùng MySQL
+# Xóa cấu hình Nginx
+if [ -f "/etc/nginx/sites-available/$DOMAIN" ]; then
+  rm "/etc/nginx/sites-available/$DOMAIN" && log "Đã xóa cấu hình Nginx." || {
+    log "Error: Không thể xóa cấu hình Nginx."
+    exit 1
+  }
+fi
+
+# Xóa liên kết tượng trưng Nginx
+if [ -L "/etc/nginx/sites-enabled/$DOMAIN" ]; then
+  rm "/etc/nginx/sites-enabled/$DOMAIN" && log "Đã xóa liên kết tượng trưng Nginx." || {
+    log "Error: Không thể xóa liên kết tượng trưng Nginx."
+    exit 1
+  }
+fi
+
+# Xóa database và user MySQL
+if mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DB_NAME';" | grep -q "$DB_NAME"; then
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;" && log "Đã xóa database MySQL $DB_NAME." || {
+    log "Error: Không thể xóa database $DB_NAME."
+    exit 1
+  }
+fi
+
 if mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SELECT User FROM mysql.user WHERE User = '$DB_USER';" | grep -q "$DB_USER"; then
-  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP USER '$DB_USER'@'localhost';"
-  echo "Đã xóa người dùng MySQL liên kết với database $DB_NAME."
-else
-  echo "Người dùng không tồn tại hoặc không thể truy cập."
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP USER IF EXISTS '$DB_USER'@'localhost';" &&
+    mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP USER IF EXISTS '$DB_USER'@'%';" &&
+    log "Đã xóa người dùng MySQL liên kết với database $DB_NAME." || {
+    log "Error: Không thể xóa người dùng MySQL $DB_USER."
+    exit 1
+  }
 fi
 
 # Kiểm tra và xóa thư mục web
-WEB_ROOT="/var/www/$DOMAIN"
 if [ -d "$WEB_ROOT" ]; then
-  rm -rf "$WEB_ROOT"
-  echo "Đã xóa thư mục web tại $WEB_ROOT."
-else
-  echo "Thư mục web không tồn tại."
+  rm -rf "$WEB_ROOT" && log "Đã xóa thư mục web." || {
+    log "Error: Không thể xóa thư mục web tại $WEB_ROOT."
+    exit 1
+  }
 fi
 
-# Kiểm tra và xóa tham chiếu trong nginx.conf
-if grep -q "$DOMAIN" /etc/nginx/nginx.conf; then
-  sed -i "/$DOMAIN/d" /etc/nginx/nginx.conf
-  echo "Đã xóa tham chiếu đến $DOMAIN trong nginx.conf."
-else
-  echo "Không tìm thấy tham chiếu đến $DOMAIN trong nginx.conf."
-fi
-
-# Kiểm tra lại cấu hình Nginx
+# Kiểm tra cấu hình Nginx
 nginx -t
 if [ $? -eq 0 ]; then
-  echo "Cấu hình Nginx hợp lệ."
-  systemctl reload nginx
+  systemctl reload nginx && log "Đã tải lại Nginx với cấu hình mới." || {
+    log "Error: Không thể tải lại Nginx."
+    exit 1
+  }
 else
-  echo "Cấu hình Nginx không hợp lệ, không thể tải lại."
+  log "Error: Cấu hình Nginx không hợp lệ."
+  exit 1
 fi
 
-echo "Quá trình xóa website hoàn tất."
+log "Quá trình xóa website hoàn tất."
