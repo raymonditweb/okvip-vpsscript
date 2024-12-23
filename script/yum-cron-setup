@@ -6,8 +6,8 @@ echo -n "Email nhan thong bao update [ENTER]: "
 read emailmanage
 
 #
-systemctl disable yum-updatesd
-dnf -y install yum-cron
+chkconfig yum-updatesd off
+yum -y install yum-cron
 
 #
 if [ ! -f /etc/yum/yum-cron.conf ]; then
