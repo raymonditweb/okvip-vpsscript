@@ -2,7 +2,7 @@
 
 # Nhập email để nhận thông báo
 echo "========================================================================="
-echo -n "Email nhận thông báo update [ENTER]: " 
+echo -n "Email nhan thong bao update [ENTER]: " 
 read emailmanage
 
 # Cập nhật hệ thống và cài đặt unattended-upgrades
