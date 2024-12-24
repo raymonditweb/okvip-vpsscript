@@ -28,15 +28,14 @@ DB_NAME=$2
 DB_EXISTS=$(mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DB_NAME';" 2>/dev/null | grep -w "$DB_NAME")
 
 if [ -z "$DB_EXISTS" ]; then
-  echo "Database '$DB_NAME' không tồn tại."
-  exit 1
-fi
-
-# Xóa database
-mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;"
-
-if [ $? -eq 0 ]; then
-    echo "Database '$DB_NAME' đã được xóa thành công."
+  echo "Error: Database '$DB_NAME' không tồn tại."
 else
+  # Xóa database
+  mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;"
+
+  if [ $? -eq 0 ]; then
+    echo "Database '$DB_NAME' đã được xóa thành công."
+  else
     echo "Error: Không thể xóa database '$DB_NAME'."
+  fi
 fi
