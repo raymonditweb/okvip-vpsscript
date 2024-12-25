@@ -1,13 +1,13 @@
 #!/bin/sh
 
 #
-echo "========================================================================="
-echo -n "Email nhan thong bao update [ENTER]: " 
-read emailmanage
+# echo "========================================================================="
+# echo -n "Email nhan thong bao update [ENTER]: " 
+# read emailmanage
 
 #
-chkconfig yum-updatesd off
-yum -y install yum-cron
+systemctl disable yum-updatesd
+dnf -y install yum-cron
 
 #
 if [ ! -f /etc/yum/yum-cron.conf ]; then
@@ -35,28 +35,27 @@ cat > "/etc/yum/yum-cron.conf" <<END
 update_cmd = default
 update_messages = yes
 download_updates = yes
-# apply_updates = no
 apply_updates = yes
-# random_sleep = 360
 random_sleep = 0
+
 [emitters]
 system_name = None
-# emit_via = stdio
-emit_via = email
+emit_via = stdio
 output_width = 80
+
 [email]
 email_from = root@localhost
-# email_to = root
-email_to = $emailmanage
 email_host = localhost
+
 [groups]
 group_list = None
 group_package_types = mandatory, default
+
 [base]
-#exclude = kernel* owncloud* php* httpd*
 exclude = php*
 debuglevel = -2
 mdpolicy = group:main
+
 END
 
 
