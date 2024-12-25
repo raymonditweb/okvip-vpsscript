@@ -23,8 +23,6 @@ for CONF_FILE in "$NGINX_CONF_DIR"/*; do
     DOMAINS=$(grep -E "server_name" "$CONF_FILE" | awk '{for (i=2; i<=NF; i++) print $i}' | sed 's/;$//' | grep -Ev "^_|^localhost$|^server_name$")
 
     for DOMAIN in $DOMAINS; do
-      # Kiểm tra nếu domain hợp lệ
-      if [[ "$DOMAIN" =~ ^[a-zA-Z0-9.-]+$ ]]; then
         echo -n "Kiểm tra domain: $DOMAIN... "
         
         # Kiểm tra SSL
@@ -36,9 +34,6 @@ for CONF_FILE in "$NGINX_CONF_DIR"/*; do
           EXPIRY_DATE=$(echo "$SSL_INFO" | grep 'notAfter' | cut -d= -f2)
           echo "Có SSL (Hết hạn: $EXPIRY_DATE)"
         fi
-      else
-        echo "Domain không hợp lệ: $DOMAIN (Bỏ qua)"
-      fi
     done
   fi
 done
