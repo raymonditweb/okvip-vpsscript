@@ -29,15 +29,16 @@ if [ -d "$CONF_PATH" ]; then
     if [ -f "$conf" ]; then
       # Đọc tên miền từ file cấu hình (tìm dòng 'server_name' cho Nginx hoặc 'ServerName' cho Apache)
       if [ "$WEBSERVER" = "nginx" ]; then
-        DOMAINS=$(grep -E "server_name" "$conf" | awk '{for (i=2; i<=NF; i++) print $i}' | sed 's/;$//' | grep -Ev "^_|^localhost$|^server_name$")
+        DOMAIN=$(grep 'server_name' "$conf" | awk '{print $2}' | sed 's/;//')
       elif [ "$WEBSERVER" = "apache" ]; then
         DOMAIN=$(grep 'ServerName' "$conf" | awk '{print $2}')
       fi
 
       # Hiển thị tên miền nếu tìm thấy
-      for DOMAIN in $DOMAINS; do
+      if [ -n "$DOMAIN" ]; then
         echo "- $DOMAIN"
-      done
+        FOUND_WEBSITES=1
+      fi
     fi
   done
 
