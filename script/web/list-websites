@@ -29,7 +29,7 @@ if [ -d "$CONF_PATH" ]; then
     if [ -f "$conf" ]; then
       # Đọc tên miền từ file cấu hình (tìm dòng 'server_name' cho Nginx hoặc 'ServerName' cho Apache)
       if [ "$WEBSERVER" = "nginx" ]; then
-        DOMAIN=$(grep 'server_name' "$conf" | awk '{print $2}' | sed 's/;//')
+        DOMAINS=$(grep -E "server_name" "$CONF_FILE" | awk '{for (i=2; i<=NF; i++) print $i}' | sed 's/;$//' | grep -Ev "^_|^localhost$|^server_name$")
       elif [ "$WEBSERVER" = "apache" ]; then
         DOMAIN=$(grep 'ServerName' "$conf" | awk '{print $2}')
       fi
