@@ -29,8 +29,8 @@ if [ -z "$SERVER_NAME_LINE" ]; then
 else
   echo "Alias domains cho domain chính ($DOMAIN):"
   # Lấy danh sách domain và có cả domain chính
-  echo "$SERVER_NAME_LINE" | sed -E 's/server_name //;s/;//'
-  
+  echo "$SERVER_NAME_LINE" | sed -E 's/server_name //;s/;//' | tr ' ' '\n'
+
   # Lấy danh sách domain và không có domain chính
-  # echo "$SERVER_NAME_LINE" | sed -E 's/server_name //;s/;//' | awk '{$1=""; print $0}'
+  # echo "$SERVER_NAME_LINE" | sed -E 's/server_name //;s/;//' | awk '{$1=""; print $0}' | tr ' ' '\n'
 fi
