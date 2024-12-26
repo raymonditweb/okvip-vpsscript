@@ -7,15 +7,37 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Kiểm tra xem Nginx hoặc Apache đã được cài đặt hay chưa
-if command -v nginx &> /dev/null; then
+if command -v nginx &>/dev/null; then
   WEBSERVER="nginx"
   CONF_PATH="/etc/nginx/sites-available"
-elif command -v apache2 &> /dev/null; then
+elif command -v apache2 &>/dev/null; then
   WEBSERVER="apache"
   CONF_PATH="/etc/apache2/sites-available"
 else
-  echo "Error: Không tìm thấy Nginx hoặc Apache trên hệ thống."
-  exit 1
+  echo "Không tìm thấy Nginx hoặc Apache trên hệ thống. Đang tiến hành cài đặt Nginx..."
+
+  # Xác định hệ điều hành và cài đặt Nginx
+  if [ -f /etc/debian_version ]; then
+    # Debian/Ubuntu
+    apt update
+    apt install -y nginx
+  elif [ -f /etc/redhat-release ]; then
+    # CentOS/RHEL
+    yum install -y nginx
+  else
+    echo "Error: Hệ điều hành không được hỗ trợ."
+    exit 1
+  fi
+
+  # Kiểm tra lại Nginx sau khi cài đặt
+  if command -v nginx &>/dev/null; then
+    WEBSERVER="nginx"
+    CONF_PATH="/etc/nginx/sites-available"
+    echo "Nginx đã được cài đặt thành công."
+  else
+    echo "Error: Cài đặt Nginx thất bại."
+    exit 1
+  fi
 fi
 
 echo "Liệt kê danh sách website trên $WEBSERVER:"
