@@ -776,3 +776,9 @@ Ví dụ:
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/monitor_delete_restore.sh.sh ) restore-all
 ```
+
+### Lấy thông tin location của vps - Get location of VPS
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/get_vps_location.sh )
+```
