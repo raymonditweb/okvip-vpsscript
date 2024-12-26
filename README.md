@@ -375,6 +375,12 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/install-wordpress) <mysql_root_password*> <domain*> <template_url*> <db_password>
 ```
 
+#### Check SSL domains
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/check_ssl_domains.sh )
+```
+
 #### SSL re-newal
 
 ```bash
