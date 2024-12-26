@@ -372,7 +372,9 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/check_ssl_domains.sh )
 ```
 
-#### SSL re-newal
+#### SSL new / re-newal
+
+Nếu SSL chưa có thì tạo mới SSL, nếu đã có thì làm mới SSL. Kiểm tra, nếu có proxy thì báo Error: Không thể đăng kí SSL vì proxy. Vui lòng tắt proxy để đăng kí SSL.
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/ssl_renewal.sh) <domain/ip*>
