@@ -51,7 +51,7 @@ if [[ -z "$response" || "$response" == *"error"* ]]; then
 fi
 
 # hiển thị thông tin chi tiết vị trí
-country=$(echo "$response" | jq -r '.country // "Không xác định"')
+region=$(echo "$response" | jq -r '.region // "Không xác định"')
 
 echo "Vị trí VPS:"
-echo "Quốc gia: $country"
+echo "Quốc gia: $region"
