@@ -21,17 +21,18 @@ if [ ! -f "$CONFIG_FILE" ]; then
   exit 1
 fi
 
-echo "Redirect information for $DOMAIN_OR_PATH:"
-echo "----------------------------------------"
-
 # Tìm các dòng chứa từ khóa 'return' và in ra
-REDIRECT_LINES=$(grep -E "return [0-9]{3} .*;" "$CONFIG_FILE")
+REDIRECT_LINES=$(grep -Eo "return [0-9]{3} https?://[^;]+" "$CONFIG_FILE")
 
 if [ -z "$REDIRECT_LINES" ]; then
   echo "Không tìm thấy redirect nào trong tệp cấu hình."
 else
-  echo "$REDIRECT_LINES"
-  echo "Lấy thông tin redirect thành công."
+  echo "Thông tin redirect của $DOMAIN_OR_PATH:"
+  echo "----------------------------------------"
+  while read -r line; do
+    REDIRECT_STATUS=$(echo "$line" | awk '{print $2}')  # Lấy mã HTTP
+    REDIRECT_URL=$(echo "$line" | awk '{print $3}')     # Lấy URL đích
+    echo "- $REDIRECT_STATUS $REDIRECT_URL"
+  done <<< "$REDIRECT_LINES"
 fi
 
-echo "----------------------------------------"
