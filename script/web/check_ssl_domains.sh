@@ -25,8 +25,8 @@ echo "Đang kiểm tra trạng thái SSL cho các domain trong Nginx..."
         for DOMAIN in $DOMAINS; do
         echo -n "Kiểm tra domain: $DOMAIN... "
         
-        # Thiết lập thời gian chờ tối đa 1 phút (60 giây)
-        SSL_INFO=$(timeout 60 bash -c "echo | openssl s_client -connect \"$DOMAIN:443\" -servername \"$DOMAIN\" 2>/dev/null | openssl x509 -noout -dates 2>/dev/null")
+        # Thiết lập thời gian chờ tối đa 10s (10 giây)
+        SSL_INFO=$(timeout 10 bash -c "echo | openssl s_client -connect \"$DOMAIN:443\" -servername \"$DOMAIN\" 2>/dev/null | openssl x509 -noout -dates 2>/dev/null")
 
         if [ -z "$SSL_INFO" ]; then
             echo "Không có SSL"
