@@ -17,22 +17,22 @@ fi
 
 # Tìm tất cả các domain trong các tệp cấu hình Nginx
 echo "Đang kiểm tra trạng thái SSL cho các domain trong Nginx..."
-for CONF_FILE in "$NGINX_CONF_DIR"/*; do
-  if [ -f "$CONF_FILE" ]; then
-    # Trích xuất danh sách domain từ tệp cấu hình
-    DOMAINS=$(grep -E "server_name" "$CONF_FILE" | awk '{for (i=2; i<=NF; i++) print $i}' | sed 's/;$//' | grep -Ev "^_|^localhost$|^server_name$")
+    for CONF_FILE in "$NGINX_CONF_DIR"/*; do
+      if [ -f "$CONF_FILE" ]; then
+        # Trích xuất danh sách domain từ tệp cấu hình
+        DOMAINS=$(grep -E "server_name" "$CONF_FILE" | awk '{for (i=2; i<=NF; i++) print $i}' | sed 's/;$//' | grep -Ev "^_|^localhost$|^server_name$")
 
-    for DOMAIN in $DOMAINS; do
+        for DOMAIN in $DOMAINS; do
         echo -n "Kiểm tra domain: $DOMAIN... "
         
-        # Kiểm tra SSL
-        SSL_INFO=$(echo | openssl s_client -connect "$DOMAIN:443" -servername "$DOMAIN" 2>/dev/null | openssl x509 -noout -dates 2>/dev/null)
+        # Thiết lập thời gian chờ tối đa 1 phút (60 giây)
+        SSL_INFO=$(timeout 60 bash -c "echo | openssl s_client -connect \"$DOMAIN:443\" -servername \"$DOMAIN\" 2>/dev/null | openssl x509 -noout -dates 2>/dev/null")
 
         if [ -z "$SSL_INFO" ]; then
-          echo "Không có SSL"
+            echo "Không có SSL"
         else
-          EXPIRY_DATE=$(echo "$SSL_INFO" | grep 'notAfter' | cut -d= -f2)
-          echo "Có SSL (Hết hạn: $EXPIRY_DATE)"
+            EXPIRY_DATE=$(echo "$SSL_INFO" | grep 'notAfter' | cut -d= -f2)
+            echo "Có SSL (Hết hạn: $EXPIRY_DATE)"
         fi
     done
   fi
