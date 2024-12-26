@@ -400,6 +400,12 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/addon-domain.sh) <primary-domain*> <addon-domain*>
 ```
 
+#### Lấy danh sách alias domain
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/get-alias-domain) <domain*>
+```
+
 #### Xoá website: yêu cầu có mysql root password để remove db - Remove Website
 
 ```bash
