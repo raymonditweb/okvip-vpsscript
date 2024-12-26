@@ -28,7 +28,6 @@ if [ -z "$REDIRECT_LINES" ]; then
   echo "Không tìm thấy redirect nào trong tệp cấu hình."
 else
   echo "Thông tin redirect của $DOMAIN_OR_PATH:"
-  echo "----------------------------------------"
   while read -r line; do
     REDIRECT_STATUS=$(echo "$line" | awk '{print $2}')  # Lấy mã HTTP
     REDIRECT_URL=$(echo "$line" | awk '{print $3}')     # Lấy URL đích
