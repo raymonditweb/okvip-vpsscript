@@ -13,13 +13,15 @@ if ! command -v lsb_release &>/dev/null || [[ $(lsb_release -si) != "Ubuntu" ]];
 fi
 
 # Kiểm tra tham số đầu vào
-if [ $# -ne 2 ]; then
-  echo "Error: Vui lòng cung cấp domain chính và alias domain. Usage: $0 <primary_domain> <alias_domain>"
+if [ $# -lt 2 ]; then
+  echo "Error: Vui lòng cung cấp domain chính và ít nhất một alias domain."
+  echo "Usage: $0 <primary_domain> <alias_domain1> [alias_domain2 ... alias_domainN]"
   exit 1
 fi
 
 PRIMARY_DOMAIN=$1
-ALIAS_DOMAIN=$2
+shift # Loại bỏ tham số đầu tiên để xử lý các alias domain còn lại
+ALIAS_DOMAINS=($@)
 
 # Đường dẫn cấu hình Nginx
 NGINX_CONF_FILE="/etc/nginx/sites-available/$PRIMARY_DOMAIN"
@@ -30,13 +32,26 @@ if [ ! -f "$NGINX_CONF_FILE" ]; then
   exit 1
 fi
 
-# Kiểm tra alias domain đã tồn tại hay chưa trong cấu hình Nginx
-if grep -qw "$ALIAS_DOMAIN" "$NGINX_CONF_FILE"; then
-  echo "Alias domain $ALIAS_DOMAIN đã tồn tại trong cấu hình Nginx của $PRIMARY_DOMAIN."
-else
-  sed -i "/server_name/s/$/ $ALIAS_DOMAIN;/" "$NGINX_CONF_FILE"
-  echo "Alias domain $ALIAS_DOMAIN đã được thêm vào cấu hình Nginx của $PRIMARY_DOMAIN."
-fi
+# Regex để validate domain
+DOMAIN_REGEX='^([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$'
+
+# Kiểm tra và thêm từng alias domain
+for ALIAS_DOMAIN in "${ALIAS_DOMAINS[@]}"; do
+  # Validate alias domain (đảm bảo domain hợp lệ)
+  if [[ ! $ALIAS_DOMAIN =~ $DOMAIN_REGEX ]]; then
+    echo "Error: Alias domain '$ALIAS_DOMAIN' không hợp lệ."
+    continue
+  fi
+
+  # Kiểm tra alias domain đã tồn tại hay chưa trong cấu hình Nginx
+  if grep -qw "$ALIAS_DOMAIN" "$NGINX_CONF_FILE"; then
+    echo "Alias domain '$ALIAS_DOMAIN' đã tồn tại trong cấu hình Nginx của $PRIMARY_DOMAIN."
+  else
+    sed -i "/server_name/s/$/ $ALIAS_DOMAIN;/" "$NGINX_CONF_FILE"
+    echo "Alias domain '$ALIAS_DOMAIN' đã được thêm vào cấu hình Nginx của $PRIMARY_DOMAIN."
+  fi
+
+done
 
 # Kiểm tra cấu hình Nginx
 if nginx -t; then
