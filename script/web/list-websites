@@ -13,6 +13,7 @@ if command -v nginx &>/dev/null; then
 elif command -v apache2 &>/dev/null; then
   WEBSERVER="apache"
   CONF_PATH="/etc/apache2/sites-available"
+
 else
   echo "Không tìm thấy Nginx hoặc Apache trên hệ thống. Đang tiến hành cài đặt Nginx..."
 
