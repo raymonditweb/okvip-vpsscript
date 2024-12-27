@@ -17,23 +17,29 @@ fi
 
 # Tìm tất cả các domain trong các tệp cấu hình Nginx
 echo "Đang kiểm tra trạng thái SSL cho các domain trong Nginx..."
-    for CONF_FILE in "$NGINX_CONF_DIR"/*; do
-      if [ -f "$CONF_FILE" ]; then
-        # Trích xuất danh sách domain từ tệp cấu hình
-        DOMAINS=$(grep -E "server_name" "$CONF_FILE" | awk '{for (i=2; i<=NF; i++) print $i}' | sed 's/;$//' | grep -Ev "^_|^localhost$|^server_name$")
+for CONF_FILE in "$NGINX_CONF_DIR"/*; do
+  if [ -f "$CONF_FILE" ]; then
+    # Trích xuất danh sách domain từ tệp cấu hình
+    DOMAINS=$(grep -E "server_name" "$CONF_FILE" | awk '{for (i=2; i<=NF; i++) print $i}' | sed 's/;$//' | grep -Ev "^_|^localhost$|^server_name$")
 
-        for DOMAIN in $DOMAINS; do
-        echo -n "Kiểm tra domain: $DOMAIN... "
-        
-        # Thiết lập thời gian chờ tối đa 10s (10 giây)
+    for DOMAIN in $DOMAINS; do
+      echo -n "Kiểm tra domain: $DOMAIN... "
+
+      # Kiểm tra ngày hết hạn của SSL từ certbot
+      CERTBOT_EXPIRY=$(certbot certificates 2>/dev/null | grep -A2 "Domains: $DOMAIN" | grep "Expiry Date" | awk -F': ' '{print $2}')
+
+      if [ -n "$CERTBOT_EXPIRY" ]; then
+        echo "Có SSL - Hết hạn: $CERTBOT_EXPIRY"
+      else
+        # Nếu không có thông tin từ certbot, kiểm tra trực tiếp bằng openssl
         SSL_INFO=$(timeout 10 bash -c "echo | openssl s_client -connect \"$DOMAIN:443\" -servername \"$DOMAIN\" 2>/dev/null | openssl x509 -noout -dates 2>/dev/null")
-
-        if [ -z "$SSL_INFO" ]; then
-            echo "Không có SSL"
+        if [ -n "$SSL_INFO" ]; then
+          END_DATE=$(echo "$SSL_INFO" | grep "notAfter=" | cut -d= -f2)
+          echo "Có SSL (openssl) - Ngày hết hạn: $END_DATE"
         else
-            EXPIRY_DATE=$(echo "$SSL_INFO" | grep 'notAfter' | cut -d= -f2)
-            echo "Có SSL (Hết hạn: $EXPIRY_DATE)"
+          echo "Không tìm thấy SSL"
         fi
+      fi
     done
   fi
 done
