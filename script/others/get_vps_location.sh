@@ -40,18 +40,16 @@ if ! command -v jq &>/dev/null; then
   install_jq
 fi
 
-# Lấy dữ liệu vị trí bằng ipinfo.io
+# Lấy dữ liệu vị trí bằng ipinfo.io với timeout 5 giây
 echo "Đang lấy thông tin vị trí VPS..."
-response=$(curl -s https://ipinfo.io)
+response=$(curl -s --max-time 10 https://ipinfo.io)
 
-# Kiểm tra nếu gọi API thành công
+# Kiểm tra nếu gọi API thành công hoặc hết thời gian chờ
 if [[ -z "$response" || "$response" == *"error"* ]]; then
   echo "Error: Không thể lấy dữ liệu vị trí. Vui lòng kiểm tra kết nối internet hoặc quyền truy cập API."
   exit 1
 fi
 
-# hiển thị thông tin chi tiết vị trí
-region=$(echo "$response" | jq -r '.region // "Không xác định"')
-
-echo "Vị trí VPS:"
-echo "Quốc gia: $region"
+# Hiển thị toàn bộ thông tin phản hồi
+echo "Phản hồi từ API:"
+echo "$response"
