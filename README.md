@@ -397,8 +397,10 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 #### Thêm addon domain
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/addon-domain.sh) <primary-domain*> <addon-domain*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/addon-domain.sh) <primary-domain*> <addon-domain1*> <addon-domain2*> <addon-domain3*> ...
 ```
+
+Cung cấp primary-domain và ít nhất 1 addon-domain để thêm vào addon domain, có thể thêm nhiều addon khác nhau
 
 #### Lấy danh sách alias domain
 
@@ -786,4 +788,10 @@ Ví dụ:
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/monitor_delete_restore.sh.sh ) restore-all
+```
+
+### Lấy thông tin location của vps - Get location of VPS
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/get_vps_location.sh )
 ```
