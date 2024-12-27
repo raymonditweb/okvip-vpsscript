@@ -402,6 +402,17 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 
 Cung cấp primary-domain và ít nhất 1 addon-domain để thêm vào addon domain, có thể thêm nhiều addon khác nhau
 
+#### Lấy danh sách alias domain
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/get-alias-domain.sh) <domain*>
+```
+
+`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/get-alias-domain.sh ) example.com `
+
+- Giải thích các tham số:
+  domain: Tên miền (ví dụ: domain.com) hoac path: Đường dẫn (ví dụ: /path/\*)
+
 #### Xoá website: yêu cầu có mysql root password để remove db - Remove Website
 
 ```bash
