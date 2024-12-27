@@ -40,7 +40,7 @@ if ! command -v jq &>/dev/null; then
   install_jq
 fi
 
-# Lấy dữ liệu vị trí bằng ipinfo.io với timeout 5 giây
+# Lấy dữ liệu vị trí bằng ipinfo.io với timeout 10 giây
 echo "Đang lấy thông tin vị trí VPS..."
 response=$(curl -s --max-time 10 https://ipinfo.io)
 
