@@ -12,27 +12,48 @@ if [ "$#" -ne 1 ]; then
   exit 1
 fi
 
-DOMAIN_OR_PATH=$1
-CONFIG_FILE="/etc/nginx/sites-available/$DOMAIN_OR_PATH.conf"
+domain=$1
 
-# Kiểm tra file cấu hình có tồn tại không
-if [ ! -f "$CONFIG_FILE" ]; then
-  echo "Error: Không tìm thấy tệp cấu hình $CONFIG_FILE."
-  exit 1
-fi
+# Function to check redirects
+check_redirects() {
+  local url=$1
+  local max_redirects=10
+  local redirect_count=0
+  local has_redirects=false
 
-# Tìm các dòng chứa từ khóa 'return' và in ra
-REDIRECT_LINES=$(grep -Eo "return [0-9]{3} https?://[^;]+" "$CONFIG_FILE" || true)
+  while [ $redirect_count -lt $max_redirects ]; do
+    # Fetch headers
+    headers=$(curl -sI "$url")
 
-if [ -z "$REDIRECT_LINES" ]; then
-  echo "Không tìm thấy redirect nào trong tệp cấu hình."
-else
-  OUTPUT="Thông tin redirect của $DOMAIN_OR_PATH:"
-  while read -r line; do
-    REDIRECT_STATUS=$(echo "$line" | awk '{print $2}') # Lấy mã HTTP
-    REDIRECT_URL=$(echo "$line" | awk '{print $3}')    # Lấy URL đích
-    OUTPUT+="\n- $REDIRECT_STATUS $REDIRECT_URL"
-  done <<<"$REDIRECT_LINES"
-  echo "$OUTPUT"
-fi
-echo # Thêm dòng trống cuối cùng
+    # Check for Location header (redirect)
+    location=$(echo "$headers" | grep -i "^Location:" | awk '{print $2}' | tr -d '\r')
+
+    if [[ -n $location ]]; then
+      if [ "$redirect_count" -eq 0 ]; then
+        echo "Redirect rules:"
+      fi
+      echo "$url -> $location"
+      url=$location
+      ((redirect_count++))
+      has_redirects=true
+    else
+      # No more redirects
+      break
+    fi
+  done
+
+  if [ "$has_redirects" = false ]; then
+    echo "Không tìm thấy redirect nào trong tệp cấu hình."
+  fi
+
+  if [ $redirect_count -eq $max_redirects ]; then
+    echo "Maximum number of redirects ($max_redirects) reached."
+  fi
+}
+
+# Main execution
+echo "Checking redirect rules for $domain"
+
+# Check both http and https
+check_redirects "http://$domain"
+check_redirects "https://$domain"
