@@ -27,11 +27,12 @@ REDIRECT_LINES=$(grep -Eo "return [0-9]{3} https?://[^;]+" "$CONFIG_FILE" || tru
 if [ -z "$REDIRECT_LINES" ]; then
   echo "Không tìm thấy redirect nào trong tệp cấu hình."
 else
-  echo "Thông tin redirect của $DOMAIN_OR_PATH:"
+  OUTPUT="Thông tin redirect của $DOMAIN_OR_PATH:"
   while read -r line; do
     REDIRECT_STATUS=$(echo "$line" | awk '{print $2}')  # Lấy mã HTTP
     REDIRECT_URL=$(echo "$line" | awk '{print $3}')     # Lấy URL đích
-    echo "- $REDIRECT_STATUS $REDIRECT_URL"
+    OUTPUT+="\n- $REDIRECT_STATUS $REDIRECT_URL"
   done <<< "$REDIRECT_LINES"
+  echo -e "$OUTPUT"
 fi
 echo # Thêm dòng trống cuối cùng
