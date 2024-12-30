@@ -22,7 +22,7 @@ if [ ! -f "$CONFIG_FILE" ]; then
 fi
 
 # Tìm các dòng chứa từ khóa 'return' và in ra
-REDIRECT_LINES=$(grep -Eo "return [0-9]{3} https?://[^;]+" "$CONFIG_FILE")
+REDIRECT_LINES=$(grep -Eo "return [0-9]{3} https?://[^;]+" "$CONFIG_FILE" || true)
 
 if [ -z "$REDIRECT_LINES" ]; then
   echo "Không tìm thấy redirect nào trong tệp cấu hình."
@@ -34,4 +34,4 @@ else
     echo "- $REDIRECT_STATUS $REDIRECT_URL"
   done <<< "$REDIRECT_LINES"
 fi
-
+echo # Thêm dòng trống cuối cùng
