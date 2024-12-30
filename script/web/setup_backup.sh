@@ -44,23 +44,26 @@ log "Tên database được xác định: $DB_NAME"
 WP_CONFIG="$WWW_DIR/wp-config.php"
 log "Tên tệp wp-config.php được xác định: $WP_CONFIG"
 
-DB_USER=$(grep "define(\"DB_USER" $WP_CONFIG | awk -F"'" '{print $2}')
-DB_PASS=$(grep "define(\"DB_PASSWORD" $WP_CONFIG | awk -F"'" '{print $2}')
-
-if [ -z "$DB_USER" ] || [ -z "$DB_PASS" ]; then
-  log "Error: Không thể đọc thông tin đăng nhập từ wp-config.php!"
-  exit 1
+if [ -f "$WP_CONFIG" ]; then
+  DB_USER=$(grep "define(\"DB_USER" "$WP_CONFIG" | awk -F"'" '{print $2}')
+  DB_PASS=$(grep "define(\"DB_PASSWORD" "$WP_CONFIG" | awk -F"'" '{print $2}')
+else
+  log "wp-config.php không tồn tại. Sẽ chỉ backup mã nguồn."
+  DB_USER=""
+  DB_PASS=""
 fi
 
-log "Thông tin đăng nhập được lấy từ wp-config.php:"
-log "  DB_USER: $DB_USER"
-log "  DB_PASS: $DB_PASS"
+if [ -n "$DB_USER" ] && [ -n "$DB_PASS" ]; then
+  log "Thông tin đăng nhập được lấy từ wp-config.php:"
+  log "  DB_USER: $DB_USER"
+  log "  DB_PASS: $DB_PASS"
 
-# Tạo tệp cấu hình MySQL
-echo "[client]" >~/.my.cnf
-echo "user=$DB_USER" >>~/.my.cnf
-echo "password=$DB_PASS" >>~/.my.cnf
-chmod 600 ~/.my.cnf # Bảo mật tệp cấu hình
+  # Tạo tệp cấu hình MySQL
+  echo "[client]" >~/.my.cnf
+  echo "user=$DB_USER" >>~/.my.cnf
+  echo "password=$DB_PASS" >>~/.my.cnf
+  chmod 600 ~/.my.cnf # Bảo mật tệp cấu hình
+fi
 
 # Giới hạn số lượng file backup
 MAX_BACKUPS=7 # Số lượng file backup tối đa được giữ lại
@@ -85,19 +88,22 @@ else
   log "ERROR: Lỗi khi backup source code."
 fi
 
-# Backup database
-log "Backup database $DB_NAME..."
-SQL_BACKUP_FILE="/tmp/${DB_NAME}.sql"
-mysqldump -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "$SQL_BACKUP_FILE"
-if [ $? -eq 0 ]; then
-  log "Backup database hoàn tất."
+# Backup database nếu có thông tin đăng nhập
+if [ -n "$DB_USER" ] && [ -n "$DB_PASS" ]; then
+  log "Backup database $DB_NAME..."
+  SQL_BACKUP_FILE="/tmp/${DB_NAME}.sql"
+  mysqldump -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" > "$SQL_BACKUP_FILE"
+  if [ $? -eq 0 ]; then
+    log "Backup database hoàn tất."
+    # Thêm file backup database vào file zip
+    zip -j "$BACKUP_FILE" "$SQL_BACKUP_FILE" >/dev/null 2>&1
+    rm "$SQL_BACKUP_FILE"
+  else
+    log "ERROR: Lỗi khi backup database."
+  fi
 else
-  log "ERROR: Lỗi khi backup database."
+  log "Không có thông tin đăng nhập database. Bỏ qua bước backup database."
 fi
-
-# Thêm file backup database vào file zip
-zip -j "$BACKUP_FILE" "$SQL_BACKUP_FILE" >/dev/null 2>&1
-rm "$SQL_BACKUP_FILE"
 
 log "Backup hoàn tất: $BACKUP_FILE"
 
