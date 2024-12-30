@@ -33,7 +33,7 @@ for DIR in "$NGINX_SITE_DIR" "$NGINX_ENABLED_DIR"; do
         echo "Domain '$DOMAIN' tìm thấy trong: $conf_file"
         echo "--------------------------------------"
         # Tìm các redirect (rewrite, return, hoặc mã 301/302)
-        grep -E "^[[:space:]]*(rewrite|return|301|302)" "$conf_file" || echo "Không tìm thấy redirect nào."
+        grep -E "^[[:space:]]*(rewrite|return|301|302)" "$conf_file" || echo "Error: Không tìm thấy redirect nào."
         echo
       fi
     done < <(find "$DIR" -type f -name "*.conf")
@@ -42,5 +42,5 @@ done
 
 # Kiểm tra nếu không tìm thấy kết quả
 if [ "$FOUND" -eq 0 ]; then
-  echo "Không tìm thấy cấu hình nào liên quan đến domain '$DOMAIN'."
+  echo "Error: Không tìm thấy cấu hình nào liên quan đến domain '$DOMAIN'."
 fi
