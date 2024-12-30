@@ -25,6 +25,9 @@ check_redirects() {
     # Fetch headers
     headers=$(curl -sI "$url")
 
+    # Get HTTP status code
+    status_code=$(echo "$headers" | grep -oP '^HTTP/\d\.\d\s+\K\d+')
+
     # Check for Location header (redirect)
     location=$(echo "$headers" | grep -i "^Location:" | awk '{print $2}' | tr -d '\r')
 
@@ -32,18 +35,23 @@ check_redirects() {
       if [ "$redirect_count" -eq 0 ]; then
         echo "Redirect rules:"
       fi
-      echo "$url -> $location"
+      echo "$url -> $location (HTTP $status_code)"
+
+      # Update URL to follow the redirect
       url=$location
       ((redirect_count++))
       has_redirects=true
     else
       # No more redirects
+      if [ "$status_code" == "301" ]; then
+        echo "$url (HTTP 301): Permanent redirect nhưng không có Location header."
+      fi
       break
     fi
   done
 
   if [ "$has_redirects" = false ]; then
-    echo "Không tìm thấy redirect nào trong tệp cấu hình."
+    echo "Không tìm thấy redirect nào."
   fi
 
   if [ $redirect_count -eq $max_redirects ]; then
