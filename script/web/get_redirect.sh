@@ -12,27 +12,35 @@ if [ "$#" -ne 1 ]; then
   exit 1
 fi
 
-DOMAIN_OR_PATH=$1
-CONFIG_FILE="/etc/nginx/sites-available/$DOMAIN_OR_PATH.conf"
+# Gán biến
+DOMAIN=$1
+NGINX_SITE_DIR="/etc/nginx/sites-available"
+NGINX_ENABLED_DIR="/etc/nginx/sites-enabled"
 
-# Kiểm tra file cấu hình có tồn tại không
-if [ ! -f "$CONFIG_FILE" ]; then
-  echo "Error: Không tìm thấy tệp cấu hình $CONFIG_FILE."
+# Kiểm tra thư mục sites-available hoặc sites-enabled
+if [ ! -d "$NGINX_SITE_DIR" ] && [ ! -d "$NGINX_ENABLED_DIR" ]; then
+  echo "Error: Không tìm thấy thư mục cấu hình site của Nginx."
   exit 1
 fi
 
-# Tìm các dòng chứa từ khóa 'return' và in ra
-REDIRECT_LINES=$(grep -Eo "return [0-9]{3} https?://[^;]+" "$CONFIG_FILE" || true)
+# Tìm các tệp cấu hình liên quan đến domain
+FOUND=0
+for DIR in "$NGINX_SITE_DIR" "$NGINX_ENABLED_DIR"; do
+  if [ -d "$DIR" ]; then
+    while read -r conf_file; do
+      if grep -q "$DOMAIN" "$conf_file"; then
+        FOUND=1
+        echo "Domain '$DOMAIN' tìm thấy trong: $conf_file"
+        echo "--------------------------------------"
+        # Tìm các redirect (rewrite, return, hoặc mã 301/302)
+        grep -E "^[[:space:]]*(rewrite|return|301|302)" "$conf_file" || echo "Error: Không tìm thấy redirect nào."
+        echo
+      fi
+    done < <(find "$DIR" -type f -name "*.conf")
+  fi
+done
 
-if [ -z "$REDIRECT_LINES" ]; then
-  echo "Không tìm thấy redirect nào trong tệp cấu hình."
-else
-  OUTPUT="Thông tin redirect của $DOMAIN_OR_PATH:"
-  while read -r line; do
-    REDIRECT_STATUS=$(echo "$line" | awk '{print $2}')  # Lấy mã HTTP
-    REDIRECT_URL=$(echo "$line" | awk '{print $3}')     # Lấy URL đích
-    OUTPUT+="\n- $REDIRECT_STATUS $REDIRECT_URL"
-  done <<< "$REDIRECT_LINES"
-  echo -e "$OUTPUT"
+# Kiểm tra nếu không tìm thấy kết quả
+if [ "$FOUND" -eq 0 ]; then
+  echo "Error: Không tìm thấy cấu hình nào liên quan đến domain '$DOMAIN'."
 fi
-echo # Thêm dòng trống cuối cùng
