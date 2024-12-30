@@ -6,12 +6,6 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# Kiểm tra tham số đầu vào
-if [ -z "$1" ]; then
-  echo "Thêm tham số: $0 <directory>"
-  exit 1
-fi
-
 # Kiểm tra xem Nginx hoặc Apache đã được cài đặt hay chưa
 if command -v nginx &>/dev/null; then
   WEBSERVER="nginx"
