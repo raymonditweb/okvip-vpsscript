@@ -8,7 +8,7 @@ fi
 
 # Kiểm tra tham số đầu vào
 if [ "$#" -ne 1 ]; then
-  echo "Usage: $0 <domain>"
+  echo "Usage: $0 <domain_or_path>"
   exit 1
 fi
 
