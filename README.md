@@ -351,7 +351,14 @@ Nhập mật khẩu mới trong cặp dấu nháy đơn, ví dụ: 'cC,2K%5kSkj!
 #### List Websites
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/list-websites)
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/list-websites) <directory*>
+```
+
+- <directory*> có thể co hoăc khong
+Example:
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/list-websites) /var/www/
 ```
 
 #### Cài đặt website WordPress tự động theo template

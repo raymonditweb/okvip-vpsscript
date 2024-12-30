@@ -13,7 +13,6 @@ if command -v nginx &>/dev/null; then
 elif command -v apache2 &>/dev/null; then
   WEBSERVER="apache"
   CONF_PATH="/etc/apache2/sites-available"
-
 else
   echo "Không tìm thấy Nginx hoặc Apache trên hệ thống. Đang tiến hành cài đặt Nginx..."
 
@@ -41,37 +40,48 @@ else
   fi
 fi
 
-echo "Liệt kê danh sách website trên $WEBSERVER:"
+# Thư mục được chỉ định
+TARGET_DIR=$1
 
-# Biến cờ để theo dõi số lượng website
-FOUND_WEBSITES=0
+# Kiểm tra thư mục tồn tại
+if [ ! -d "$TARGET_DIR" ]; then
+  echo "Không tìm thấy directory $TARGET_DIR."
+  exit 1
+fi
 
-# Liệt kê các file cấu hình trong thư mục cấu hình
-if [ -d "$CONF_PATH" ]; then
-  for CONF_FILE in "$CONF_PATH"/*; do
-    if [ -f "$CONF_FILE" ]; then
-      # Đọc danh sách domain từ file cấu hình
-      if [ "$WEBSERVER" = "nginx" ]; then
-        DOMAINS=$(grep -E "server_name" "$CONF_FILE" | awk '{for (i=2; i<=NF; i++) print $i}' | sed 's/;$//' | grep -Ev "^_|^localhost$|^server_name$")
-      elif [ "$WEBSERVER" = "apache" ]; then
-        DOMAINS=$(grep -E "ServerName|ServerAlias" "$CONF_FILE" | awk '{for (i=2; i<=NF; i++) print $i}' | sed 's/;$//')
-      fi
+# Hàm tìm domain trong cấu hình Nginx
+find_nginx_domains() {
+  find /etc/nginx/sites-available /etc/nginx/conf.d -type f 2>/dev/null | while read -r file; do
+    grep -E "server_name\s+" "$file" | sed -E 's/.*server_name\s+([^;]+);.*/\1/' | tr -s ' ' '\n'
+  done | sort -u | grep -v '^_$' | grep -v -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'  # Loại bỏ dòng chứa "_" và địa chỉ IP
+}
 
-      # Hiển thị từng domain nếu tìm thấy
-      if [ -n "$DOMAINS" ]; then
-        for DOMAIN in $DOMAINS; do
-          echo "- $DOMAIN"
-          FOUND_WEBSITES=1
-        done
-      fi
+# Hàm tìm domain trong thư mục được chỉ định
+find_domains_in_directory() {
+  local dir="$1"
+
+  # Duyệt qua tất cả các thư mục con trong directory
+  find "$dir" -mindepth 1 -maxdepth 1 -type d | while read -r subdir; do
+    # Lấy tên thư mục con (tên miền tiềm năng)
+    domain=$(basename "$subdir")
+
+    # Kiểm tra nếu tên thư mục là một domain hợp lệ
+    if [[ "$domain" =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
+      echo "$domain"
     fi
   done
+}
 
-  # Kiểm tra nếu không tìm thấy website nào
-  if [ "$FOUND_WEBSITES" -eq 0 ]; then
-    echo "Không tìm thấy website nào."
-  fi
+# Gọi các hàm và hợp nhất kết quả
+nginx_domains=$(find_nginx_domains)
+directory_domains=$(find_domains_in_directory "$TARGET_DIR")
+
+# Hợp nhất và loại bỏ trùng lặp
+merged_domains=$(echo -e "$nginx_domains\n$directory_domains" | sort -u)
+
+echo "Danh sách các domain hợp lệ:"
+if [ -n "$merged_domains" ]; then
+  echo "$merged_domains"
 else
-  echo "Error: Không tìm thấy thư mục cấu hình $CONF_PATH."
-  exit 1
+  echo "Không tìm thấy domain hợp lệ."
 fi
