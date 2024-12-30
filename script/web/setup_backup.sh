@@ -56,7 +56,7 @@ fi
 if [ -n "$DB_USER" ] && [ -n "$DB_PASS" ]; then
   log "Thông tin đăng nhập được lấy từ wp-config.php:"
   log "  DB_USER: $DB_USER"
-  log "  DB_PASS: [Đã ẩn]"
+  log "  DB_PASS: $DB_PASS"
 
   # Tạo tệp cấu hình MySQL
   echo "[client]" >~/.my.cnf
@@ -112,7 +112,7 @@ BACKUP_COUNT=$(ls -1t "$BACKUP_DIR" | grep "${DOMAIN}_" | wc -l)
 
 if [ "$BACKUP_COUNT" -gt "$MAX_BACKUPS" ]; then
   log "Xóa các backup cũ..."
-  ls -1t "$BACKUP_DIR" | grep "${DOMAIN}_" | tail -n +$(($MAX_BACKUPS + 1)) | while read OLD_BACKUP; do
+  ls -1t "$BACKUP_DIR" | grep "${DOMAIN}_" | tail -n +$(($MAX_BACKUPS)) | while read OLD_BACKUP; do
     rm "$BACKUP_DIR/$OLD_BACKUP"
     log "Đã xóa backup cũ: $OLD_BACKUP"
   done
