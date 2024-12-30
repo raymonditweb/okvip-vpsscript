@@ -69,7 +69,9 @@ check_error() {
 get_network_interface() {
   ip -o -4 addr show | awk '{print $2}' | grep -v 'lo' | head -n 1
 }
+
 interface=$(get_network_interface)
+
 if [ -z "$interface" ]; then
   log_message "Error: Không tìm thấy giao diện mạng nào hoạt động."
   exit 1
