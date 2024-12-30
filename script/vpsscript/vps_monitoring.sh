@@ -65,15 +65,25 @@ check_error() {
   fi
 }
 
+# Tự động phát hiện giao diện mạng hoạt động
+get_network_interface() {
+  ip -o -4 addr show | awk '{print $2}' | grep -v 'lo' | head -n 1
+}
+interface=$(get_network_interface)
+if [ -z "$interface" ]; then
+  log_message "Error: Không tìm thấy giao diện mạng nào hoạt động."
+  exit 1
+fi
+
 # Hàm thu thập các thông số hệ thống
 collect_system_stats() {
   # CPU Usage
-  cpu_usage=$(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}')
+  cpu_usage=$(timeout 5 top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}')
   check_error "Error: Không thể lấy dữ liệu CPU."
   total_cpu=$(echo "$total_cpu + $cpu_usage" | bc)
 
   # Memory Usage
-  memory_usage=$(free | grep Mem | awk '{print $3/$2 * 100.0}')
+  memory_usage=$(timeout 5 free | grep Mem | awk '{print $3/$2 * 100.0}')
   check_error "Error: Không thể lấy dữ liệu Memory usage"
   total_memory=$(echo "$total_memory + $memory_usage" | bc)
 
@@ -83,14 +93,14 @@ collect_system_stats() {
   total_disk=$(echo "$total_disk + $disk_usage" | bc)
 
   # Network RX/TX
-  network_rx=$(cat /sys/class/net/eth0/statistics/rx_bytes)
-  network_tx=$(cat /sys/class/net/eth0/statistics/tx_bytes)
+  network_rx=$(timeout 5 cat /sys/class/net/$interface/statistics/rx_bytes)
+  network_tx=$(timeout 5 cat /sys/class/net/$interface/statistics/tx_bytes)
   check_error "Error: Không thể lấy dữ liệu Network traffic"
 
   sleep 1
 
-  network_rx_new=$(cat /sys/class/net/eth0/statistics/rx_bytes)
-  network_tx_new=$(cat /sys/class/net/eth0/statistics/tx_bytes)
+  network_rx_new=$(timeout 5 cat /sys/class/net/$interface/statistics/rx_bytes)
+  network_tx_new=$(timeout 5 cat /sys/class/net/$interface/statistics/tx_bytes)
   check_error "Error: Không thể lấy dữ liệu new Network traffic"
 
   rx_diff=$((network_rx_new - network_rx))
@@ -100,12 +110,12 @@ collect_system_stats() {
   total_tx=$((total_tx + tx_diff))
 
   # Load Average
-  load_average=$(uptime | awk -F'load average: ' '{ print $2 }' | cut -d',' -f1)
+  load_average=$(timeout 5 uptime | awk -F'load average: ' '{ print $2 }' | cut -d',' -f1)
   check_error "Error: Không thể lấy dữ liệu Load average"
   total_load=$(echo "$total_load + $load_average" | bc)
 
   # Process Count
-  process_count=$(ps aux --no-heading | wc -l)
+  process_count=$(timeout 5 ps aux --no-heading | wc -l)
   check_error "Error: Không thể lấy dữ liệu Process details"
 }
 
