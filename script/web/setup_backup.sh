@@ -37,7 +37,7 @@ fi
 
 # Cài đặt
 WWW_DIR="/var/www/$DOMAIN" # Thư mục chứa mã nguồn web
-DB_NAME=$(echo "$DOMAIN" | sed -E 's/\./_/g')
+DB_NAME="${DOMAIN//./_}" # Tên cơ sở dữ liệu, thay thế dấu chấm bằng dấu gạch dưới
 log "Tên database được xác định: $DB_NAME"
 
 # Đọc thông tin đăng nhập từ wp-config.php

@@ -22,7 +22,7 @@ SERVER_IP=$(hostname -I | awk '{print $1}') # Lấy địa chỉ IP của server
 MYSQL_ROOT_PASSWORD=${1:-$(openssl rand -base64 32)} # Mật khẩu root MySQL (ngẫu nhiên nếu không truyền vào)
 DOMAIN=${2:-"vpsscript.demo"} # Domain mặc định là vpsscript.demo nếu không truyền vào
 WEB_ROOT="/var/www/$DOMAIN" # Thư mục gốc cho website
-DB_NAME=$(echo "$DOMAIN" | sed 's/\./_/g') # Tạo tên database từ domain, thay . bang _
+DB_NAME="${DOMAIN//./_}" # Tạo tên database từ domain, thay . bang _
 PHPMYADMIN_PORT=8080 # Port mặc định cho phpMyAdmin
 
 # Hàm hỗ trợ
