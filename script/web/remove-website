@@ -35,6 +35,14 @@ else
   echo "Liên kết tượng trưng không tồn tại trong sites-enabled."
 fi
 
+# Xóa chứng chỉ SSL
+if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+  certbot delete --cert-name "$DOMAIN" -n
+  echo "Đã xóa chứng chỉ SSL cho $DOMAIN."
+else
+  echo "Không tìm thấy chứng chỉ SSL cho $DOMAIN."
+fi
+
 # Kiểm tra và xóa database MySQL
 if mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DB_NAME';" | grep -q "$DB_NAME"; then
   mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;"
