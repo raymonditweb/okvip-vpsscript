@@ -15,19 +15,21 @@ if [[ "$OS" != "Ubuntu" || ( "$VERSION" != "20.04" && "$VERSION" != "22.04" ) ]]
 fi
 
 set -e
-trap 'echo "Đã xảy ra lỗi trong quá trình cài đặt. Vui lòng kiểm tra các thông báo lỗi phía trên."' ERR
+trap 'echo "\u0110\u00e3 x\u1ea3y ra l\u1ed7i trong qu\u00e1 tr\u00ecnh c\u00e0i \u0111\u1eb7t. Vui l\u00f2ng ki\u1ec3m tra c\u00e1c th\u00f4ng b\u00e1o l\u1ed7i ph\u00eda tr\u00ean."' ERR
+
+# Đặt DEBIAN_FRONTEND để tắt hộp thoại
+export DEBIAN_FRONTEND=noninteractive
 
 # Biến toàn cục
-SERVER_IP=$(hostname -I | awk '{print $1}') # Lấy địa chỉ IP của server
-MYSQL_ROOT_PASSWORD=${1:-$(openssl rand -base64 32)} # Mật khẩu root MySQL (ngẫu nhiên nếu không truyền vào)
-DOMAIN=${2:-"vpsscript.demo"} # Domain mặc định là vpsscript.demo nếu không truyền vào
-WEB_ROOT="/var/www/$DOMAIN" # Thư mục gốc cho website
-DB_NAME="${DOMAIN//./_}" # Tạo tên database từ domain, thay . bang _
-PHPMYADMIN_PORT=8080 # Port mặc định cho phpMyAdmin
+SERVER_IP=$(hostname -I | awk '{print $1}')
+MYSQL_ROOT_PASSWORD=${1:-$(openssl rand -base64 32)}
+DOMAIN=${2:-"vpsscript.demo"}
+WEB_ROOT="/var/www/$DOMAIN"
+DB_NAME="${DOMAIN//./_}"
+PHPMYADMIN_PORT=8080
 
 # Hàm hỗ trợ
 function configure_nginx {
-  # Hàm cấu hình Nginx cho một domain cụ thể
   local domain=$1
   local web_root=$2
   cat > "/etc/nginx/sites-available/$domain" <<EOL
@@ -44,7 +46,7 @@ server {
 
   location ~ \.php$ {
     include snippets/fastcgi-php.conf;
-    fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+    fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
     fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
     include fastcgi_params;
   }
@@ -57,29 +59,32 @@ server {
   access_log /var/log/nginx/$domain-access.log;
 }
 EOL
-  # Tạo symbolic link để kích hoạt cấu hình Nginx cho domain
   ln -s "/etc/nginx/sites-available/$domain" /etc/nginx/sites-enabled/
 }
 
 function restart_services {
-  # Hàm khởi động lại các dịch vụ cần thiết
-  systemctl restart nginx mysql php7.4-fpm
+  systemctl restart nginx mysql php8.1-fpm
 }
 
 # Cài đặt gói cần thiết
 echo "Cập nhật và cài đặt các gói cần thiết..."
-apt update && apt upgrade -y # Cập nhật hệ thống
-apt install -y nginx mysql-server php-fpm php-mysql unzip php7.4-{fpm,mysql,cli,curl,json,mbstring,xml,zip,gd} # Cài đặt LEMP stack và các module PHP
+apt update && apt upgrade -y
+apt install -y nginx mysql-server php-fpm php-mysql unzip software-properties-common
+
+# Thêm PPA cho PHP 8.1
+add-apt-repository -y ppa:ondrej/php
+apt update
+apt install -y php8.1-{fpm,mysql,cli,curl,mbstring,xml,zip,gd}
 
 # Cấu hình MySQL
 echo "Cấu hình MySQL root password..."
-mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';" # Thiết lập mật khẩu cho user root
-mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" # Tạo database mới
+mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';"
+mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 # Cài đặt phpMyAdmin
 echo "Cài đặt phpMyAdmin..."
-DEBIAN_FRONTEND=noninteractive apt install -y phpmyadmin # Cài đặt phpMyAdmin
-ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin # Tạo symbolic link cho phpMyAdmin
+apt install -y phpmyadmin
+ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
 
 # Cấu hình phpMyAdmin trong Nginx
 cat > /etc/nginx/sites-available/phpmyadmin <<EOL
@@ -96,7 +101,7 @@ server {
 
   location ~ \.php$ {
     include snippets/fastcgi-php.conf;
-    fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+    fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
     fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
     include fastcgi_params;
   }
@@ -109,15 +114,25 @@ server {
   access_log /var/log/nginx/phpmyadmin-access.log;
 }
 EOL
-ln -s /etc/nginx/sites-available/phpmyadmin /etc/nginx/sites-enabled/ # Kích hoạt cấu hình phpMyAdmin
-ufw allow $PHPMYADMIN_PORT/tcp # Mở cổng cho phpMyAdmin
+# Kích hoạt cấu hình phpMyAdmin
+ln -s /etc/nginx/sites-available/phpmyadmin /etc/nginx/sites-enabled/
+
+# Khởi động firewall và thêm cổng cho các dịch vụ
+echo "Cấu hình firewall..."
+ufw allow OpenSSH
+for port in 20 21 80 443 3306 $PHPMYADMIN_PORT; do
+  if ! ufw status | grep -q $port; then
+    ufw allow $port/tcp
+  fi
+done
+ufw --force enable
 
 # Tạo trang demo
 echo "Tạo site mẫu $DOMAIN..."
-mkdir -p "$WEB_ROOT" # Tạo thư mục gốc cho website
-chown -R www-data:www-data "$WEB_ROOT" # Cấp quyền sở hữu cho www-data
-chmod -R 755 "$WEB_ROOT" # Cấp quyền đọc và thực thi cho thư mục
-configure_nginx "$DOMAIN" "$WEB_ROOT" # Cấu hình Nginx cho website demo
+mkdir -p "$WEB_ROOT"
+chown -R www-data:www-data "$WEB_ROOT"
+chmod -R 755 "$WEB_ROOT"
+configure_nginx "$DOMAIN" "$WEB_ROOT"
 
 # Cài đặt WP-CLI
 echo "Cài đặt WP-CLI..."
@@ -134,20 +149,28 @@ fi
 echo "WP-CLI đã được cài đặt thành công!"
 
 # Kiểm tra cấu hình Nginx và khởi động dịch vụ
-nginx -t # Kiểm tra cấu hình Nginx
-restart_services # Khởi động lại các dịch vụ cần thiết
+nginx -t
+restart_services
+
+# Thêm domain vào /etc/hosts nếu chưa tồn tại
+if ! grep -q "127.0.0.1 $DOMAIN" /etc/hosts; then
+  echo "127.0.0.1 $DOMAIN" >> /etc/hosts
+fi
+
+# Ghi thông tin cấu hình ra file vpsscript.conf
+NGINX_VERSION=$(nginx -v 2>&1 | grep -oP 'nginx/\K[^ ]+')
 
 # Lưu thông tin cài đặt
 cat > "/home/vpsscript.conf" <<END
 serverip="$SERVER_IP"
 current_os_version="$VERSION"
+nginx_version="$NGINX_VERSION"
 mysql_root_password="$MYSQL_ROOT_PASSWORD"
 mainsite="$DOMAIN"
 database_name="$DB_NAME"
 phpmyadmin_port="$PHPMYADMIN_PORT"
 END
 
-# Hiển thị thông báo hoàn tất
 echo "Cài đặt hoàn tất!"
 echo "Website demo: http://$DOMAIN"
 echo "phpMyAdmin: http://$SERVER_IP:$PHPMYADMIN_PORT"
