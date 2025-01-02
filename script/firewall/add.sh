@@ -19,7 +19,7 @@ PROTOCOL=$2
 # Kiểm tra trạng thái của UFW
 if ! ufw status | grep -q "Status: active"; then
   echo "UFW chưa được kích hoạt. Đang kích hoạt..."
-  ufw enable || {
+  ufw --force enable || {
     echo "Error: Không thể kích hoạt UFW."
     exit 1
   }
