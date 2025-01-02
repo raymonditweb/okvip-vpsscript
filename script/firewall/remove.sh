@@ -16,14 +16,36 @@ fi
 PORT=$1
 PROTOCOL=$2
 
+delete_rule() {
+  local port=$1
+  local protocol=$2
+
+  if [ -z "$protocol" ]; then
+    # Kiểm tra và xóa quy tắc không chỉ định giao thức
+    if ufw status | grep -q "^\s*${port}\s"; then
+      ufw delete allow "$port"
+      echo "Quy tắc cho cổng $port đã được xóa."
+    else
+      echo "Quy tắc cho cổng $port không tồn tại."
+    fi
+  else
+    # Kiểm tra và xóa quy tắc có giao thức
+    if ufw status | grep -q "${port}/${protocol}"; then
+      ufw delete allow "$port/$protocol"
+      echo "Quy tắc cho cổng $port/$protocol đã được xóa."
+    else
+      echo "Quy tắc cho cổng $port/$protocol không tồn tại."
+    fi
+  fi
+}
+
 # Xóa quy tắc tường lửa
 if [ -z "$PROTOCOL" ]; then
   echo "---- XÓA QUY TẮC TƯỜNG LỬA CHO CẢ TCP VÀ UDP ----"
-  ufw delete allow $PORT/tcp
-  ufw delete allow $PORT/udp
+  delete_rule "$PORT" ""
 else
   echo "---- XÓA QUY TẮC TƯỜNG LỬA ----"
-  ufw delete allow $PORT/$PROTOCOL
+  delete_rule "$PORT" "$PROTOCOL"
 fi
 
 # Kiểm tra trạng thái của tường lửa
