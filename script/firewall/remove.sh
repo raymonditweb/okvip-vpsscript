@@ -48,5 +48,10 @@ else
   delete_rule "$PORT" "$PROTOCOL"
 fi
 
+# Làm mới trạng thái tường lửa
+echo "---- LÀM MỚI TRẠNG THÁI TƯỜNG LỬA ----"
+ufw reload
+echo "Tường lửa đã được làm mới."
+
 # Kiểm tra trạng thái của tường lửa
 ufw status
