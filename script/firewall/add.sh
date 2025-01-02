@@ -16,10 +16,22 @@ fi
 PORT=$1
 PROTOCOL=$2
 
+# Kiểm tra trạng thái của UFW
+if ! ufw status | grep -q "Status: active"; then
+  echo "UFW chưa được kích hoạt. Đang kích hoạt..."
+  ufw enable || {
+    echo "Error: Không thể kích hoạt UFW."
+    exit 1
+  }
+fi
+
 # Kiểm tra và xác định giao thức
 if [ -z "$PROTOCOL" ]; then
   echo "Không có giao thức được cung cấp. Đang mở full port (TCP và UDP)..."
-  ufw allow $PORT || { echo "Error: Lỗi khi thêm quy tắc tường lửa cho cổng $PORT."; exit 1; }
+  ufw allow $PORT || {
+    echo "Error: Lỗi khi thêm quy tắc tường lửa cho cổng $PORT."
+    exit 1
+  }
 else
   # Kiểm tra giao thức có hợp lệ hay không
   if [[ "$PROTOCOL" != "tcp" && "$PROTOCOL" != "udp" ]]; then
@@ -27,7 +39,10 @@ else
     exit 1
   fi
   echo "Đang mở cổng $PORT với giao thức $PROTOCOL..."
-  ufw allow $PORT/$PROTOCOL || { echo "Error: Lỗi khi thêm quy tắc tường lửa cho cổng $PORT/$PROTOCOL."; exit 1; }
+  ufw allow $PORT/$PROTOCOL || {
+    echo "Error: Lỗi khi thêm quy tắc tường lửa cho cổng $PORT/$PROTOCOL."
+    exit 1
+  }
 fi
 
 # Kiểm tra trạng thái của tường lửa
