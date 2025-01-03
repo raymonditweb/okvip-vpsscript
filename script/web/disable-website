@@ -8,7 +8,7 @@ fi
 
 # Đọc thông tin đầu vào
 DOMAIN=$1
-NGINX_CONFIG_AVAILABLE="/etc/nginx/sites-available/$DOMAIN"
+NGINX_CONFIG="/etc/nginx/sites-available/$DOMAIN"
 NGINX_CONFIG_SYMLINK="/etc/nginx/sites-enabled/$DOMAIN"
 
 if [ -z "$DOMAIN" ]; then
@@ -16,35 +16,22 @@ if [ -z "$DOMAIN" ]; then
   exit 1
 fi
 
-# Kiểm tra tệp cấu hình Nginx
-if [ ! -f "$NGINX_CONFIG_AVAILABLE" ]; then
-  echo "Error: Không tìm thấy tệp cấu hình Nginx cho $DOMAIN tại $NGINX_CONFIG_AVAILABLE."
-  exit 1
-fi
-
-# Tắt website bằng cách xóa symlink
-if [ -L "$NGINX_CONFIG_SYMLINK" ]; then
-  echo "Tắt website $DOMAIN..."
-  rm -f "$NGINX_CONFIG_SYMLINK"
-else
+# Kiểm tra symlink trong sites-enabled
+if [ ! -f "$NGINX_CONFIG_SYMLINK" ]; then
   echo "Website $DOMAIN chưa được bật hoặc không có trong sites-enabled."
-fi
-
-# Chèn return 444; ngay dưới dòng server_name
-if grep -q "server_name $DOMAIN;" "$NGINX_CONFIG_AVAILABLE"; then
-  echo "Chèn return 444; vào cấu hình $NGINX_CONFIG_AVAILABLE..."
-  sed -i "/server_name $DOMAIN;/a\    return 444;" "$NGINX_CONFIG_AVAILABLE"
 else
-  echo "Error: Không tìm thấy dòng server_name $DOMAIN; trong $NGINX_CONFIG_AVAILABLE."
-  exit 1
+  echo "Tắt website $DOMAIN..."
+  
+  # Thêm cấu hình để chặn tất cả kết nối vào HTTP và HTTPS
+  echo "Thêm cấu hình vào $NGINX_CONFIG để chặn tất cả các domain..."
+  sed -i '1s/^/server {\n    listen 80;\n    listen 443 ssl;\n    server_name _;\n    return 444;\n}/' "$NGINX_CONFIG"
+
+  # Xóa symlink trong sites-enabled
+  rm -f "$NGINX_CONFIG_SYMLINK"
 fi
 
 # Tải lại Nginx
 echo "Tải lại Nginx..."
-if nginx -t; then
-  systemctl reload nginx
-  echo "Website $DOMAIN đã bị tắt và chặn truy cập!"
-else
-  echo "Error: Cấu hình Nginx không hợp lệ. Kiểm tra lại tệp cấu hình!"
-  exit 1
-fi
+nginx -t && systemctl reload nginx
+
+echo "Website $DOMAIN đã được tắt!"
