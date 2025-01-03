@@ -78,8 +78,8 @@ apt install -y php8.1-{fpm,mysql,cli,curl,mbstring,xml,zip,gd}
 
 # Cấu hình MySQL
 echo "Cấu hình MySQL root password..."
-mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';"
-mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+mysql --silent -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';"
+mysql --silent --user=root --password="$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
 # Cài đặt phpMyAdmin
 echo "Cài đặt phpMyAdmin..."
@@ -120,7 +120,7 @@ ln -s /etc/nginx/sites-available/phpmyadmin /etc/nginx/sites-enabled/
 # Khởi động firewall và thêm cổng cho các dịch vụ
 echo "Cấu hình firewall..."
 ufw allow OpenSSH
-for port in 20 21 80 443 3306 $PHPMYADMIN_PORT; do
+for port in 20 21 22 80 443 3306 $PHPMYADMIN_PORT; do
   if ! ufw status | grep -q $port; then
     ufw allow $port/tcp
   fi
