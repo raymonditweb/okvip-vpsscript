@@ -22,16 +22,27 @@ if [ ! -f "$NGINX_CONFIG" ]; then
   exit 1
 fi
 
+# Loại bỏ khối cấu hình chặn truy cập nếu tồn tại
+if grep -q "server.*return 444;" "$NGINX_CONFIG" || grep -q "server.*deny all;" "$NGINX_CONFIG"; then
+  echo "Xóa khối cấu hình chặn truy cập trong $NGINX_CONFIG..."
+  sed -i '/server.*return 444;/,/}/d' "$NGINX_CONFIG"
+  sed -i '/server.*deny all;/,/}/d' "$NGINX_CONFIG"
+fi
+
 # Tạo symlink từ sites-available đến sites-enabled
-if [ -f "$NGINX_CONFIG_SYMLINK" ]; then
+if [ -L "$NGINX_CONFIG_SYMLINK" ]; then
   echo "Website $DOMAIN đã được bật."
 else
   echo "Bật website $DOMAIN..."
-  ln -s $NGINX_CONFIG $NGINX_CONFIG_SYMLINK
+  ln -s "$NGINX_CONFIG" "$NGINX_CONFIG_SYMLINK"
 fi
 
 # Tải lại Nginx
 echo "Tải lại Nginx..."
-nginx -t && systemctl reload nginx
-
-echo "Website $DOMAIN đã được bật!"
+if nginx -t; then
+  systemctl reload nginx
+  echo "Website $DOMAIN đã được bật!"
+else
+  echo "Error: Cấu hình Nginx không hợp lệ. Kiểm tra lại tệp cấu hình!"
+  exit 1
+fi
