@@ -22,11 +22,12 @@ if [ ! -f "$NGINX_CONFIG" ]; then
   exit 1
 fi
 
-# Loại bỏ khối cấu hình chặn truy cập nếu tồn tại
-if grep -q "server.*return 444;" "$NGINX_CONFIG" || grep -q "server.*deny all;" "$NGINX_CONFIG"; then
-  echo "Xóa khối cấu hình chặn truy cập trong $NGINX_CONFIG..."
-  sed -i '/server.*return 444;/,/}/d' "$NGINX_CONFIG"
-  sed -i '/server.*deny all;/,/}/d' "$NGINX_CONFIG"
+# Loại bỏ dòng return 444; nếu tồn tại
+if grep -q "return 444;" "$NGINX_CONFIG"; then
+  echo "Xóa dòng return 444; trong $NGINX_CONFIG..."
+  sed -i '/return 444;/d' "$NGINX_CONFIG"
+else
+  echo "Không tìm thấy dòng return 444; trong $NGINX_CONFIG. Không cần chỉnh sửa."
 fi
 
 # Tạo symlink từ sites-available đến sites-enabled
