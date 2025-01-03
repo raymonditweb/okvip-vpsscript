@@ -16,18 +16,24 @@ if [ -z "$DOMAIN" ]; then
   exit 1
 fi
 
-# Kiểm tra symlink trong sites-enabled
-if [ ! -f "$NGINX_CONFIG_SYMLINK" ]; then
-  echo "Website $DOMAIN chưa được bật hoặc không có trong sites-enabled."
-else
-  echo "Tắt website $DOMAIN..."
-  
-  # Thêm cấu hình để chặn tất cả kết nối vào HTTP và HTTPS
-  echo "Thêm cấu hình vào $NGINX_CONFIG để chặn tất cả các domain..."
-  sed -i '1s/^/server {\n    listen 80;\n    listen 443 ssl;\n    server_name _;\n    return 444;\n}/' "$NGINX_CONFIG"
+# Kiểm tra tệp cấu hình Nginx
+if [ ! -f "$NGINX_CONFIG" ]; then
+  echo "Error: Không tìm thấy tệp cấu hình Nginx cho $DOMAIN tại $NGINX_CONFIG."
+  exit 1
+fi
 
-  # Xóa symlink trong sites-enabled
+# Kiểm tra tệp cấu hình trong sites-enabled
+if [ -L "$NGINX_CONFIG_SYMLINK" ]; then
+  echo "Tắt website $DOMAIN..."
   rm -f "$NGINX_CONFIG_SYMLINK"
+
+  # Thêm return 444; sau dòng server_name và trước dòng listen 443
+  echo "Chèn return 444; vào $NGINX_CONFIG..."
+  sed -i '/server_name '"$DOMAIN"'/a\    return 444;' "$NGINX_CONFIG"
+  sed -i '/listen 443 ssl;/i\    return 444;' "$NGINX_CONFIG"
+else
+  echo "Website $DOMAIN chưa được bật hoặc không có trong sites-enabled."
+  exit 1
 fi
 
 # Tải lại Nginx
