@@ -27,9 +27,9 @@ if [ -L "$NGINX_CONFIG_SYMLINK" ]; then
   echo "Tắt website $DOMAIN..."
   rm -f "$NGINX_CONFIG_SYMLINK"
 
-  # Thêm cấu hình chặn phía trước server_name
+  # Thêm cấu hình chặn vào trước server_name trong file cấu hình
   echo "Thêm cấu hình chặn vào $NGINX_CONFIG..."
-  sed -i '1s/^/server {\n    listen 80;\n    listen 443 ssl;\n    return 444;\n    server_name '"$DOMAIN"';\n/' "$NGINX_CONFIG"
+  sed -i '/server_name '"$DOMAIN"'/i\    listen 80;\n    listen 443 ssl;\n    return 444;' "$NGINX_CONFIG"
 else
   echo "Website $DOMAIN chưa được bật hoặc không có trong sites-enabled."
   exit 1
