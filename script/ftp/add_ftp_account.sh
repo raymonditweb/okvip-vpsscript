@@ -19,11 +19,31 @@ if ! command -v expect &>/dev/null; then
   fi
 fi
 
+# Kiểm tra và cài đặt Pure-FTPd nếu chưa có
+if ! command -v pure-pw &>/dev/null; then
+  echo "Pure-FTPd chưa được cài đặt. Đang tiến hành cài đặt..."
+  if [ -x "$(command -v apt-get)" ]; then
+    apt-get update && apt-get install -y pure-ftpd
+  elif [ -x "$(command -v yum)" ]; then
+    yum install -y pure-ftpd
+  else
+    echo "Error: Không thể xác định trình quản lý gói để cài đặt Pure-FTPd."
+    exit 1
+  fi
+fi
+
 # Đường dẫn tới tệp chứa danh sách tài khoản FTP
 FTP_USER_FILE="/etc/ftp_users.txt"
 DEFAULT_USERNAME="default_user"
 DEFAULT_PASSWORD="default_password"
 FTP_HOME="/home/ftp_users"
+FTP_SHELL="/sbin/nologin"
+
+# Đảm bảo shell tồn tại trong /etc/shells
+if ! grep -q "^$FTP_SHELL$" /etc/shells; then
+  echo "Thêm $FTP_SHELL vào /etc/shells..."
+  echo "$FTP_SHELL" >>/etc/shells
+fi
 
 # Hàm để thêm tài khoản FTP
 add_account() {
@@ -43,7 +63,7 @@ add_account() {
   fi
 
   # Tạo tài khoản hệ thống và thiết lập thư mục FTP riêng
-  if ! useradd -m -d "$directory" -s /sbin/bash "$username"; then
+  if ! useradd -m -d "$directory" -s "$FTP_SHELL" "$username"; then
     echo "Error: Không thể tạo tài khoản hệ thống $username."
     return 1
   fi
@@ -58,20 +78,9 @@ add_account() {
   echo "$username:$password" >>"$FTP_USER_FILE"
 
   # Thiết lập quyền thư mục
-  if ! mkdir -p "$directory"; then
-    echo "Error: Không thể tạo thư mục $directory."
-    return 1
-  fi
-
-  if ! chown "$username:$username" "$directory"; then
-    echo "Error: Không thể gán quyền sở hữu thư mục $directory cho tài khoản $username."
-    return 1
-  fi
-
-  if ! chmod 755 "$directory"; then
-    echo "Error: Không thể đặt quyền thư mục $directory."
-    return 1
-  fi
+  mkdir -p "$directory"
+  chown "$username:$username" "$directory"
+  chmod 755 "$directory"
 
   # Tạo tài khoản FTP trong cơ sở dữ liệu Pure-FTPd bằng expect
   uid=$(id -u "$username")
@@ -90,10 +99,10 @@ add_account() {
   }
 
   # Cập nhật cơ sở dữ liệu của Pure-FTPd
-  if ! pure-pw mkdb; then
+  pure-pw mkdb || {
     echo "Error: Không thể cập nhật cơ sở dữ liệu của Pure-FTPd."
     return 1
-  fi
+  }
 
   # Kích hoạt tài khoản FTP
   echo "Tài khoản FTP $username đã được thêm thành công với đầy đủ quyền."

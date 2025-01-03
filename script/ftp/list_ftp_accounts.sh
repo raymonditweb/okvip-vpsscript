@@ -2,53 +2,25 @@
 
 # Kiểm tra quyền root
 if [ "$(id -u)" -ne 0 ]; then
-  echo "Error: Vui lòng chạy script này với quyền root."
+  echo "Error: Vui lòng chạy script với quyền root."
   exit 1
 fi
 
-# Đường dẫn tới tệp chứa danh sách tài khoản FTP
-FTP_USER_FILE="/etc/ftp_users.txt"
-
-# Hàm cài đặt Pure-FTPD nếu chưa có
-install_pureftpd() {
-  if ! command -v pure-pw &>/dev/null; then
-    echo "Pure-FTPD chưa được cài đặt. Đang tiến hành cài đặt..."
-    if command -v apt-get &>/dev/null; then
-      apt-get update && apt-get install -y pure-ftpd
-    elif command -v yum &>/dev/null; then
-      yum install -y pure-ftpd
-    else
-      echo "Error: Không xác định được hệ quản lý gói. Vui lòng cài đặt Pure-FTPD thủ công."
-      exit 1
-    fi
-    echo "Cài đặt Pure-FTPD hoàn tất."
-  fi
-}
-
-# Hàm để kiểm tra status của FTP user
+# Hàm để kiểm tra trạng thái của tài khoản FTP
 check_ftp_status() {
-  local username=$1
-
-  # Kiểm tra xem user có tồn tại trong Pure-FTPd database không
+  local username="$1"
+  # Kiểm tra xem tài khoản có tồn tại trong Pure-FTPd không
   if pure-pw show "$username" &>/dev/null; then
-    # Kiểm tra shell hệ thống để xác định trạng thái
-    local shell
-    shell=$(getent passwd "$username" | cut -d: -f7)
-    if [[ "$shell" == "/sbin/nologin" ]]; then
-      echo "Inactive"
-    else
-      echo "Active"
-    fi
+    echo "Active"
   else
-    # Không tìm thấy trong Pure-FTPd database
     echo "Inactive"
   fi
 }
 
-# Hàm để lấy FTP quota
+# Hàm để lấy quota của tài khoản FTP
 get_ftp_quota() {
-  local username=$1
-  local quota=$(pure-pw show "$username" 2>/dev/null | awk '/Ratio/ {split($3,a,":"); print a[1]}')
+  local username="$1"
+  local quota=$(pure-pw show "$username" 2>/dev/null | awk '/Quota/ {print $3}')
   if [ -z "$quota" ] || [ "$quota" = "none" ]; then
     echo "Unlimited"
   else
@@ -56,66 +28,50 @@ get_ftp_quota() {
   fi
 }
 
-# Hàm để lấy FTP directory
+# Hàm để lấy thư mục của tài khoản FTP
 get_ftp_directory() {
-  local username=$1
-  local dir=$(pure-pw show "$username" 2>/dev/null | grep "Directory" | awk '{print $3}' | sed 's|/./||g')
+  local username="$1"
+  local dir=$(pure-pw show "$username" 2>/dev/null | awk '/Directory/ {print $3}')
   if [ -z "$dir" ]; then
-    echo "/var/www/$username"
+    echo "Unknown"
   else
-    echo "/var/www$dir"
+    echo "$dir"
   fi
 }
 
-# Hàm để liệt kê tài khoản FTP
+# Hàm để liệt kê danh sách tài khoản FTP
 list_accounts() {
   echo "Danh sách chi tiết tài khoản FTP:"
   echo "--------------------------------------------------------------------------------"
-  printf "%-15s %-15s %-20s %-15s %-10s\n" "USERNAME" "PASSWORD" "DIRECTORY" "QUOTA" "STATUS"
+  printf "%-15s %-20s %-15s %-10s\n" "USERNAME" "DIRECTORY" "QUOTA" "STATUS"
   echo "--------------------------------------------------------------------------------"
 
-  if [[ -f $FTP_USER_FILE ]]; then
-    while IFS=: read -r username password remainder; do
-      if [ ! -z "$username" ]; then
-        # Lấy thông tin chi tiết
-        status=$(check_ftp_status "$username")
-        quota=$(get_ftp_quota "$username")
-        directory=$(get_ftp_directory "$username")
+  # Lấy danh sách tài khoản từ Pure-FTPd
+  pure-pw list | awk '{print $1}' | while read -r username; do
+    directory=$(get_ftp_directory "$username")
+    quota=$(get_ftp_quota "$username")
+    status=$(check_ftp_status "$username")
 
-        password=$(echo "$password")
-
-        printf "%-15s %-15s %-20s %-15s %-10s\n" \
-          "$username" \
-          "$password" \
-          "$directory" \
-          "$quota" \
-          "$status"
-      fi
-    done <"$FTP_USER_FILE"
-  else
-    echo "Error: Không tìm thấy file $FTP_USER_FILE"
-    echo "Tạo file mới..."
-    touch "$FTP_USER_FILE"
-    chmod 600 "$FTP_USER_FILE"
-    echo "Đã tạo file $FTP_USER_FILE"
-  fi
+    printf "%-15s %-20s %-15s %-10s\n" \
+      "$username" \
+      "$directory" \
+      "$quota" \
+      "$status"
+  done
   echo "--------------------------------------------------------------------------------"
 }
 
 # Kiểm tra các lệnh cần thiết
 check_requirements() {
-  commands=("pure-pw" "grep" "awk")
+  commands=("pure-pw" "awk")
   for cmd in "${commands[@]}"; do
     if ! command -v "$cmd" &>/dev/null; then
       echo "Error: Lệnh '$cmd' chưa được cài đặt."
       echo "Vui lòng cài đặt Pure-FTPD và các gói cần thiết."
-      return 1
+      exit 1
     fi
   done
 }
-
-# Kiểm tra và cài đặt Pure-FTPD nếu cần
-install_pureftpd
 
 # Kiểm tra yêu cầu trước khi chạy
 check_requirements
@@ -124,5 +80,5 @@ check_requirements
 list_accounts
 
 # Hiển thị tổng số tài khoản
-total_accounts=$(grep -c "." "$FTP_USER_FILE" 2>/dev/null || echo 0)
+total_accounts=$(pure-pw list | wc -l)
 echo "Tổng số tài khoản: $total_accounts"

@@ -1,15 +1,12 @@
 #!/bin/bash
 
 # Kiểm tra quyền root
-if [ "$EUID" -ne 0 ]; then
+if [ "$(id -u)" -ne 0 ]; then
   echo "Error: Vui lòng chạy script với quyền root."
   exit 1
 fi
 
-# Đường dẫn tới tệp chứa danh sách tài khoản FTP
-FTP_USER_FILE="/etc/ftp_users.txt"
-
-# Hàm để hiển thị mật khẩu của tài khoản FTP
+# Hàm để hiển thị thông báo hoặc hướng dẫn đặt lại mật khẩu
 show_password() {
   local username="$1"
 
@@ -18,16 +15,19 @@ show_password() {
     return 1
   fi
 
-  # Kiểm tra xem tài khoản có tồn tại không
-  if grep -q "^$username:" "$FTP_USER_FILE"; then
-    # Lấy mật khẩu từ tệp và hiển thị
-    password=$(grep "^$username:" "$FTP_USER_FILE" | cut -d':' -f2)
-    echo "Mật khẩu của tài khoản $username là: $password"
-  else
-    echo "Error: Tài khoản $username không tồn tại."
+  # Kiểm tra xem tài khoản có tồn tại trong Pure-FTPd không
+  if ! pure-pw show "$username" &>/dev/null; then
+    echo "Error: Tài khoản $username không tồn tại trong Pure-FTPd."
     return 1
   fi
+
+  # Thông báo rằng mật khẩu không thể được lấy lại
+  echo "Lưu ý: Pure-FTPd không lưu mật khẩu dạng văn bản thuần."
+  echo "Nếu bạn quên mật khẩu, hãy đặt lại bằng cách sử dụng lệnh sau:"
+  echo "  pure-pw passwd $username"
+  echo "Sau đó cập nhật cơ sở dữ liệu Pure-FTPd bằng lệnh:"
+  echo "  pure-pw mkdb"
 }
 
-# Gọi hàm hiển thị mật khẩu với tham số từ dòng lệnh
+# Gọi hàm hiển thị thông báo hoặc hướng dẫn đặt lại mật khẩu
 show_password "$1"

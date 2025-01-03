@@ -21,13 +21,35 @@ delete_account() {
 
   # Kiểm tra xem tài khoản có tồn tại trong hệ thống không
   if id "$username" &>/dev/null; then
+    # Xóa tài khoản khỏi cơ sở dữ liệu Pure-FTPd
+    if pure-pw userdel "$username"; then
+      echo "Đã xóa tài khoản FTP từ cơ sở dữ liệu Pure-FTPd."
+    else
+      echo "Error: Không thể xóa tài khoản FTP $username khỏi Pure-FTPd."
+      return 1
+    fi
+
+    # Cập nhật cơ sở dữ liệu của Pure-FTPd
+    if ! pure-pw mkdb; then
+      echo "Error: Không thể cập nhật cơ sở dữ liệu của Pure-FTPd."
+      return 1
+    fi
+
     # Xóa tài khoản hệ thống
-    userdel -r "$username"  # Xóa người dùng và thư mục cá nhân
+    if userdel -r "$username"; then
+      echo "Đã xóa tài khoản hệ thống và thư mục cá nhân cho $username."
+    else
+      echo "Error: Không thể xóa tài khoản hệ thống $username."
+      return 1
+    fi
 
-    # Xóa tài khoản khỏi tệp
-    sed -i "/^$username:/d" "$FTP_USER_FILE"
+    # Xóa tài khoản khỏi tệp theo dõi
+    if [ -f "$FTP_USER_FILE" ]; then
+      sed -i "/^$username:/d" "$FTP_USER_FILE"
+      echo "Đã xóa $username khỏi danh sách tài khoản FTP."
+    fi
 
-    echo "Đã xóa tài khoản FTP cho $username."
+    echo "Tài khoản $username đã được xóa hoàn toàn."
   else
     echo "Error: Tài khoản $username không tồn tại."
   fi
