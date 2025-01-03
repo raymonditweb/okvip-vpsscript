@@ -8,15 +8,21 @@ fi
 
 # Đọc thông tin đầu vào
 DOMAIN=$1
-NGINX_CONFIG_SYMLINK="/etc/nginx/sites-enabled/$DOMAIN"
 NGINX_CONFIG_AVAILABLE="/etc/nginx/sites-available/$DOMAIN"
+NGINX_CONFIG_SYMLINK="/etc/nginx/sites-enabled/$DOMAIN"
 
 if [ -z "$DOMAIN" ]; then
   echo "Error: Sử dụng: ./disable-website.sh <domain>"
   exit 1
 fi
 
-# Kiểm tra symlink trong sites-enabled
+# Kiểm tra tệp cấu hình Nginx
+if [ ! -f "$NGINX_CONFIG_AVAILABLE" ]; then
+  echo "Error: Không tìm thấy tệp cấu hình Nginx cho $DOMAIN tại $NGINX_CONFIG_AVAILABLE."
+  exit 1
+fi
+
+# Tắt website bằng cách xóa symlink
 if [ -L "$NGINX_CONFIG_SYMLINK" ]; then
   echo "Tắt website $DOMAIN..."
   rm -f "$NGINX_CONFIG_SYMLINK"
@@ -24,18 +30,12 @@ else
   echo "Website $DOMAIN chưa được bật hoặc không có trong sites-enabled."
 fi
 
-# Chèn cấu hình return 444 vào sites-available
-if [ -f "$NGINX_CONFIG_AVAILABLE" ]; then
-  echo "Cập nhật cấu hình để chặn truy cập vào $DOMAIN..."
-
-  # Thêm một server block mới nếu chưa tồn tại
-  if ! grep -q "server.*return 444;" "$NGINX_CONFIG_AVAILABLE"; then
-    echo -e "\n# Block access to the domain\nserver {\n    server_name $DOMAIN;\n    return 444;\n}" >> "$NGINX_CONFIG_AVAILABLE"
-  else
-    echo "Cấu hình chặn truy cập đã tồn tại trong $NGINX_CONFIG_AVAILABLE."
-  fi
+# Chèn return 444; ngay dưới dòng server_name
+if grep -q "server_name $DOMAIN;" "$NGINX_CONFIG_AVAILABLE"; then
+  echo "Chèn return 444; vào cấu hình $NGINX_CONFIG_AVAILABLE..."
+  sed -i "/server_name $DOMAIN;/a\    return 444;" "$NGINX_CONFIG_AVAILABLE"
 else
-  echo "Error: Không tìm thấy tệp cấu hình trong /etc/nginx/sites-available/."
+  echo "Error: Không tìm thấy dòng server_name $DOMAIN; trong $NGINX_CONFIG_AVAILABLE."
   exit 1
 fi
 
@@ -43,7 +43,7 @@ fi
 echo "Tải lại Nginx..."
 if nginx -t; then
   systemctl reload nginx
-  echo "Website $DOMAIN đã được tắt và chặn truy cập!"
+  echo "Website $DOMAIN đã bị tắt và chặn truy cập!"
 else
   echo "Error: Cấu hình Nginx không hợp lệ. Kiểm tra lại tệp cấu hình!"
   exit 1
