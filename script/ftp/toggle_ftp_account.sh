@@ -52,16 +52,32 @@ fi
 case $ACTION in
 enable)
   if is_system_user; then
-    usermod -s /bin/bash "$USERNAME" && echo "Đã kích hoạt tài khoản hệ thống cho '$USERNAME'."
+    if usermod -s /bin/bash "$USERNAME"; then
+      echo "Đã kích hoạt tài khoản hệ thống cho '$USERNAME'."
+    else
+      echo "Error: Không thể kích hoạt tài khoản hệ thống cho '$USERNAME'."
+    fi
   elif is_virtual_user; then
-    pure-pw unlock "$USERNAME" && pure-pw mkdb && echo "Đã kích hoạt tài khoản Pure-FTPd cho '$USERNAME'."
+    if pure-pw unlock "$USERNAME" && pure-pw mkdb; then
+      echo "Đã kích hoạt tài khoản Pure-FTPd cho '$USERNAME'."
+    else
+      echo "Error: Không thể kích hoạt tài khoản Pure-FTPd cho '$USERNAME'."
+    fi
   fi
   ;;
 disable)
   if is_system_user; then
-    usermod -s "$LOCKED_SHELL" "$USERNAME" && echo "Đã vô hiệu hóa tài khoản hệ thống cho '$USERNAME'."
+    if usermod -s "$LOCKED_SHELL" "$USERNAME"; then
+      echo "Đã vô hiệu hóa tài khoản hệ thống cho '$USERNAME'."
+    else
+      echo "Error: Không thể vô hiệu hóa tài khoản hệ thống cho '$USERNAME'."
+    fi
   elif is_virtual_user; then
-    pure-pw lock "$USERNAME" && pure-pw mkdb && echo "Đã vô hiệu hóa tài khoản Pure-FTPd cho '$USERNAME'."
+    if pure-pw lock "$USERNAME" && pure-pw mkdb; then
+      echo "Đã vô hiệu hóa tài khoản Pure-FTPd cho '$USERNAME'."
+    else
+      echo "Error: Không thể vô hiệu hóa tài khoản Pure-FTPd cho '$USERNAME'."
+    fi
   fi
   ;;
 *)
