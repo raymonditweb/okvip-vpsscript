@@ -8,7 +8,6 @@ fi
 
 # Đọc thông tin đầu vào
 DOMAIN=$1
-NGINX_CONFIG="/etc/nginx/sites-available/$DOMAIN"
 NGINX_CONFIG_SYMLINK="/etc/nginx/sites-enabled/$DOMAIN"
 
 if [ -z "$DOMAIN" ]; then
@@ -16,23 +15,12 @@ if [ -z "$DOMAIN" ]; then
   exit 1
 fi
 
-# Kiểm tra tệp cấu hình Nginx
-if [ ! -f "$NGINX_CONFIG" ]; then
-  echo "Error: Không tìm thấy tệp cấu hình Nginx cho $DOMAIN tại $NGINX_CONFIG."
-  exit 1
-fi
-
-# Kiểm tra tệp cấu hình trong sites-enabled
-if [ -L "$NGINX_CONFIG_SYMLINK" ]; then
-  echo "Tắt website $DOMAIN..."
-  rm -f "$NGINX_CONFIG_SYMLINK"
-
-  # Thêm cấu hình chặn vào trước server_name trong file cấu hình
-  echo "Thêm cấu hình chặn vào $NGINX_CONFIG..."
-  sed -i '/server_name '"$DOMAIN"'/i\    listen 80;\n    listen 443 ssl;\n    return 444;' "$NGINX_CONFIG"
-else
+# Kiểm tra symlink trong sites-enabled
+if [ ! -f "$NGINX_CONFIG_SYMLINK" ]; then
   echo "Website $DOMAIN chưa được bật hoặc không có trong sites-enabled."
-  exit 1
+else
+  echo "Tắt website $DOMAIN..."
+  rm -f $NGINX_CONFIG_SYMLINK
 fi
 
 # Tải lại Nginx

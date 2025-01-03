@@ -22,28 +22,16 @@ if [ ! -f "$NGINX_CONFIG" ]; then
   exit 1
 fi
 
-# Loại bỏ dòng return 444; nếu tồn tại
-if grep -q "return 444;" "$NGINX_CONFIG"; then
-  echo "Xóa dòng return 444; trong $NGINX_CONFIG..."
-  sed -i '/return 444;/d' "$NGINX_CONFIG"
-else
-  echo "Không tìm thấy dòng return 444; trong $NGINX_CONFIG. Không cần chỉnh sửa."
-fi
-
 # Tạo symlink từ sites-available đến sites-enabled
-if [ -L "$NGINX_CONFIG_SYMLINK" ]; then
+if [ -f "$NGINX_CONFIG_SYMLINK" ]; then
   echo "Website $DOMAIN đã được bật."
 else
   echo "Bật website $DOMAIN..."
-  ln -s "$NGINX_CONFIG" "$NGINX_CONFIG_SYMLINK"
+  ln -s $NGINX_CONFIG $NGINX_CONFIG_SYMLINK
 fi
 
 # Tải lại Nginx
 echo "Tải lại Nginx..."
-if nginx -t; then
-  systemctl reload nginx
-  echo "Website $DOMAIN đã được bật!"
-else
-  echo "Error: Cấu hình Nginx không hợp lệ. Kiểm tra lại tệp cấu hình!"
-  exit 1
-fi
+nginx -t && systemctl reload nginx
+
+echo "Website $DOMAIN đã được bật!"
