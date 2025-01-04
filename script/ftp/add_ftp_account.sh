@@ -38,12 +38,50 @@ DEFAULT_USERNAME="default_user"
 DEFAULT_PASSWORD="default_password"
 FTP_HOME="/home/ftp_users"
 FTP_SHELL="/sbin/nologin"
+# Đường dẫn tệp cấu hình Pure-FTPd
+PURE_FTPD_CONF="/etc/pure-ftpd/pure-ftpd.conf"
+
+# Cấu hình dải port Passive
+PASSIVE_PORT_START=49152
+PASSIVE_PORT_END=65535
 
 # Đảm bảo shell tồn tại trong /etc/shells
 if ! grep -q "^$FTP_SHELL$" /etc/shells; then
   echo "Thêm $FTP_SHELL vào /etc/shells..."
   echo "$FTP_SHELL" >>/etc/shells
 fi
+
+# Cập nhật pure-ftpd.conf
+update_pure_ftpd_config() {
+  echo "Cập nhật tệp cấu hình Pure-FTPd..."
+
+  if [ ! -f "$PURE_FTPD_CONF" ]; then
+    echo "Error: Không tìm thấy tệp cấu hình $PURE_FTPD_CONF."
+    exit 1
+  fi
+
+  # Thêm hoặc cập nhật dải PassivePortRange
+  if grep -q "PassivePortRange" "$PURE_FTPD_CONF"; then
+    sed -i "s/^PassivePortRange.*/PassivePortRange $PASSIVE_PORT_START $PASSIVE_PORT_END/" "$PURE_FTPD_CONF"
+  else
+    echo "PassivePortRange $PASSIVE_PORT_START $PASSIVE_PORT_END" >>"$PURE_FTPD_CONF"
+  fi
+
+  echo "Tệp cấu hình Pure-FTPd đã được cập nhật."
+}
+
+# Mở dải port trong UFW
+open_ports_ufw() {
+  echo "Mở dải port $PASSIVE_PORT_START-$PASSIVE_PORT_END trong UFW..."
+
+  if command -v ufw &>/dev/null; then
+    ufw allow "$PASSIVE_PORT_START:$PASSIVE_PORT_END/tcp"
+    ufw reload
+    echo "Đã mở dải port trong UFW."
+  else
+    echo "Warning: UFW không được cài đặt, bỏ qua bước này."
+  fi
+}
 
 # Hàm để thêm tài khoản FTP
 add_account() {
@@ -104,9 +142,23 @@ add_account() {
     return 1
   }
 
-  # Kích hoạt tài khoản FTP
   echo "Tài khoản FTP $username đã được thêm thành công với đầy đủ quyền."
 }
 
-# Gọi hàm thêm tài khoản với tham số từ dòng lệnh
+# Khởi động lại Pure-FTPd
+restart_pure_ftpd() {
+  echo "Khởi động lại Pure-FTPd để áp dụng thay đổi..."
+  systemctl restart pure-ftpd || {
+    echo "Error: Không thể khởi động lại Pure-FTPd."
+    exit 1
+  }
+  echo "Pure-FTPd đã được khởi động lại."
+}
+
+# Gọi các hàm để thực hiện
+update_pure_ftpd_config
+open_ports_ufw
+restart_pure_ftpd
+
+# Gọi hàm thêm tài khoản FTP nếu cần
 add_account "$1" "$2" "$3"
