@@ -146,11 +146,6 @@ else
   echo "SSL cho domain $DOMAIN đã tồn tại."
 fi
 
-# Thêm domain vào /etc/hosts
-if ! grep -q "127.0.0.1 $DOMAIN" /etc/hosts; then
-  echo "127.0.0.1 $DOMAIN" >> /etc/hosts
-fi
-
 # Tạo hoặc cập nhật wp-config.php
 echo "Cấu hình wp-config.php..."
 if [ -f "$WEB_ROOT/wp-config.php" ]; then
