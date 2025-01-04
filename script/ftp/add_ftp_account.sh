@@ -10,9 +10,9 @@ fi
 if ! command -v expect &>/dev/null; then
   echo "Expect chưa được cài đặt. Đang tiến hành cài đặt..."
   if [ -x "$(command -v apt-get)" ]; then
-    apt-get update && apt-get install -y expect # Trên Ubuntu/Debian
+    apt-get update && apt-get install -y expect
   elif [ -x "$(command -v yum)" ]; then
-    yum install -y expect # Trên CentOS/RHEL
+    yum install -y expect
   else
     echo "Error: Không thể xác định trình quản lý gói để cài đặt expect."
     exit 1
@@ -34,11 +34,8 @@ fi
 
 # Đường dẫn tới tệp chứa danh sách tài khoản FTP
 FTP_USER_FILE="/etc/ftp_users.txt"
-DEFAULT_USERNAME="default_user"
-DEFAULT_PASSWORD="default_password"
-FTP_HOME="/home/ftp_users"
+FTP_HOME="/var/www"
 FTP_SHELL="/sbin/nologin"
-# Đường dẫn tệp cấu hình Pure-FTPd
 PURE_FTPD_CONF="/etc/pure-ftpd/pure-ftpd.conf"
 
 # Cấu hình dải port Passive
@@ -60,10 +57,35 @@ update_pure_ftpd_config() {
     exit 1
   fi
 
-  # Thêm hoặc cập nhật dải PassivePortRange
-  if grep -q "PassivePortRange" "$PURE_FTPD_CONF"; then
-    sed -i "s/^PassivePortRange.*/PassivePortRange $PASSIVE_PORT_START $PASSIVE_PORT_END/" "$PURE_FTPD_CONF"
-  else
+  # Thêm hoặc cập nhật cấu hình chroot và dải PassivePortRange
+  sed -i "s/^.*ChrootEveryone.*/ChrootEveryone yes/" "$PURE_FTPD_CONF"
+  sed -i "s/^.*PassivePortRange.*/PassivePortRange $PASSIVE_PORT_START $PASSIVE_PORT_END/" "$PURE_FTPD_CONF"
+
+  # Nếu không có, thêm mới
+  if ! grep -q "^ChrootEveryone" "$PURE_FTPD_CONF"; then
+    echo "ChrootEveryone yes" >>"$PURE_FTPD_CONF"
+  fi
+  if ! grep -q "^PassivePortRange" "$PURE_FTPD_CONF"; then
+    echo "PassivePortRange $PASSIVE_PORT_START $PASSIVE_PORT_END" >>"$PURE_FTPD_CONF"
+  fi
+
+  # Thêm hoặc cập nhật cấu hình thời gian chờ và dải PassivePortRange
+  sed -i "s/^.*TimeoutIdle.*/TimeoutIdle 600/" "$PURE_FTPD_CONF"
+  sed -i "s/^.*TimeoutNoTransfer.*/TimeoutNoTransfer 600/" "$PURE_FTPD_CONF"
+  sed -i "s/^.*TimeoutStalled.*/TimeoutStalled 600/" "$PURE_FTPD_CONF"
+  sed -i "s/^.*PassivePortRange.*/PassivePortRange $PASSIVE_PORT_START $PASSIVE_PORT_END/" "$PURE_FTPD_CONF"
+
+  # Nếu không có, thêm mới
+  if ! grep -q "^TimeoutIdle" "$PURE_FTPD_CONF"; then
+    echo "TimeoutIdle 600" >>"$PURE_FTPD_CONF"
+  fi
+  if ! grep -q "^TimeoutNoTransfer" "$PURE_FTPD_CONF"; then
+    echo "TimeoutNoTransfer 600" >>"$PURE_FTPD_CONF"
+  fi
+  if ! grep -q "^TimeoutStalled" "$PURE_FTPD_CONF"; then
+    echo "TimeoutStalled 600" >>"$PURE_FTPD_CONF"
+  fi
+  if ! grep -q "^PassivePortRange" "$PURE_FTPD_CONF"; then
     echo "PassivePortRange $PASSIVE_PORT_START $PASSIVE_PORT_END" >>"$PURE_FTPD_CONF"
   fi
 
@@ -73,7 +95,6 @@ update_pure_ftpd_config() {
 # Mở dải port trong UFW
 open_ports_ufw() {
   echo "Mở dải port $PASSIVE_PORT_START-$PASSIVE_PORT_END trong UFW..."
-
   if command -v ufw &>/dev/null; then
     ufw allow "$PASSIVE_PORT_START:$PASSIVE_PORT_END/tcp"
     ufw reload
@@ -85,9 +106,17 @@ open_ports_ufw() {
 
 # Hàm để thêm tài khoản FTP
 add_account() {
-  local username="${1:-$DEFAULT_USERNAME}"
-  local password="${2:-$DEFAULT_PASSWORD}"
-  local directory="${3:-$FTP_HOME/$username}"
+
+  # Kiểm tra đủ 3 tham số
+  if [ "$#" -lt 3 ]; then
+    echo "Error: Hàm add_account yêu cầu 3 tham số: username, password, và thư mục."
+    echo "Sử dụng: add_account <username> <password> <directory>"
+    return 1
+  fi
+
+  local username="$1"
+  local password="$2"
+  local directory="$FTP_HOME/$3"
 
   # Đảm bảo đường dẫn là tuyệt đối
   if [[ "$directory" != /* ]]; then
@@ -142,7 +171,7 @@ add_account() {
     return 1
   }
 
-  echo "Tài khoản FTP $username đã được thêm thành công với đầy đủ quyền."
+  echo "Tài khoản FTP $username đã được thêm thành công với thư mục bị chroot."
 }
 
 # Khởi động lại Pure-FTPd
