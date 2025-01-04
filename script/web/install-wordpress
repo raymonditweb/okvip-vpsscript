@@ -77,21 +77,7 @@ fi
 echo "Tạo database và user MySQL cho WordPress..."
 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
 
-# Kiểm tra phiên bản MySQL
-MYSQL_VERSION=$(mysql -V | grep -o -E '[4-9]+\.[0-9]+\.[0-9]+')
-
-# Xử lý tạo user tùy thuộc vào phiên bản MySQL
-if [[ "$MYSQL_VERSION" =~ ^8.* ]]; then
-    # MySQL 8.x sử dụng caching_sha2_password
-    echo "Detected MySQL 8.x, creating user with caching_sha2_password..."
-    mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
-else
-    # MySQL 5.x sử dụng mysql_native_password
-    echo "Detected MySQL 5.x or older, creating user with mysql_native_password..."
-    mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED WITH mysql_native_password BY '$DB_PASSWORD';"
-fi
-
-# Cấp quyền truy cập cho user trên database
+mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
 
@@ -117,10 +103,6 @@ else
   exit 1
 fi
 
-# Cập nhật domain trong database thành https://
-echo "Cập nhật domain https://$DOMAIN trong database..."
-mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "UPDATE ${DB_NAME}.wp_options SET option_value='https://$DOMAIN' WHERE option_name IN ('siteurl', 'home');"
-
 # Cấu hình Nginx cho website
 echo "Cấu hình Nginx cho website $DOMAIN..."
 cat > /etc/nginx/sites-available/$DOMAIN <<EOL
@@ -137,7 +119,7 @@ server {
 
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
+        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
         include fastcgi_params;
     }
@@ -162,11 +144,6 @@ if ! sudo certbot certificates | grep -q "$DOMAIN"; then
   certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m no-reply@okvip.com --redirect
 else
   echo "SSL cho domain $DOMAIN đã tồn tại."
-fi
-
-# Thêm domain vào /etc/hosts
-if ! grep -q "127.0.0.1 $DOMAIN" /etc/hosts; then
-  echo "127.0.0.1 $DOMAIN" >> /etc/hosts
 fi
 
 # Tạo hoặc cập nhật wp-config.php
