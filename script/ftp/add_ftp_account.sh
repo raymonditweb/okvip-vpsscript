@@ -151,7 +151,7 @@ add_account() {
   chown "$username:$username" "$directory"
 
   # Thêm tài khoản vào tệp theo dõi tài khoản FTP
-  echo "$username:$password:$directory" >> "$FTP_USER_FILE"
+  echo "$username:$password:$directory" >>"$FTP_USER_FILE"
 
   # Tạo tài khoản FTP trong cơ sở dữ liệu Pure-FTPd bằng expect
   uid=$(id -u "$username")
@@ -175,7 +175,7 @@ add_account() {
     return 1
   }
 
-  echo "Tài khoản FTP $username đã được thêm thành công với thư mục bị chroot."
+  echo "Tài khoản FTP $username đã được thêm thành công với đầy đủ quyền."
 }
 
 # Khởi động lại Pure-FTPd
