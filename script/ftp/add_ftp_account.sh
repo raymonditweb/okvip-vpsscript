@@ -146,8 +146,12 @@ add_account() {
 
   # Thiết lập quyền thư mục
   mkdir -p "$directory"
+
+  chmod 770 "$directory"
   chown "$username:$username" "$directory"
-  chmod 755 "$directory"
+
+  # Thêm tài khoản vào tệp theo dõi tài khoản FTP
+  echo "$username:$password:$directory" >> "$FTP_USER_FILE"
 
   # Tạo tài khoản FTP trong cơ sở dữ liệu Pure-FTPd bằng expect
   uid=$(id -u "$username")
