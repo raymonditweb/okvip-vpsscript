@@ -35,6 +35,9 @@ fi
 # Regex để validate domain
 DOMAIN_REGEX='^([a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$'
 
+# Lấy danh sách alias domain hiện tại trong cấu hình Nginx
+EXISTING_ALIASES=$(grep -oP '(?<=server_name\s).*;' "$NGINX_CONF_FILE" | tr -d ';')
+
 # Kiểm tra và thêm từng alias domain
 for ALIAS_DOMAIN in "${ALIAS_DOMAINS[@]}"; do
   # Validate alias domain (đảm bảo domain hợp lệ)
@@ -43,14 +46,20 @@ for ALIAS_DOMAIN in "${ALIAS_DOMAINS[@]}"; do
     continue
   fi
 
-  # Kiểm tra alias domain đã tồn tại hay chưa trong cấu hình Nginx
-  if grep -qw "$ALIAS_DOMAIN" "$NGINX_CONF_FILE"; then
+  # Kiểm tra alias domain có liên quan đến domain chính hay không
+  if [[ $ALIAS_DOMAIN != "www.$PRIMARY_DOMAIN" && $ALIAS_DOMAIN != *".$PRIMARY_DOMAIN" ]]; then
+    echo "Error: Alias domain '$ALIAS_DOMAIN' không liên quan đến domain chính '$PRIMARY_DOMAIN'."
+    continue
+  fi
+
+  # Kiểm tra alias domain đã tồn tại hay chưa
+  if [[ "$EXISTING_ALIASES" =~ (^|[[:space:]])$ALIAS_DOMAIN($|[[:space:]]) ]]; then
     echo "Alias domain '$ALIAS_DOMAIN' đã tồn tại trong cấu hình Nginx của $PRIMARY_DOMAIN."
   else
+    # Thêm alias domain vào cấu hình
     sed -i "/server_name/s/$/ $ALIAS_DOMAIN;/" "$NGINX_CONF_FILE"
     echo "Alias domain '$ALIAS_DOMAIN' đã được thêm vào cấu hình Nginx của $PRIMARY_DOMAIN."
   fi
-
 done
 
 # Kiểm tra cấu hình Nginx
