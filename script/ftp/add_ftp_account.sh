@@ -148,7 +148,7 @@ add_account() {
   mkdir -p "$directory"
 
   chmod 770 "$directory"
-  chown "$username:$username" "$directory"
+  chown -R "$username:$username" "$directory"
 
   # Thêm tài khoản vào tệp theo dõi tài khoản FTP
   echo "$username:$password:$directory" >>"$FTP_USER_FILE"
