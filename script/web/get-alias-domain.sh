@@ -28,9 +28,6 @@ if [ -z "$SERVER_NAME_LINE" ]; then
   echo "Không tìm thấy alias domains trong file cấu hình của $DOMAIN"
 else
   echo "Alias domains cho domain chính ($DOMAIN):"
-  # Lấy danh sách domain và có cả domain chính
-  echo "$SERVER_NAME_LINE" | sed -E 's/server_name //;s/;//' | tr -s ' ' '\n'
-
-  # Lấy danh sách domain và không có domain chính
-  # echo "$SERVER_NAME_LINE" | sed -E 's/server_name //;s/;//' | awk '{$1=""; print $0}' | tr -s ' ' '\n'
+  # Lấy danh sách domain, loại bỏ trùng lặp, và loại bỏ domain chính
+  echo "$SERVER_NAME_LINE" | sed -E 's/server_name //;s/;//' | tr -s ' ' '\n' | grep -v "^$DOMAIN$" | sort -u
 fi
