@@ -42,13 +42,13 @@ EXISTING_ALIASES=$(grep -oP '(?<=server_name\s).*;' "$NGINX_CONF_FILE" | tr -d '
 for ALIAS_DOMAIN in "${ALIAS_DOMAINS[@]}"; do
   # Validate alias domain (đảm bảo domain hợp lệ)
   if [[ ! $ALIAS_DOMAIN =~ $DOMAIN_REGEX ]]; then
-    echo "Error: Alias domain '$ALIAS_DOMAIN' không hợp lệ."
+    echo
     continue
   fi
 
   # Kiểm tra alias domain có liên quan đến domain chính hay không
   if [[ $ALIAS_DOMAIN != "www.$PRIMARY_DOMAIN" && $ALIAS_DOMAIN != *".$PRIMARY_DOMAIN" ]]; then
-    echo "Error: Alias domain '$ALIAS_DOMAIN' không liên quan đến domain chính '$PRIMARY_DOMAIN'."
+    echo
     continue
   fi
 
