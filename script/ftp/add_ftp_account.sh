@@ -150,7 +150,7 @@ restart_pure_ftpd() {
   echo "Pure-FTPd đã được khởi động lại."
 }
 
-# Thực thi các bước chính
+# Thực thi các ham chính
 update_pure_ftpd_config
 open_ports_ufw
 restart_pure_ftpd
