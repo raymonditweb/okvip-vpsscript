@@ -6,31 +6,27 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-# Đường dẫn shell bị khóa (để vô hiệu hóa tài khoản)
 LOCKED_SHELL="/sbin/nologin"
+LOCK_FILE="/etc/ftp_users.lock" # Tệp theo dõi tài khoản bị vô hiệu hóa
 
-# Hàm hiển thị hướng dẫn sử dụng
+# Đảm bảo tệp theo dõi tồn tại
+if [ ! -f "$LOCK_FILE" ]; then
+  touch "$LOCK_FILE"
+fi
+
 usage() {
   echo "Error: Sử dụng: $0 <username> <action>"
   echo "  <username>   : Tên người dùng FTP cần quản lý"
   echo "  <action>     : 'enable' để kích hoạt hoặc 'disable' để vô hiệu hóa"
-  return 1
+  exit 1
 }
 
-# Kiểm tra số lượng tham số đầu vào
 if [[ $# -ne 2 ]]; then
   usage
-  exit 1
 fi
 
 USERNAME=$1
 ACTION=$2
-
-# Kiểm tra tính hợp lệ của tên người dùng
-if [[ ! "$USERNAME" =~ ^[a-zA-Z0-9._-]+$ ]]; then
-  echo "Error: Tên người dùng không hợp lệ!"
-  exit 1
-fi
 
 # Kiểm tra người dùng hệ thống
 is_system_user() {
@@ -42,47 +38,87 @@ is_virtual_user() {
   pure-pw show "$USERNAME" &>/dev/null
 }
 
-# Kiểm tra xem người dùng có tồn tại không
-if ! is_system_user && ! is_virtual_user; then
-  echo "Error: Người dùng '$USERNAME' không tồn tại!"
-  exit 1
-fi
+# Kiểm tra trạng thái hiện tại của tài khoản hệ thống
+is_system_user_locked() {
+  local shell
+  shell=$(getent passwd "$USERNAME" | cut -d: -f7)
+  [[ "$shell" == "$LOCKED_SHELL" ]]
+}
 
-# Thực hiện hành động
+# Kiểm tra trạng thái tài khoản Pure-FTPd
+is_virtual_user_locked() {
+  grep -q "^$USERNAME$" "$LOCK_FILE"
+}
+
 case $ACTION in
 enable)
+  # Kích hoạt tài khoản hệ thống
   if is_system_user; then
-    if usermod -s /bin/bash "$USERNAME"; then
-      echo "Đã kích hoạt tài khoản hệ thống cho '$USERNAME'."
+    if is_system_user_locked; then
+      if usermod -s /bin/bash "$USERNAME"; then
+        echo "Đã kích hoạt tài khoản hệ thống cho '$USERNAME'."
+      else
+        echo "Error: Không thể kích hoạt tài khoản hệ thống cho '$USERNAME'."
+        exit 1
+      fi
     else
-      echo "Error: Không thể kích hoạt tài khoản hệ thống cho '$USERNAME'."
-    fi
-  elif is_virtual_user; then
-    if pure-pw unlock "$USERNAME" && pure-pw mkdb; then
-      echo "Đã kích hoạt tài khoản Pure-FTPd cho '$USERNAME'."
-    else
-      echo "Error: Không thể kích hoạt tài khoản Pure-FTPd cho '$USERNAME'."
+      echo "Tài khoản hệ thống '$USERNAME' đã được kích hoạt trước đó."
     fi
   fi
+
+  # Kích hoạt tài khoản Pure-FTPd
+  if is_virtual_user; then
+    if is_virtual_user_locked; then
+      sed -i "/^$USERNAME$/d" "$LOCK_FILE" # Xóa khỏi tệp khóa
+      if pure-pw unlock "$USERNAME" && pure-pw mkdb; then
+        echo "Tài khoản Pure-FTPd '$USERNAME' đã được kích hoạt."
+      else
+        echo "Error: Không thể kích hoạt tài khoản Pure-FTPd '$USERNAME'."
+        exit 1
+      fi
+    else
+      echo "Tài khoản Pure-FTPd '$USERNAME' đã được kích hoạt trước đó."
+    fi
+  else
+    echo "Error: Tài khoản '$USERNAME' không tồn tại trong Pure-FTPd."
+  fi
   ;;
+
 disable)
+  # Vô hiệu hóa tài khoản hệ thống
   if is_system_user; then
-    if usermod -s "$LOCKED_SHELL" "$USERNAME"; then
-      echo "Đã vô hiệu hóa tài khoản hệ thống cho '$USERNAME'."
+    if ! is_system_user_locked; then
+      if usermod -s "$LOCKED_SHELL" "$USERNAME"; then
+        echo "Đã vô hiệu hóa tài khoản hệ thống cho '$USERNAME'."
+      else
+        echo "Error: Không thể vô hiệu hóa tài khoản hệ thống cho '$USERNAME'."
+        exit 1
+      fi
     else
-      echo "Error: Không thể vô hiệu hóa tài khoản hệ thống cho '$USERNAME'."
-    fi
-  elif is_virtual_user; then
-    if pure-pw lock "$USERNAME" && pure-pw mkdb; then
-      echo "Đã vô hiệu hóa tài khoản Pure-FTPd cho '$USERNAME'."
-    else
-      echo "Error: Không thể vô hiệu hóa tài khoản Pure-FTPd cho '$USERNAME'."
+      echo "Tài khoản hệ thống '$USERNAME' đã bị vô hiệu hóa trước đó."
     fi
   fi
+
+  # Vô hiệu hóa tài khoản Pure-FTPd
+  if is_virtual_user; then
+    if ! is_virtual_user_locked; then
+      echo "$USERNAME" >>"$LOCK_FILE" # Thêm vào tệp khóa
+      if pure-pw lock "$USERNAME" && pure-pw mkdb; then
+        echo "Tài khoản Pure-FTPd '$USERNAME' đã được vô hiệu hóa."
+      else
+        echo "Error: Không thể vô hiệu hóa tài khoản Pure-FTPd '$USERNAME'."
+        exit 1
+      fi
+    else
+      echo "Tài khoản Pure-FTPd '$USERNAME' đã bị vô hiệu hóa trước đó."
+    fi
+  else
+    echo "Tài khoản '$USERNAME' không tồn tại trong Pure-FTPd."
+  fi
   ;;
+
 *)
   echo "Error: Hành động không hợp lệ!"
   usage
-  exit 1
   ;;
 esac
