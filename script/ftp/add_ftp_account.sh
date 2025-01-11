@@ -83,6 +83,7 @@ open_ports_ufw() {
 add_account() {
   if [ "$#" -lt 3 ]; then
     echo "Error: Hàm add_account yêu cầu 3 tham số: username, password, và thư mục."
+    echo "Sử dụng: add_account <username> <password> <directory>"
     return 1
   fi
 
