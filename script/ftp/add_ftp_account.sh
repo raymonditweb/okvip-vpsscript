@@ -138,7 +138,7 @@ add_account() {
     }
   fi
 
-  echo "Tài khoản FTP $username đã được thêm thành công."
+  echo "Tài khoản FTP $username đã được thêm thành công với đầy đủ quyền."
 }
 
 # Khởi động lại Pure-FTPd
