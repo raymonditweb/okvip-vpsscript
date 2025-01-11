@@ -18,20 +18,20 @@ install_jq() {
   elif command -v pacman &>/dev/null; then
     sudo pacman -S jq --noconfirm
   else
-    echo "Error: Không phát hiện trình quản lý gói. Vui lòng tự cài đặt jq."
+    echo
     return 1
   fi
 
   # Xác minh xem jq đã được cài đặt thành công chưa
   if ! command -v jq &>/dev/null; then
-    echo "Error: Cài đặt jq thất bại. Vui lòng tự cài đặt jq để tiếp tục."
+    echo
     return 1
   fi
 }
 
 # Kiểm tra nếu curl đã được cài đặt
 if ! command -v curl &>/dev/null; then
-  echo "Error: curl chưa được cài đặt. Vui lòng cài đặt để tiếp tục."
+  echo
   exit 1
 fi
 
@@ -46,7 +46,7 @@ response=$(curl -s --max-time 10 https://ipinfo.io)
 
 # Kiểm tra nếu gọi API thành công hoặc hết thời gian chờ
 if [[ -z "$response" || "$response" == *"error"* ]]; then
-  echo "Error: Không thể lấy dữ liệu vị trí. Vui lòng kiểm tra kết nối internet hoặc quyền truy cập API."
+  echo
   exit 1
 fi
 
