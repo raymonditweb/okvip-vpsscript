@@ -43,7 +43,7 @@ fi
 update_pure_ftpd_config() {
   echo "Cập nhật tệp cấu hình Pure-FTPd..."
   [ ! -f "$PURE_FTPD_CONF" ] && {
-    echo "Error: Không tìm thấy $PURE_FTPD_CONF."
+    echo "Error: Không tìm thấy tệp cấu hình $PURE_FTPD_CONF."
     exit 1
   }
 
