@@ -15,7 +15,7 @@ if [ ! -f "$LOCK_FILE" ]; then
 fi
 
 usage() {
-  echo "Sử dụng: $0 <username> <action>"
+  echo "Error: Sử dụng: $0 <username> <action>"
   echo "  <username>   : Tên người dùng FTP cần quản lý"
   echo "  <action>     : 'enable' để kích hoạt hoặc 'disable' để vô hiệu hóa"
   exit 1
@@ -56,9 +56,9 @@ enable)
   if is_system_user; then
     if is_system_user_locked; then
       if usermod -s /bin/bash "$USERNAME"; then
-        echo "Tài khoản hệ thống '$USERNAME' đã được kích hoạt."
+        echo "Đã kích hoạt tài khoản hệ thống cho '$USERNAME'."
       else
-        echo "Error: Không thể kích hoạt tài khoản hệ thống '$USERNAME'."
+        echo "Error: Không thể kích hoạt tài khoản hệ thống cho '$USERNAME'."
         exit 1
       fi
     else
@@ -80,7 +80,7 @@ enable)
       echo "Tài khoản Pure-FTPd '$USERNAME' đã được kích hoạt trước đó."
     fi
   else
-    echo "Tài khoản '$USERNAME' không tồn tại trong Pure-FTPd."
+    echo "Error: Tài khoản '$USERNAME' không tồn tại trong Pure-FTPd."
   fi
   ;;
 
@@ -89,9 +89,9 @@ disable)
   if is_system_user; then
     if ! is_system_user_locked; then
       if usermod -s "$LOCKED_SHELL" "$USERNAME"; then
-        echo "Tài khoản hệ thống '$USERNAME' đã được vô hiệu hóa."
+        echo "Đã vô hiệu hóa tài khoản hệ thống cho '$USERNAME'."
       else
-        echo "Error: Không thể vô hiệu hóa tài khoản hệ thống '$USERNAME'."
+        echo "Error: Không thể vô hiệu hóa tài khoản hệ thống cho '$USERNAME'."
         exit 1
       fi
     else
