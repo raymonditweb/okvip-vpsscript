@@ -30,6 +30,9 @@ cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
 # Chuẩn hóa danh sách server_name: Loại bỏ dấu chấm phẩy nếu có
 NORMALIZED_DOMAIN_OR_PATH=$(echo "$DOMAIN_OR_PATH" | tr ';' ' ')
 
+# Thoát ký tự đặc biệt trong TARGET
+ESCAPED_TARGET=$(printf '%s' "$TARGET" | sed -e 's/[\/&]/\\&/g')
+
 # Kiểm tra và ghi tệp
 if ! grep -q "server_name" "$CONFIG_FILE"; then
   cat <<EOL >> "$CONFIG_FILE"
@@ -39,17 +42,17 @@ server {
   server_name $NORMALIZED_DOMAIN_OR_PATH;
 
   location / {
-    return $REDIRECT_TYPE $TARGET;
+    return $REDIRECT_TYPE $ESCAPED_TARGET;
   }
 }
 EOL
 else
   if ! grep -q "location / {" "$CONFIG_FILE"; then
     sed -i "/server_name/a \    location / {
-        return $REDIRECT_TYPE $TARGET;
+        return $REDIRECT_TYPE $ESCAPED_TARGET;
     }" "$CONFIG_FILE"
   else
-    sed -i "/location \/ {/!b;n;s/return [0-9]* .*/return $REDIRECT_TYPE $TARGET;/" "$CONFIG_FILE"
+    sed -i "/location \/ {/!b;n;s/return [0-9]* .*/return $REDIRECT_TYPE $ESCAPED_TARGET;/" "$CONFIG_FILE"
   fi
 fi
 
