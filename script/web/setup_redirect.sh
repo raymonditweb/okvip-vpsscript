@@ -27,13 +27,16 @@ fi
 # Tạo bản sao lưu của tệp cấu hình
 cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
 
+# Chuẩn hóa danh sách server_name: Loại bỏ dấu chấm phẩy nếu có
+NORMALIZED_DOMAIN_OR_PATH=$(echo "$DOMAIN_OR_PATH" | tr ';' ' ')
+
 # Kiểm tra và ghi tệp
 if ! grep -q "server_name" "$CONFIG_FILE"; then
   cat <<EOL >> "$CONFIG_FILE"
 
 server {
   listen 80;
-  server_name $DOMAIN_OR_PATH;
+  server_name $NORMALIZED_DOMAIN_OR_PATH;
 
   location / {
     return $REDIRECT_TYPE $TARGET;
