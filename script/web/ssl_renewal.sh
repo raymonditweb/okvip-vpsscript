@@ -47,14 +47,16 @@ check_proxy() {
 # Hàm kiểm tra chứng chỉ SSL
 check_ssl() {
   echo "Đang kiểm tra chứng chỉ SSL cho $DOMAIN_OR_IP ..."
-  timeout $TIMEOUT_DURATION bash -c "echo | openssl s_client -connect \"$DOMAIN_OR_IP:443\" -servername \"$DOMAIN_OR_IP\" 2>/dev/null | openssl x509 -noout -dates 2>/dev/null"
+  SSL_INFO=$(timeout $TIMEOUT_DURATION bash -c "echo | openssl s_client -connect \"$DOMAIN_OR_IP:443\" -servername \"$DOMAIN_OR_IP\" 2>/dev/null | openssl x509 -noout -dates 2>/dev/null")
 
   if [ $? -ne 0 ]; then
     echo "Timeout hoặc không tìm thấy chứng chỉ SSL cho $DOMAIN_OR_IP."
     return 1
   else
     echo "Chứng chỉ SSL hoạt động bình thường cho $DOMAIN_OR_IP."
-    return 0
+    END_DATE=$(echo "$SSL_INFO" | grep 'notAfter' | cut -d= -f2)
+    echo "Ngày hết hạn chứng chỉ SSL: $END_DATE"
+    return 1
   fi
 }
 
