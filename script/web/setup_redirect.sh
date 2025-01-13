@@ -62,3 +62,4 @@ fi
 
 # Tải lại Nginx
 systemctl reload nginx
+echo "Setup redirect thành công"
