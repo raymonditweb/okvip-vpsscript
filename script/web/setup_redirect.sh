@@ -28,23 +28,25 @@ fi
 cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
 
 # Kiểm tra và ghi tệp
-if ! grep -q "server_name $DOMAIN_OR_PATH;" "$CONFIG_FILE"; then
+if ! grep -q "server_name" "$CONFIG_FILE"; then
   cat <<EOL >> "$CONFIG_FILE"
 
 server {
   listen 80;
   server_name $DOMAIN_OR_PATH;
 
-  location /$REDIRECT_TYPE {
+  location / {
     return $REDIRECT_TYPE $TARGET;
   }
 }
 EOL
 else
-  if ! grep -q "location /$REDIRECT_TYPE {" "$CONFIG_FILE"; then
-    sed -i "/server_name $DOMAIN_OR_PATH;/a \ \ \ \ location /$REDIRECT_TYPE {\n        return $REDIRECT_TYPE $TARGET;\n    }" "$CONFIG_FILE"
+  if ! grep -q "location / {" "$CONFIG_FILE"; then
+    sed -i "/server_name/a \    location / {
+        return $REDIRECT_TYPE $TARGET;
+    }" "$CONFIG_FILE"
   else
-    sed -i "/location \/$REDIRECT_TYPE {/!b;n;s/return [0-9]* .*/return $REDIRECT_TYPE $TARGET;/" "$CONFIG_FILE"
+    sed -i "/location \/ {/!b;n;s/return [0-9]* .*/return $REDIRECT_TYPE $TARGET;/" "$CONFIG_FILE"
   fi
 fi
 
