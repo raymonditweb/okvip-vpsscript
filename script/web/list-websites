@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Kiểm tra xem người dùng có quyền root hay không
+# Kiểm tra quyền root
 if [ "$EUID" -ne 0 ]; then
   echo "Error: Vui lòng chạy script với quyền root."
   exit 1
 fi
 
-# Kiểm tra xem Nginx hoặc Apache đã được cài đặt hay chưa
+# Kiểm tra và xác định web server
 if command -v nginx &>/dev/null; then
   WEBSERVER="nginx"
   CONF_PATH="/etc/nginx/sites-available"
@@ -15,35 +15,20 @@ elif command -v apache2 &>/dev/null; then
   CONF_PATH="/etc/apache2/sites-available"
 else
   echo "Không tìm thấy Nginx hoặc Apache trên hệ thống. Đang tiến hành cài đặt Nginx..."
-
-  # Xác định hệ điều hành và cài đặt Nginx
   if [ -f /etc/debian_version ]; then
-    # Debian/Ubuntu
-    apt update
-    apt install -y nginx
+    apt update && apt install -y nginx
   elif [ -f /etc/redhat-release ]; then
-    # CentOS/RHEL
     yum install -y nginx
   else
     echo "Error: Hệ điều hành không được hỗ trợ."
     exit 1
   fi
-
-  # Kiểm tra lại Nginx sau khi cài đặt
-  if command -v nginx &>/dev/null; then
-    WEBSERVER="nginx"
-    CONF_PATH="/etc/nginx/sites-available"
-    echo "Nginx đã được cài đặt thành công."
-  else
-    echo "Error: Cài đặt Nginx thất bại."
-    exit 1
-  fi
+  WEBSERVER="nginx"
+  CONF_PATH="/etc/nginx/sites-available"
 fi
 
 # Thư mục được chỉ định
 TARGET_DIR=$1
-
-# Kiểm tra thư mục tồn tại
 if [ ! -d "$TARGET_DIR" ]; then
   echo "Không tìm thấy directory $TARGET_DIR."
   exit 1
@@ -53,35 +38,42 @@ fi
 find_nginx_domains() {
   find /etc/nginx/sites-available /etc/nginx/conf.d -type f 2>/dev/null | while read -r file; do
     grep -E "server_name\s+" "$file" | sed -E 's/.*server_name\s+([^;]+);.*/\1/' | tr -s ' ' '\n'
-  done | sort -u | grep -v '^_$' | grep -v -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'  # Loại bỏ dòng chứa "_" và địa chỉ IP
+  done | sort -u | grep -v '^_$' | grep -v -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'
 }
 
 # Hàm tìm domain trong thư mục được chỉ định
 find_domains_in_directory() {
   local dir="$1"
-
-  # Duyệt qua tất cả các thư mục con trong directory
   find "$dir" -mindepth 1 -maxdepth 1 -type d | while read -r subdir; do
-    # Lấy tên thư mục con (tên miền tiềm năng)
     domain=$(basename "$subdir")
-
-    # Kiểm tra nếu tên thư mục là một domain hợp lệ
     if [[ "$domain" =~ ^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$ ]]; then
       echo "$domain"
     fi
   done
 }
 
+# Hàm lọc và loại bỏ subdomain trùng lặp
+filter_domains() {
+  echo "$1" | sort -u | awk -F. '
+  NF > 1 {  # Chỉ xử lý các dòng có ít nhất hai phần tách bằng dấu chấm
+    root_domain = $(NF-1) "." $NF
+    if (!seen[root_domain]++) {
+      print root_domain
+    }
+  }'
+}
+
 # Gọi các hàm và hợp nhất kết quả
 nginx_domains=$(find_nginx_domains)
 directory_domains=$(find_domains_in_directory "$TARGET_DIR")
-
-# Hợp nhất và loại bỏ trùng lặp
 merged_domains=$(echo -e "$nginx_domains\n$directory_domains" | sort -u)
 
+# Loại bỏ trùng lặp domain
+filtered_domains=$(filter_domains "$merged_domains")
+
 echo "Danh sách các domain hợp lệ:"
-if [ -n "$merged_domains" ]; then
-  echo "$merged_domains"
+if [ -n "$filtered_domains" ]; then
+  echo "$filtered_domains"
 else
   echo "Không tìm thấy domain hợp lệ."
 fi
