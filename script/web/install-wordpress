@@ -10,15 +10,16 @@ fi
 MYSQL_ROOT_PASSWORD=$1
 DOMAIN=$2
 TEMPLATE_URL=$3
+USERNAME=$4
 WEB_ROOT="/var/www/$DOMAIN"
 DB_NAME="${DOMAIN//./_}" # Tên cơ sở dữ liệu, thay thế dấu chấm bằng dấu gạch dưới
-DB_USER=$DB_NAME"_user"
-DB_PASSWORD=${4:-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)}
+DB_USER=${USERNAME:-$DB_NAME"_user"}
+DB_PASSWORD=${5:-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)}
 
 # Kiểm tra nếu không nhập template URL thì báo lỗi
 if [ -z "$TEMPLATE_URL" ]; then
   echo "Error: Vui lòng nhập URL của template."
-  echo "Sử dụng: ./install-wordpress <mysql_root_password> <domain> <template_url>"
+  echo "Sử dụng: <mysql_root_password> <domain> <template_url> [username] [password]"
   exit 1
 fi
 
@@ -30,7 +31,7 @@ fi
 
 # Kiểm tra các thông tin đầu vào
 if [ -z "$MYSQL_ROOT_PASSWORD" ] || [ -z "$DOMAIN" ]; then
-  echo "Error: Sử dụng: ./install-wordpress <mysql_root_password> <domain> <template_url>"
+  echo "Error: Sử dụng: <mysql_root_password> <domain> <template_url> [username] [password]"
   exit 1
 fi
 
@@ -77,7 +78,16 @@ fi
 echo "Tạo database và user MySQL cho WordPress..."
 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
 
-mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
+USER_EXISTS=$(mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = '$DB_USER');")
+
+if [ "$USER_EXISTS" -eq 1 ]; then
+  echo "User $DB_USER đã tồn tại. Cập nhật mật khẩu..."
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "ALTER USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
+else
+  echo "Tạo user $DB_USER..."
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
+fi
+
 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
 
