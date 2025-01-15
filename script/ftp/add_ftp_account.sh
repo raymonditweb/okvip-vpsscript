@@ -22,9 +22,42 @@ install_package() {
   fi
 }
 
+# Hàm cài đặt Pure-FTPd mới nhất từ mã nguồn
+install_pureftpd_latest() {
+  echo "Cài đặt phiên bản mới nhất của Pure-FTPd..."
+  local temp_dir="/tmp/pure-ftpd"
+  mkdir -p "$temp_dir"
+  cd "$temp_dir" || exit 1
+
+  # Tải mã nguồn Pure-FTPd mới nhất
+  curl -LO https://download.pureftpd.org/pub/pure-ftpd/releases/pure-ftpd-latest.tar.gz
+  if [ $? -ne 0 ]; then
+    echo "Error: Không thể tải mã nguồn Pure-FTPd."
+    exit 1
+  fi
+
+  # Giải nén và cài đặt
+  tar -xzf pure-ftpd-latest.tar.gz
+  cd pure-ftpd-* || exit 1
+  ./configure --prefix=/usr --sysconfdir=/etc --with-puredb --with-tls
+  make && make install
+  if [ $? -ne 0 ]; then
+    echo "Error: Không thể cài đặt Pure-FTPd từ mã nguồn."
+    exit 1
+  fi
+
+  echo "Pure-FTPd đã được cài đặt thành công từ mã nguồn."
+  cd / || exit 1
+  rm -rf "$temp_dir"
+}
+
 # Cài đặt expect và Pure-FTPd nếu chưa có
 install_package "expect"
-install_package "pure-ftpd"
+if ! command -v pure-ftpd &>/dev/null; then
+  install_pureftpd_latest
+else
+  echo
+fi
 
 # Biến cấu hình
 FTP_USER_FILE="/etc/ftp_users.txt"
