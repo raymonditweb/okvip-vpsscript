@@ -6,6 +6,25 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
+# Hàm cài đặt Pure-FTPD nếu chưa có
+install_pureftpd() {
+  if ! command -v pure-pw &>/dev/null; then
+    echo "Pure-FTPD chưa được cài đặt. Đang tiến hành cài đặt..."
+    if command -v apt-get &>/dev/null; then
+      apt-get update
+      apt-get install -y pure-ftpd
+    elif command -v yum &>/dev/null; then
+      yum install -y pure-ftpd
+    else
+      echo "Không thể xác định trình quản lý gói. Vui lòng cài đặt Pure-FTPD thủ công."
+      exit 1
+    fi
+    echo "Pure-FTPD đã được cài đặt."
+  else
+    echo "Pure-FTPD đã được cài đặt."
+  fi
+}
+
 # Đường dẫn tới tệp khóa (theo dõi tài khoản bị vô hiệu hóa)
 LOCK_FILE="/etc/ftp_users.lock"
 
@@ -101,6 +120,9 @@ check_requirements() {
     fi
   done
 }
+
+# Kiểm tra và cài đặt Pure-FTPD nếu cần
+install_pureftpd
 
 # Kiểm tra yêu cầu trước khi chạy
 check_requirements
