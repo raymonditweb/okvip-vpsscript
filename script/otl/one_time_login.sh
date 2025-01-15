@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Kiểm tra quyền root
+if [ "$EUID" -ne 0 ]; then
+  echo "Error: Vui lòng chạy với quyền root."
+  exit 1
+fi
+
 # Kiểm tra và lấy tham số domain từ dòng lệnh
 if [ "$#" -ne 3 ]; then
   echo "Cách dùng: $0 <DOMAIN> <WP_USERNAME> <WP_PASSWORD>"
