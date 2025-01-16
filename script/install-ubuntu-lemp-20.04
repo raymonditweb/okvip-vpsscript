@@ -28,7 +28,7 @@ PHPMYADMIN_PORT=8080
 # Cài đặt gói cần thiết
 echo "Cập nhật và cài đặt các gói cần thiết..."
 apt update && apt upgrade -y
-apt install -y nginx mysql-server php-fpm php-mysql unzip software-properties-common
+apt install -y nginx mysql-server php-fpm php-mysql unzip software-properties-common curl
 
 # Thêm PPA cho PHP 8.1
 add-apt-repository -y ppa:ondrej/php
@@ -39,17 +39,39 @@ apt install -y php8.1-{fpm,mysql,cli,curl,mbstring,xml,zip,gd}
 echo "Cấu hình MySQL root password..."
 mysql --silent -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '$MYSQL_ROOT_PASSWORD';"
 
-# Cài đặt phpMyAdmin
-echo "Cài đặt phpMyAdmin..."
-apt install -y phpmyadmin
+# Tải và cài đặt phiên bản mới nhất của phpMyAdmin
+echo "Tải và cài đặt phiên bản mới nhất của phpMyAdmin..."
+LATEST_PHPMYADMIN_VERSION=$(curl -s https://www.phpmyadmin.net/home_page/version.txt | grep -Eo '^[0-9]+\.[0-9]+\.[0-9]+')
+if [[ -z "$LATEST_PHPMYADMIN_VERSION" ]]; then
+  echo "Error: Không thể lấy phiên bản mới nhất của phpMyAdmin. Vui lòng kiểm tra kết nối mạng."
+  exit 1
+fi
+
+TARBALL_URL="https://files.phpmyadmin.net/phpMyAdmin/${LATEST_PHPMYADMIN_VERSION}/phpMyAdmin-${LATEST_PHPMYADMIN_VERSION}-all-languages.tar.gz"
+
+# Kiểm tra xem URL có tồn tại không
+if curl --output /dev/null --silent --head --fail "$TARBALL_URL"; then
+  curl -o phpmyadmin.tar.gz "$TARBALL_URL"
+else
+  echo "Error: Không thể tải phpMyAdmin từ $TARBALL_URL. Vui lòng kiểm tra URL."
+  exit 1
+fi
+
+# Giải nén và cài đặt
+mkdir -p /usr/share/phpmyadmin
+tar -xzf phpmyadmin.tar.gz --strip-components=1 -C /usr/share/phpmyadmin || {
+  echo "Error: Không thể giải nén tệp phpMyAdmin. Tệp có thể không hợp lệ.";
+  exit 1;
+}
+rm phpmyadmin.tar.gz
 ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
 
 # Tắt cảnh báo lỗi thời trong phpMyAdmin
 echo "Tắt cảnh báo lỗi thời trong phpMyAdmin..."
 PHPMA_CONFIG_FILE="/usr/share/phpmyadmin/libraries/config.default.php"
-if ! grep -q "ini_set('display_errors'" "$PHPMA_CONFIG_FILE"; then
-  echo "ini_set('display_errors', 0);" >> "$PHPMA_CONFIG_FILE"
-fi
+sed -i "/ini_set('display_errors'/d" "$PHPMA_CONFIG_FILE"
+echo -e "\n// Tắt hiển thị lỗi\nini_set('display_errors', 0);" >> "$PHPMA_CONFIG_FILE"
+echo -e "\n\$cfg['DisplayErrors'] = false;" >> "$PHPMA_CONFIG_FILE"
 
 # Cấu hình phpMyAdmin trong Nginx
 cat > /etc/nginx/sites-available/phpmyadmin <<EOL
@@ -64,7 +86,7 @@ server {
     try_files \$uri \$uri/ =404;
   }
 
-  location ~ \.php$ {
+  location ~ \.php\$ {
     include snippets/fastcgi-php.conf;
     fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
     fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
