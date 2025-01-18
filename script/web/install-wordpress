@@ -11,19 +11,22 @@ MYSQL_ROOT_PASSWORD=$1
 DOMAIN=$2
 TEMPLATE_URL=$3
 USERNAME=$4
+DB_PASSWORD=${5:-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)}
+ADMIN_USERNAME=$6
+ADMIN_PASS=$7
+
 WEB_ROOT="/var/www/$DOMAIN"
 DB_NAME="${DOMAIN//./_}" # Tên cơ sở dữ liệu, thay thế dấu chấm bằng dấu gạch dưới
 DB_USER=${USERNAME:-$DB_NAME"_user"}
-DB_PASSWORD=${5:-$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)}
 
-# Kiểm tra nếu không nhập template URL thì báo lỗi
-if [ -z "$TEMPLATE_URL" ]; then
+# Kiểm tra nếu không nhập các thông tin cần thiết thì báo lỗi
+if [ -z "$TEMPLATE_URL" ] || [ -z "$ADMIN_USERNAME" ] || [ -z "$ADMIN_PASS" ]; then
   echo "Error: Vui lòng nhập URL của template."
-  echo "Sử dụng: <mysql_root_password> <domain> <template_url> [username] [password]"
+  echo "Sử dụng: <mysql_root_password> <domain> <template_url> <username> <password> <admin_username> <admin_pass>"
   exit 1
 fi
 
-# Kiểm tra URL có hợp lệ không (phải bắt đầu bằng http:// hoặc https://)
+# Kiểm tra URL có hợp lệ không
 if ! [[ "$TEMPLATE_URL" =~ ^https:// ]]; then
   echo "Error: Template URL không hợp lệ. URL phải bắt đầu bằng https://"
   exit 1
@@ -31,30 +34,25 @@ fi
 
 # Kiểm tra các thông tin đầu vào
 if [ -z "$MYSQL_ROOT_PASSWORD" ] || [ -z "$DOMAIN" ]; then
-  echo "Error: Sử dụng: <mysql_root_password> <domain> <template_url> [username] [password]"
+  echo "Error: Sử dụng: <mysql_root_password> <domain> <template_url> <username> <password> <admin_username> <admin_pass>"
   exit 1
 fi
 
-# Kiểm tra Nginx có được cài đặt không
+# Kiểm tra Nginx, MySQL và PHP
 if ! command -v nginx >/dev/null; then
   echo "Error: Nginx chưa được cài đặt. Vui lòng khởi tạo server trước."
   exit 1
 fi
-
-# Kiểm tra MySQL có được cài đặt không
 if ! command -v mysql >/dev/null; then
   echo "Error: MySQL chưa được cài đặt. Vui lòng khởi tạo server trước."
   exit 1
 fi
-
-# Kiểm tra PHP có được cài đặt không
 if ! command -v php >/dev/null; then
   echo "Error: PHP chưa được cài đặt. Vui lòng khởi tạo server trước."
   exit 1
 fi
 
 # Kiểm tra mật khẩu MySQL
-echo "Kiểm tra kết nối MySQL..."
 if ! mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "exit" >/dev/null 2>&1; then
   echo "Error: Mật khẩu MySQL không chính xác. Dừng lại."
   exit 1
@@ -62,59 +60,43 @@ fi
 
 echo "Bắt đầu cài đặt WordPress với domain $DOMAIN và template từ $TEMPLATE_URL..."
 
-# Cài đặt unzip nếu chưa có
+# Cài đặt các gói cần thiết
 if ! command -v unzip >/dev/null; then
-  echo "Cài đặt unzip..."
   apt install unzip -y
 fi
-
-# Cài đặt Let's Encrypt Certbot nếu chưa có
 if ! command -v certbot >/dev/null; then
-  echo "Cài đặt Certbot..."
   apt install certbot python3-certbot-nginx -y
 fi
 
-# Tạo database và user MySQL cho WordPress
-echo "Tạo database và user MySQL cho WordPress..."
+# Tạo database và user MySQL
 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
-
 USER_EXISTS=$(mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = '$DB_USER');")
-
 if [ "$USER_EXISTS" -eq 1 ]; then
-  echo "User $DB_USER đã tồn tại. Cập nhật mật khẩu..."
   mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "ALTER USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
 else
-  echo "Tạo user $DB_USER..."
   mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
 fi
-
 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
 
-# Tải template từ URL và giải nén
-echo "Tải template từ $TEMPLATE_URL..."
+# Tải và giải nén template
 mkdir -p $WEB_ROOT
 wget -O /tmp/template.zip "$TEMPLATE_URL" --no-check-certificate --quiet
-
 if [ $? -ne 0 ]; then
   echo "Error: Không thể tải template từ URL $TEMPLATE_URL. Dừng lại."
   exit 1
 fi
-
-echo "Giải nén template..."
 unzip -o /tmp/template.zip -d $WEB_ROOT
 
-# Import database
+# Import database nếu có file db.sql
 if [ -f "$WEB_ROOT/db.sql" ]; then
-  echo "Import database từ db.sql..."
   mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_NAME < $WEB_ROOT/db.sql
 else
   echo "Error: Không tìm thấy file db.sql trong template. Dừng lại."
   exit 1
 fi
 
-# Cấu hình Nginx cho website
-echo "Cấu hình Nginx cho website $DOMAIN..."
+# Cấu hình Nginx
 cat > /etc/nginx/sites-available/$DOMAIN <<EOL
 server {
     listen 80;
@@ -142,43 +124,36 @@ server {
     access_log /var/log/nginx/$DOMAIN-access.log;
 }
 EOL
-
-# Kích hoạt cấu hình Nginx
 ln -s /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
 nginx -t
 systemctl reload nginx
 
-# Cài đặt SSL với Let's Encrypt nếu chưa có
-if ! sudo certbot certificates | grep -q "$DOMAIN"; then
-  echo "Cài đặt SSL với Let's Encrypt cho domain $DOMAIN..."
-  certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m no-reply@okvip.com --redirect
-else
-  echo "SSL cho domain $DOMAIN đã tồn tại."
+# Cài đặt SSL
+if ! certbot certificates | grep -q "$DOMAIN"; then
+  certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m no-reply@$DOMAIN --redirect
 fi
 
-# Tạo hoặc cập nhật wp-config.php
-echo "Cấu hình wp-config.php..."
-if [ -f "$WEB_ROOT/wp-config.php" ]; then
-  echo "wp-config.php đã tồn tại, cập nhật các thông tin cần thiết..."
-  wp config set DB_NAME "$DB_NAME" --path=$WEB_ROOT --allow-root
-  wp config set DB_USER "$DB_USER" --path=$WEB_ROOT --allow-root
-  wp config set DB_PASSWORD "$DB_PASSWORD" --path=$WEB_ROOT --allow-root
-else
-  echo "Tạo mới wp-config.php..."
+# Cấu hình wp-config.php
+if [ ! -f "$WEB_ROOT/wp-config.php" ]; then
   wp config create --dbname="$DB_NAME" --dbuser="$DB_USER" --dbpass="$DB_PASSWORD" --dbhost="localhost" --path=$WEB_ROOT --allow-root
 fi
+wp config set DB_NAME "$DB_NAME" --path=$WEB_ROOT --allow-root
+wp config set DB_USER "$DB_USER" --path=$WEB_ROOT --allow-root
+wp config set DB_PASSWORD "$DB_PASSWORD" --path=$WEB_ROOT --allow-root
 
-# Tạo lại secret keys cho wp-config.php
-echo "Tạo lại secret keys..."
-wp config shuffle-salts --path=$WEB_ROOT --allow-root
+# Tạo tài khoản admin
+wp core install --url="https://$DOMAIN" --title="$DOMAIN" --admin_user="$ADMIN_USERNAME" --admin_password="$ADMIN_PASS" --admin_email="admin@$DOMAIN" --path=$WEB_ROOT --allow-root
 
 # Thiết lập quyền cho thư mục web
 chown -R www-data:www-data $WEB_ROOT
 chmod -R 755 $WEB_ROOT
 
-# Kết thúc
+# Hoàn tất
 echo "WordPress đã được cài đặt thành công trên domain https://$DOMAIN/"
 echo "Thông tin cơ sở dữ liệu:"
 echo "  - Database: $DB_NAME"
 echo "  - User: $DB_USER"
 echo "  - Password: $DB_PASSWORD"
+echo "Thông tin tài khoản admin:"
+echo "  - Username: $ADMIN_USERNAME"
+echo "  - Password: $ADMIN_PASS"
