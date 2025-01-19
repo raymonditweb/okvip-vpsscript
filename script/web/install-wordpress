@@ -153,12 +153,9 @@ wp config set DB_NAME "$DB_NAME" --path=$WEB_ROOT --allow-root
 wp config set DB_USER "$DB_USER" --path=$WEB_ROOT --allow-root
 wp config set DB_PASSWORD "$DB_PASSWORD" --path=$WEB_ROOT --allow-root
 
-# Tạo tài khoản admin và cập nhật mật khẩu thông qua WP-CLI
-if wp user get "$ADMIN_USERNAME" --path="$WEB_ROOT" --allow-root >/dev/null 2>&1; then
-  wp user update "$ADMIN_USERNAME" --user_pass="$ADMIN_PASS" --path="$WEB_ROOT" --allow-root
-else
-  wp user create "$ADMIN_USERNAME" admin@$DOMAIN --role=administrator --user_pass="$ADMIN_PASS" --path="$WEB_ROOT" --allow-root
-fi
+# Cập nhật mật khẩu admin trực tiếp trong database
+ADMIN_PASS_MD5=$(echo -n "$ADMIN_PASS" | md5sum | awk '{print $1}')
+mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_NAME -e "UPDATE wp_users SET user_pass = '$ADMIN_PASS_MD5' WHERE user_login = '$ADMIN_USERNAME' OR user_login = 'admin';"
 
 # Thiết lập quyền cho thư mục web
 chown -R www-data:www-data $WEB_ROOT
