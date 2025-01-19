@@ -52,6 +52,18 @@ if ! command -v php >/dev/null; then
   exit 1
 fi
 
+# Kiểm tra và cài đặt WP-CLI nếu chưa có
+if ! command -v wp >/dev/null; then
+  echo "Cài đặt WP-CLI..."
+  curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+  chmod +x wp-cli.phar
+  mv wp-cli.phar /usr/local/bin/wp
+  if ! command -v wp >/dev/null; then
+    echo "Error: Không thể cài đặt WP-CLI. Dừng lại."
+    exit 1
+  fi
+fi
+
 # Kiểm tra mật khẩu MySQL
 if ! mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "exit" >/dev/null 2>&1; then
   echo "Error: Mật khẩu MySQL không chính xác. Dừng lại."
@@ -141,10 +153,12 @@ wp config set DB_NAME "$DB_NAME" --path=$WEB_ROOT --allow-root
 wp config set DB_USER "$DB_USER" --path=$WEB_ROOT --allow-root
 wp config set DB_PASSWORD "$DB_PASSWORD" --path=$WEB_ROOT --allow-root
 
-# Tạo tài khoản admin và cập nhật mật khẩu thông qua MySQL
-ADMIN_PASS_HASH=$(echo -n "$ADMIN_PASS" | md5sum | awk '{print $1}')
-TABLE_NAME=$(mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -sse "USE $DB_NAME; SHOW TABLES LIKE '%users';")
-mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "USE $DB_NAME; UPDATE $TABLE_NAME SET user_pass = '$ADMIN_PASS_HASH' WHERE user_login = '$ADMIN_USERNAME';"
+# Tạo tài khoản admin và cập nhật mật khẩu thông qua WP-CLI
+if wp user get "$ADMIN_USERNAME" --path="$WEB_ROOT" --allow-root >/dev/null 2>&1; then
+  wp user update "$ADMIN_USERNAME" --user_pass="$ADMIN_PASS" --path="$WEB_ROOT" --allow-root
+else
+  wp user create "$ADMIN_USERNAME" admin@$DOMAIN --role=administrator --user_pass="$ADMIN_PASS" --path="$WEB_ROOT" --allow-root
+fi
 
 # Thiết lập quyền cho thư mục web
 chown -R www-data:www-data $WEB_ROOT
