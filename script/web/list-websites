@@ -78,5 +78,5 @@ echo "Danh sách các domain hợp lệ:"
 if [ -n "$filtered_domains" ]; then
   echo "$filtered_domains"
 else
-  echo "Không có domain hợp lệ nào được tìm thấy."
+  echo
 fi
