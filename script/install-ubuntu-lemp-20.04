@@ -132,6 +132,20 @@ echo "WP-CLI đã được cài đặt thành công!"
 nginx -t
 systemctl restart nginx mysql php8.1-fpm
 
+# Xóa example.com khỏi cấu hình Nginx (nếu tồn tại)
+if [ -f /etc/nginx/sites-available/example.com ]; then
+  echo "Xóa cấu hình example.com..."
+  rm -f /etc/nginx/sites-available/example.com
+fi
+
+if [ -L /etc/nginx/sites-enabled/example.com ]; then
+  echo "Hủy kích hoạt cấu hình example.com..."
+  rm -f /etc/nginx/sites-enabled/example.com
+fi
+
+# Kiểm tra cấu hình Nginx và khởi động lại dịch vụ
+nginx -t && systemctl restart nginx
+
 # Ghi thông tin cấu hình ra file vpsscript.conf
 NGINX_VERSION=$(nginx -v 2>&1 | grep -oP 'nginx/\K[^ ]+')
 
