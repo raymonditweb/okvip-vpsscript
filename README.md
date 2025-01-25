@@ -461,6 +461,12 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
   redirect-type: Loại redirect (có thể là 301, 302)
   target: URL đích tới (ví dụ: https://domain-dich.com)
 
+#### Cấu hình redirect nhiều domains(301) - Redirect configuration for multiple domains (301)
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/multiple_redirects.sh ) <domain1.com*> <domain2.com*> <domain3.com*> <https://targeturl.com*>
+```
+
 #### Lấy thông tin cấu hình redirect (301, 302) - Redirect configuration Information (301, 302, etc.)
 
 ```bash
