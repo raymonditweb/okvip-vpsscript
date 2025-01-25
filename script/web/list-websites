@@ -71,6 +71,9 @@ merged_domains=$(echo -e "$nginx_domains\n$directory_domains" | sort -u)
 # Loại bỏ trùng lặp domain
 filtered_domains=$(filter_domains "$merged_domains")
 
+# Loại bỏ example.com khỏi danh sách
+filtered_domains=$(echo "$filtered_domains" | grep -v '^example\.com$')
+
 echo "Danh sách các domain hợp lệ:"
 if [ -n "$filtered_domains" ]; then
   echo "$filtered_domains"
