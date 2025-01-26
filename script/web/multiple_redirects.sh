@@ -3,7 +3,7 @@
 # Kiểm tra quyền root
 if [ "$EUID" -ne 0 ]; then
   echo "Error: Vui lòng chạy với quyền root"
-  exit
+  exit 1
 fi
 
 # Đường dẫn file cấu hình Nginx
@@ -18,31 +18,41 @@ else
 fi
 
 # Kiểm tra tham số đầu vào
-if [ "$#" -lt 2 ]; then
-  echo "Error: Cách sử dụng: $0 source1 source2 ... target"
+if [ "$#" -lt 3 ]; then
+  echo "Error: Cách sử dụng: $0 domain source1 source2 ... target"
   exit 1
 fi
 
-# Tách target URL hoặc path khỏi danh sách tham số
+# Lấy domain đầu tiên
+DOMAIN="$1"
+# Tách target URL khỏi danh sách tham số
 TARGET="${@: -1}"
-SOURCES=("${@:1:$#-1}")
+# Lấy danh sách source (trừ domain và target)
+SOURCES=(${@:2:$#-2})
 
 # Kiểm tra tính hợp lệ của domain hoặc path
-validate_source() {
-  local source=$1
-  if [[ $source =~ ^/ ]]; then
-    return 0 # Hợp lệ nếu là path bắt đầu bằng '/'
-  elif [[ $source =~ ^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+[a-zA-Z]{2,}$ ]]; then
+validate_input() {
+  local input=$1
+  if [[ $input =~ ^/ ]]; then
+    return 0 # Hợp lệ nếu là path
+  elif [[ $input =~ ^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)+[a-zA-Z]{2,}$ ]]; then
     return 0 # Hợp lệ nếu là domain
   else
-    echo "Error: Domain hoặc path không hợp lệ: $source"
+    echo "Error: Domain hoặc path không hợp lệ: $input"
     return 1
   fi
 }
 
+# Kiểm tra tính hợp lệ của DOMAIN
+validate_input "$DOMAIN"
+if [ $? -ne 0 ]; then
+  echo "Error: Domain chính không hợp lệ: $DOMAIN"
+  exit 1
+fi
+
 # Thêm các rule 301 vào file cấu hình
 for source in "${SOURCES[@]}"; do
-  validate_source "$source"
+  validate_input "$source"
   if [ $? -ne 0 ]; then
     echo "Error: Bỏ qua source không hợp lệ: $source"
     continue
@@ -51,8 +61,12 @@ for source in "${SOURCES[@]}"; do
   if [[ $source =~ ^/ ]]; then
     # Nếu là path
     cat >>"$NGINX_CONFIG" <<EOL
-location $source {
-    return 301 $TARGET;
+server {
+    listen 80;
+    server_name $DOMAIN;
+    location $source {
+        return 301 $TARGET;
+    }
 }
 EOL
   else
@@ -80,7 +94,7 @@ else
   # Xóa các thay đổi vừa thêm
   for source in "${SOURCES[@]}"; do
     if [[ $source =~ ^/ ]]; then
-      sed -i "/location $source {/,+1d" "$NGINX_CONFIG"
+      sed -i "/location $source {/,+2d" "$NGINX_CONFIG"
     else
       sed -i "/server_name $source;/,/}/d" "$NGINX_CONFIG"
     fi
