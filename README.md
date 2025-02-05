@@ -165,6 +165,14 @@ bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/ra
   - Không đủ tham số: Error: Sử dụng: phiên_bản_php (ví dụ: 7.4/ 8.1)
   - Thất bại: Error: Không thể cài đặt PHP $PHP_VERSION. Vui lòng kiểm tra lại.
 
+### Cấu hình PHP version cho từng website - Configure PHP version for each website
+
+```bash
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/configure_php_each_site.sh) <domain*> <php_version*> <root_directory*>
+```
+
+`Vi du: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/configure_php_each_site.sh) example.com 8.1 /var/www/example.com`
+
 #### Install Rclone for sync backup to gdrive
 
 ```bash
