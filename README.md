@@ -21,6 +21,14 @@ For Ubuntu 20.04:
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/remove-ubuntu-lemp-20.04 )
 ```
 
+### Check VPS status
+
+For Ubuntu 20.04:
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/status_vps.sh )
+```
+
 ### System Management Commands
 
 #### Lệnh Cài Đặt yum-cron - Auto Update System
