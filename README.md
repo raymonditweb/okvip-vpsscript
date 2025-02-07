@@ -383,6 +383,12 @@ Example:
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/list-websites) /var/www/
 ```
 
+#### Change domain
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/change_domain.sh) <old_domain*> <new_domain*>
+```
+
 #### Cài đặt website WordPress tự động theo template
 
 - Add domain
