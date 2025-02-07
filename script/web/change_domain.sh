@@ -15,61 +15,84 @@ fi
 
 OLD_DOMAIN=$1
 NEW_DOMAIN=$2
+BACKUP_DIR="backup_$(date +%Y%m%d_%H%M%S)"
+NGINX_CONF_DIR="/etc/nginx/sites-available"
+NGINX_ENABLED_DIR="/etc/nginx/sites-enabled"
+WEB_ROOT_DIR="/var/www"
+WP_CONFIG_PATH="$WEB_ROOT_DIR/$NEW_DOMAIN/wp-config.php"
 
-# Tạo backup trước khi thay đổi
-backup_dir="backup_$(date +%Y%m%d_%H%M%S)"
-mkdir -p "$backup_dir"
+# Tạo thư mục backup
+mkdir -p "$BACKUP_DIR"
 
-# Hàm khôi phục từ backup
+# Hàm khôi phục từ backup nếu có lỗi
 restore_from_backup() {
   echo "Đang khôi phục từ backup..."
-  find "$backup_dir" -type f | while IFS= read -r backup_file; do
-    original_file="${backup_file#$backup_dir/}"
-    if [ -f "$original_file" ]; then
+  find "$BACKUP_DIR" -type f | while IFS= read -r backup_file; do
+    original_file="${backup_file#$BACKUP_DIR/}"
+    if [ -f "$backup_file" ]; then
       cp "$backup_file" "$original_file"
       echo "Đã khôi phục: $original_file"
     fi
   done
-  echo "Khôi phục hoàn tất"
+  echo "Quá trình khôi phục hoàn tất!"
+  exit 1
 }
 
-# Bẫy lỗi để khôi phục khi có lỗi
-trap 'echo "Error: Đã phát hiện lỗi"; restore_from_backup; exit 1' ERR INT TERM
+# Bẫy lỗi để tự động khôi phục khi có lỗi
+trap 'echo "Error: xảy ra! Tiến hành khôi phục..."; restore_from_backup' ERR INT TERM
 
-# Biến đếm số file được thay đổi
-changed_files=0
+# 1. Cập nhật cấu hình Nginx
+echo "Cập nhật cấu hình Nginx..."
+NGINX_CONF="$NGINX_CONF_DIR/$OLD_DOMAIN"
+NEW_NGINX_CONF="$NGINX_CONF_DIR/$NEW_DOMAIN"
 
-# Tìm và thay thế trong tất cả các file văn bản (loại trừ file nhị phân)
-find . -type f -not -path "./$backup_dir/*" -not -path "./.git/*" | while IFS= read -r file; do
-  if grep -Iq "$OLD_DOMAIN" "$file"; then
-    # Tạo backup của file
-    backup_path="$backup_dir/$file"
-    mkdir -p "$(dirname "$backup_path")"
-    cp "$file" "$backup_path"
-
-    # Thay thế domain
-    if sed -i "s/$OLD_DOMAIN/$NEW_DOMAIN/g" "$file"; then
-      echo "Đã xử lý file: $file"
-      ((changed_files++))
-    else
-      echo "Error: Lỗi khi xử lý file: $file"
-      restore_from_backup
-      exit 1
-    fi
-  fi
-done
-
-# Kiểm tra xem có file nào được thay đổi không
-if [ $changed_files -eq 0 ]; then
-  echo "Error: Không tìm thấy file nào chứa domain $OLD_DOMAIN"
-  restore_from_backup
-  exit 1
+if [ -f "$NGINX_CONF" ]; then
+  cp "$NGINX_CONF" "$BACKUP_DIR/$OLD_DOMAIN"
+  sed -i "s/$OLD_DOMAIN/$NEW_DOMAIN/g" "$NGINX_CONF"
+  mv "$NGINX_CONF" "$NEW_NGINX_CONF"
+  ln -sf "$NEW_NGINX_CONF" "$NGINX_ENABLED_DIR/$NEW_DOMAIN"
+  rm -f "$NGINX_ENABLED_DIR/$OLD_DOMAIN"
+  echo "Đã cập nhật Nginx config!"
+else
+  echo "Error: Không tìm thấy file cấu hình Nginx cho $OLD_DOMAIN"
 fi
 
-# Hiển thị kết quả
-echo "Đã thay đổi thành công $changed_files file"
-echo "Danh sách các file đã được thay đổi:"
-find . -type f -not -path "./$backup_dir/*" -not -path "./.git/*" -exec grep -l "$NEW_DOMAIN" {} \;
+systemctl restart nginx
 
-echo "Đã tạo backup tại thư mục: $backup_dir"
-echo "Hoàn thành thay đổi domain từ $OLD_DOMAIN sang $NEW_DOMAIN"
+# 2. Đổi thư mục website
+echo "Đổi thư mục website..."
+if [ -d "$WEB_ROOT_DIR/$OLD_DOMAIN" ]; then
+  mv "$WEB_ROOT_DIR/$OLD_DOMAIN" "$WEB_ROOT_DIR/$NEW_DOMAIN"
+  echo "Đã chuyển thư mục website!"
+else
+  echo "Error: Không tìm thấy thư mục $WEB_ROOT_DIR/$OLD_DOMAIN"
+fi
+
+# 3. Cập nhật file wp-config.php
+echo "Cập nhật file wp-config.php..."
+if [ -f "$WP_CONFIG_PATH" ]; then
+  cp "$WP_CONFIG_PATH" "$BACKUP_DIR/wp-config.php"
+  sed -i "s/$OLD_DOMAIN/$NEW_DOMAIN/g" "$WP_CONFIG_PATH"
+  echo "Đã cập nhật wp-config.php!"
+else
+  echo "Error: Không tìm thấy file wp-config.php tại $WP_CONFIG_PATH"
+fi
+
+# 4. Cập nhật domain trong database WordPress
+echo "Cập nhật domain trong database WordPress..."
+DB_NAME=$(grep DB_NAME "$WP_CONFIG_PATH" | cut -d "'" -f 4)
+DB_USER=$(grep DB_USER "$WP_CONFIG_PATH" | cut -d "'" -f 4)
+DB_PASS=$(grep DB_PASSWORD "$WP_CONFIG_PATH" | cut -d "'" -f 4)
+
+if [[ -n "$DB_NAME" && -n "$DB_USER" && -n "$DB_PASS" ]]; then
+  mysql -u"$DB_USER" -p"$DB_PASS" -e "
+    UPDATE $DB_NAME.wp_options SET option_value = '$NEW_DOMAIN' WHERE option_name IN ('siteurl', 'home');
+  "
+  echo "Đã cập nhật domain trong database!"
+else
+  echo "Error: Không thể trích xuất thông tin database từ wp-config.php"
+  restore_from_backup
+fi
+
+echo "Backup đã được lưu tại: $BACKUP_DIR"
+echo "Quá trình thay đổi domain từ $OLD_DOMAIN sang $NEW_DOMAIN đã hoàn tất!"
