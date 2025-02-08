@@ -386,7 +386,7 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 #### Change domain
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/change_domain.sh) <old_domain*> <new_domain*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/change_domain.sh) <old_domain*> <new_domain*> <mysql_root_password*>
 ```
 
 #### Cài đặt website WordPress tự động theo template
