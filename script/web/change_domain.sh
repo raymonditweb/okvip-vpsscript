@@ -13,6 +13,25 @@ if [ "$#" -ne 3 ]; then
   exit 1
 fi
 
+OLD_DOMAIN=$1
+NEW_DOMAIN=$2
+DB_ROOT_PASS=$3
+BACKUP_DIR="/var/backups/$OLD_DOMAIN/backup_$(date +%Y%m%d_%H%M%S)"
+NGINX_CONF_DIR="/etc/nginx/sites-available"
+NGINX_ENABLED_DIR="/etc/nginx/sites-enabled"
+WEB_ROOT_DIR="/var/www"
+
+# Định dạng tên database và user
+format_db_name() {
+  echo "$1" | sed 's/\./_/g'
+}
+
+OLD_DB_NAME=$(format_db_name "$OLD_DOMAIN")
+NEW_DB_NAME=$(format_db_name "$NEW_DOMAIN")
+OLD_DB_USER="${OLD_DB_NAME}_user"
+NEW_DB_USER="${NEW_DB_NAME}_user"
+WP_CONFIG_PATH="$WEB_ROOT_DIR/$NEW_DOMAIN/wp-config.php"
+
 # Hàm rollback để khôi phục khi có lỗi
 rollback() {
   echo "Error: Có lỗi xảy ra. Đang khôi phục lại trạng thái cũ..."
@@ -45,25 +64,6 @@ EOF
   echo "Đã khôi phục về trạng thái ban đầu!"
   exit 1
 }
-
-OLD_DOMAIN=$1
-NEW_DOMAIN=$2
-DB_ROOT_PASS=$3
-BACKUP_DIR="backup_$(date +%Y%m%d_%H%M%S)"
-NGINX_CONF_DIR="/etc/nginx/sites-available"
-NGINX_ENABLED_DIR="/etc/nginx/sites-enabled"
-WEB_ROOT_DIR="/var/www"
-
-# Định dạng tên database và user
-format_db_name() {
-  echo "$1" | sed 's/\./_/g'
-}
-
-OLD_DB_NAME=$(format_db_name "$OLD_DOMAIN")
-NEW_DB_NAME=$(format_db_name "$NEW_DOMAIN")
-OLD_DB_USER="${OLD_DB_NAME}_user"
-NEW_DB_USER="${NEW_DB_NAME}_user"
-WP_CONFIG_PATH="$WEB_ROOT_DIR/$NEW_DOMAIN/wp-config.php"
 
 # Tạo thư mục backup
 mkdir -p "$BACKUP_DIR" || { echo "Không thể tạo thư mục backup"; exit 1; }
