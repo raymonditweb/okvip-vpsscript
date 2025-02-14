@@ -179,7 +179,7 @@ bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/ra
 bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/configure_php_each_site.sh) <domain*> <php_version*> <root_directory*>
 ```
 
-`Vi du: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/configure_php_ini.sh) example.com 8.1 /var/www/example.com`
+`Vi du: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/configure_php_each_site.sh) example.com 8.1 /var/www/example.com`
 
 ### Cấu hình php.ini - Configure php.ini
 
