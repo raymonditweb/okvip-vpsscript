@@ -101,12 +101,16 @@ server {
 EOF
 fi
 
-# Check if PHP-FPM is installed
+# Check if PHP-FPM is installed; nếu chưa cài thì tiến hành cài đặt
 if ! systemctl status php${PHP_VERSION}-fpm &>/dev/null; then
-  echo "Warning: PHP-FPM ${PHP_VERSION} chưa được cài."
-  echo "Run: apt install php${PHP_VERSION}-fpm"
-  rm "$TEMP_FILE"
-  exit 1
+  echo "PHP-FPM ${PHP_VERSION} chưa được cài, tiến hành cài đặt..."
+  apt-get update
+  apt-get install -y php${PHP_VERSION}-fpm
+  if [ $? -ne 0 ]; then
+    echo "Error: Không thể cài đặt PHP-FPM ${PHP_VERSION}."
+    rm "$TEMP_FILE"
+    exit 1
+  fi
 fi
 
 # Apply new configuration
