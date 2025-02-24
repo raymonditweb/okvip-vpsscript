@@ -184,10 +184,10 @@ bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/ra
 ### Cấu hình php.ini - Configure php.ini
 
 ```bash
-bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/configure_php_ini.sh) <property1:value1*> <property2:value2*>...
+bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/configure_php_ini.sh) <domain*> <property1:value1*> <property2:value2*>...
 ```
 
-`Vi du: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/configure_php_ini.sh) memory_limit:512M upload_max_filesize:50M post_max_size:50M`
+`Vi du: bash <(curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/others/configure_php_ini.sh) example.com memory_limit:512M upload_max_filesize:50M post_max_size:50M`
 
 #### Install Rclone for sync backup to gdrive
 
