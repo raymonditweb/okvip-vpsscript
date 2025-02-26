@@ -451,7 +451,7 @@ Cung cấp primary-domain và ít nhất 1 addon-domain để thêm vào addon d
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/get-alias-domain.sh) <domain*>
 ```
 
-`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/get-alias-domain.sh ) example.com `
+`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/get-alias-domain.sh ) example.com`
 
 - Giải thích các tham số:
   domain: Tên miền (ví dụ: domain.com) hoac path: Đường dẫn (ví dụ: /path/\*)
@@ -503,10 +503,18 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/get_redirect.sh ) <domain/path>
 ```
 
-`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/get_redirect.sh ) example.com `
+`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/get_redirect.sh ) example.com`
 
 - Giải thích các tham số:
   domain: Tên miền (ví dụ: domain.com) hoac path: Đường dẫn (ví dụ: /path/\*)
+
+#### Cấu hình Wordpress URL rewrite - Configuration for Wordpress URL rewrite
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/wordpress_nginx_rewrite.sh ) <domain*>
+```
+
+`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/wordpress_nginx_rewrite.sh ) example.com`
 
 #### Export DB
 
