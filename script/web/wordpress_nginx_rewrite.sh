@@ -6,14 +6,15 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# Kiểm tra xem người dùng có nhập domain không
-if [ -z "$1" ]; then
-  echo "Cách sử dụng: $0 <domain>"
+# Kiểm tra xem người dùng có nhập đủ tham số không
+if [ -z "$1" ] || [ -z "$2" ]; then
+  echo "Cách sử dụng: $0 <domain> <doạn cấu hình cần thêm>"
   exit 1
 fi
 
-# Lấy domain từ tham số đầu vào
+# Lấy domain và đoạn cần thêm từ tham số đầu vào
 DOMAIN="$1"
+EXTRA_CONFIG="$2"
 NGINX_CONF="/etc/nginx/sites-available/$DOMAIN"
 NGINX_LINK="/etc/nginx/sites-enabled/$DOMAIN"
 WEB_ROOT="/var/www/$DOMAIN"
@@ -34,23 +35,14 @@ fi
 # Nếu file cấu hình đã tồn tại, chỉ cập nhật phần URL Rewrite
 if [ -f "$NGINX_CONF" ]; then
   echo "File cấu hình Nginx đã tồn tại. Kiểm tra và cập nhật..."
-
-  # Kiểm tra và thêm URL Rewrite nếu chưa có
-  if ! grep -q "try_files \$uri \$uri/ /index.php?\$args;" "$NGINX_CONF"; then
-    echo "Thêm cấu hình URL Rewrite..."
-    sed -i '/location \/ {/a \        try_files \$uri \$uri/ /index.php?\$args;' "$NGINX_CONF"
+  
+  # Kiểm tra xem đoạn cấu hình đã tồn tại chưa
+  if ! grep -qF "$EXTRA_CONFIG" "$NGINX_CONF"; then
+    echo "Thêm đoạn cấu hình vào file..."
+    echo -e "\n    $EXTRA_CONFIG" >> "$NGINX_CONF"
   else
-    echo "URL Rewrite đã có sẵn, không cần cập nhật."
+    echo "Error: Đoạn cấu hình đã tồn tại, không cần thêm."
   fi
-
-  # Kiểm tra và thêm redirect wp-admin nếu chưa có
-  if ! grep -q "rewrite /wp-admin$ \$scheme://\$host\$uri/ permanent;" "$NGINX_CONF"; then
-    echo "Thêm redirect /wp-admin..."
-    echo -e "\n    rewrite /wp-admin$ \$scheme://\$host\$uri/ permanent;" >>"$NGINX_CONF"
-  else
-    echo "Redirect /wp-admin đã có sẵn."
-  fi
-
 else
   echo "Tạo file cấu hình Nginx mới tại: $NGINX_CONF"
 
@@ -67,7 +59,7 @@ server {
 
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php8.1-fpm.sock; # Kiểm tra phiên bản PHP của bạn
+        fastcgi_pass unix:/run/php/php8.1-fpm.sock;
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
         include fastcgi_params;
     }
@@ -88,6 +80,9 @@ server {
 
     # Redirect wp-admin
     rewrite /wp-admin$ \$scheme://\$host\$uri/ permanent;
+
+    # Thêm đoạn cấu hình được chỉ định
+    $EXTRA_CONFIG
 }
 EOF
 fi
