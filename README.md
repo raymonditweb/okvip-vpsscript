@@ -511,10 +511,10 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 #### Cấu hình Wordpress URL rewrite - Configuration for Wordpress URL rewrite
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/wordpress_nginx_rewrite.sh ) <domain*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/wordpress_nginx_rewrite.sh ) <domain*> <extra_config*>
 ```
 
-`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/wordpress_nginx_rewrite.sh ) example.com`
+`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/wordpress_nginx_rewrite.sh ) example.com "location /custom { return 200 'Hello'; }"`
 
 #### Export DB
 
