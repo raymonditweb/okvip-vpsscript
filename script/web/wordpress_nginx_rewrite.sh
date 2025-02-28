@@ -39,7 +39,7 @@ if [ -f "$NGINX_CONF" ]; then
   # Kiểm tra xem đoạn cấu hình đã tồn tại chưa
   if ! grep -qF "$EXTRA_CONFIG" "$NGINX_CONF"; then
     echo "Thêm đoạn cấu hình vào file..."
-    echo -e "\n    $EXTRA_CONFIG" >> "$NGINX_CONF"
+    sed -i "/^    error_log /i \    $EXTRA_CONFIG" "$NGINX_CONF"
   else
     echo "Error: Đoạn cấu hình đã tồn tại, không cần thêm."
   fi
@@ -92,7 +92,13 @@ if [ ! -L "$NGINX_LINK" ]; then
   ln -sf "$NGINX_CONF" "$NGINX_LINK"
 fi
 
-# Kiểm tra lỗi và khởi động lại Nginx
-nginx -t && systemctl restart nginx
+# Kiểm tra lỗi Nginx
+if ! nginx -t; then
+  echo "Error: Lỗi cấu hình Nginx! Vui lòng kiểm tra lại."
+  exit 1
+fi
+
+# Nếu không có lỗi, khởi động lại Nginx
+systemctl restart nginx
 
 echo "Cấu hình Nginx đã được cập nhật"
