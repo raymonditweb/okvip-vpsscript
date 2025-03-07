@@ -597,6 +597,10 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/list-db ) <mysql_root_password*>
 ```
 
+`vi du:
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/list-db ) okvip@P@ssw0rd2024
+`
+
 #### Thêm database và userdb tương ứng mới (userdb = dbname) - Add database
 
 ```bash
@@ -614,6 +618,10 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/delete-db ) <mysql_root_password*> <db_name*>
 ```
+
+`vi du:
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/db/delete-db ) okvip@P@ssw0rd2024 test_db
+`
 
 ## 5. User Operations
 

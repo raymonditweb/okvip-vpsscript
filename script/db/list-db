@@ -14,12 +14,12 @@ fi
 
 MYSQL_ROOT_PASSWORD=$1
 
-# Câu truy vấn để lấy danh sách các database và người dùng, bỏ qua system databases
-query="SELECT db.db AS db_name, IFNULL(GROUP_CONCAT(DISTINCT user.User SEPARATOR ', '), '') AS users
-       FROM mysql.db AS db
-       LEFT JOIN mysql.user AS user ON db.User = user.User
-       WHERE db.db NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')
-       GROUP BY db.db;"
+# Câu truy vấn để lấy danh sách các database thực sự tồn tại và người dùng, bỏ qua system databases
+query="SELECT SCHEMA_NAME AS db_name,IFNULL(GROUP_CONCAT(DISTINCT db.User SEPARATOR ', '), '') AS users
+  FROM information_schema.SCHEMATA s
+  LEFT JOIN mysql.db AS db ON s.SCHEMA_NAME = db.Db
+  WHERE s.SCHEMA_NAME NOT IN ('mysql', 'information_schema', 'performance_schema', 'sys')
+  GROUP BY s.SCHEMA_NAME;"
 
 # Chạy truy vấn và hiển thị kết quả
 mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "$query"

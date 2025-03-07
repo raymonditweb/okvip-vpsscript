@@ -14,9 +14,6 @@ fi
 
 MYSQL_ROOT_PASSWORD=$1
 
-# Nhập tên database muốn xóa
-# read -p "Nhập tên database muốn xóa: " DB_NAME
-
 # Kiểm tra tham số tên database
 if [ -z "$2" ]; then
   echo "Vui lòng truyền tên database muốn xóa."
@@ -25,17 +22,28 @@ fi
 DB_NAME=$2
 
 # Kiểm tra sự tồn tại của database
-DB_EXISTS=$(mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DB_NAME';" 2>/dev/null | grep -w "$DB_NAME")
+DB_EXISTS=$(mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '$DB_NAME';" 2>/dev/null | grep -v "SCHEMA_NAME" | grep -w "$DB_NAME")
 
 if [ -z "$DB_EXISTS" ]; then
   echo "Error: Database '$DB_NAME' không tồn tại."
+  exit 1
 else
   # Xóa database
   mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;"
 
+  # Kiểm tra kết quả của lệnh drop database
   if [ $? -eq 0 ]; then
     echo "Database '$DB_NAME' đã được xóa thành công."
   else
     echo "Error: Không thể xóa database '$DB_NAME'."
+    exit 1
+  fi
+
+  # Kiểm tra lại sau khi xóa để chắc chắn
+  DB_STILL_EXISTS=$(mysql --user=root --password="$MYSQL_ROOT_PASSWORD" -e "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '$DB_NAME';" 2>/dev/null | grep -v "SCHEMA_NAME" | grep -w "$DB_NAME")
+
+  if [ -n "$DB_STILL_EXISTS" ]; then
+    echo "Warning: Database '$DB_NAME' vẫn còn tồn tại sau khi cố gắng xóa."
+    exit 1
   fi
 fi
