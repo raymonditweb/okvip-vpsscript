@@ -13,6 +13,10 @@ For Ubuntu 20.04:
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/install-ubuntu-lemp-20.04 ) <mysql_root_password> <init_main_domain.com>
 ```
 
+`
+vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/install-ubuntu-lemp-20.04 ) okvip@P@ssw0rd2024
+`
+
 ### Go Cài đặt LEMP - LEMP Uninstallation
 
 For Ubuntu 20.04:
@@ -20,6 +24,10 @@ For Ubuntu 20.04:
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/remove-ubuntu-lemp-20.04 )
 ```
+
+`
+vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/remove-ubuntu-lemp-20.04 )
+`
 
 ### Check VPS status
 
