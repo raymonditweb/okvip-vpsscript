@@ -128,6 +128,18 @@ fi
 
 echo "WP-CLI đã được cài đặt thành công!"
 
+# Kiểm tra và gỡ bỏ Apache nếu nó đang cài đặt
+if dpkg -l | grep -q apache2; then
+  echo "Phát hiện Apache. Đang xóa Apache..."
+  systemctl stop apache2
+  apt remove --purge -y apache2 apache2-utils apache2-bin apache2.2-common
+  apt autoremove -y
+  apt clean
+  echo "Đã xóa Apache thành công."
+else
+  echo "Apache không được cài đặt."
+fi
+
 # Kiểm tra cấu hình Nginx và khởi động dịch vụ
 nginx -t
 systemctl restart nginx mysql php8.1-fpm
