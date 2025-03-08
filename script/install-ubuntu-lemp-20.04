@@ -28,7 +28,7 @@ PHPMYADMIN_PORT=8080
 # Cài đặt gói cần thiết
 echo "Cập nhật và cài đặt các gói cần thiết..."
 apt update && apt upgrade -y
-apt install -y nginx mysql-server php-fpm php-mysql unzip software-properties-common curl
+apt install -y nginx mysql-server php-fpm php-cli php-mysql php-curl php-xml php-mbstring php-zip unzip software-properties-common curl
 
 # Thêm PPA cho PHP 8.1
 add-apt-repository -y ppa:ondrej/php
