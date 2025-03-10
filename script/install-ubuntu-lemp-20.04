@@ -28,7 +28,7 @@ PHPMYADMIN_PORT=8080
 # Cài đặt gói cần thiết
 echo "Cập nhật và cài đặt các gói cần thiết..."
 apt update && apt upgrade -y
-apt install -y nginx mysql-server php-fpm php-mysql unzip software-properties-common curl
+apt install -y nginx mysql-server php-fpm php-cli php-mysql php-curl php-xml php-mbstring php-zip unzip software-properties-common curl
 
 # Thêm PPA cho PHP 8.1
 add-apt-repository -y ppa:ondrej/php
@@ -130,6 +130,18 @@ if ! command -v wp &> /dev/null; then
 fi
 
 echo "WP-CLI đã được cài đặt thành công!"
+
+# Kiểm tra và gỡ bỏ Apache nếu nó đang cài đặt
+if dpkg -l | grep -q apache2; then
+  echo "Phát hiện Apache. Đang xóa Apache..."
+  systemctl stop apache2
+  apt remove --purge -y apache2 apache2-utils apache2-bin apache2.2-common
+  apt autoremove -y
+  apt clean
+  echo "Đã xóa Apache thành công."
+else
+  echo "Apache không được cài đặt."
+fi
 
 # Kiểm tra cấu hình Nginx và khởi động dịch vụ
 nginx -t
