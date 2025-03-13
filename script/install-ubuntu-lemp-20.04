@@ -66,9 +66,6 @@ tar -xzf phpmyadmin.tar.gz --strip-components=1 -C /usr/share/phpmyadmin || {
 rm phpmyadmin.tar.gz
 ln -s /usr/share/phpmyadmin /var/www/html/phpmyadmin
 
-# Xóa folder html
-rm -rf /var/www/html
-
 # Tắt cảnh báo lỗi thời trong phpMyAdmin
 echo "Tắt cảnh báo lỗi thời trong phpMyAdmin..."
 PHPMA_CONFIG_FILE="/usr/share/phpmyadmin/libraries/config.default.php"
