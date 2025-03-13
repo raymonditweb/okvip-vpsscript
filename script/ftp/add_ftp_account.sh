@@ -171,6 +171,7 @@ add_account() {
     }
   fi
 
+  echo "$username" >> /etc/pure-ftpd/conf/ChrootUsers
   echo "Tài khoản FTP $username đã được thêm thành công với đầy đủ quyền."
 }
 
