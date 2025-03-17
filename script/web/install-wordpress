@@ -103,6 +103,8 @@ unzip -o /tmp/template.zip -d $WEB_ROOT
 # Import database nếu có file db.sql
 if [ -f "$WEB_ROOT/db.sql" ]; then
   mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_NAME < $WEB_ROOT/db.sql
+  # Update option_value
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_NAME -e "UPDATE wp_options SET option_value = 'https://$DOMAIN' WHERE option_name IN ('siteurl', 'home');"
   # Xóa file db.sql sau khi import
   rm -f "$WEB_ROOT/db.sql"
   echo "File db.sql đã được xóa sau khi cài đặt thành công."
