@@ -103,10 +103,14 @@ unzip -o /tmp/template.zip -d $WEB_ROOT
 # Import database nếu có file db.sql
 if [ -f "$WEB_ROOT/db.sql" ]; then
   mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_NAME < $WEB_ROOT/db.sql
+  # Xóa file db.sql sau khi import
+  rm -f "$WEB_ROOT/db.sql"
+  echo "File db.sql đã được xóa sau khi cài đặt thành công."
 else
   echo "Error: Không tìm thấy file db.sql trong template. Dừng lại."
   exit 1
 fi
+
 
 # Cấu hình Nginx
 cat > /etc/nginx/sites-available/$DOMAIN <<EOL
