@@ -8,7 +8,7 @@ fi
 
 # Kiểm tra tham số
 if [ "$#" -ne 3 ]; then
-  echo "Error: Sử dụng: $0 <domain> <target_url> <redirect_type>"
+  echo "Error: Sử dụng: $0 <domain> <redirect_type> <target_url>"
   exit 1
 fi
 
