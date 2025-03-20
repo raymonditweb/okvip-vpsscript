@@ -8,61 +8,40 @@ fi
 
 # Kiểm tra xem có đủ tham số hay không
 if [ "$#" -ne 3 ]; then
-  echo "Error: Su dung: $0 <domain_or_path> <redirect_type> <target>"
+  echo "Error: Sử dụng: $0 <domain> <redirect_type> <target_url>"
+  echo "redirect_type: 301 hoặc 302"
   exit 1
 fi
 
-DOMAIN_OR_PATH=$1
+DOMAIN=$1
 REDIRECT_TYPE=$2
-TARGET=$3
+TARGET_URL=$3
 
-# Kiểm tra quyền ghi tệp
-CONFIG_FILE="/etc/nginx/sites-available/$DOMAIN_OR_PATH.conf"
-
-if [ ! -f "$CONFIG_FILE" ]; then
-  echo "Tạo tệp cấu hình: $CONFIG_FILE"
-  touch "$CONFIG_FILE"
+# Kiểm tra redirect_type hợp lệ không
+if [[ "$REDIRECT_TYPE" != "301" && "$REDIRECT_TYPE" != "302" ]]; then
+  echo "Error: redirect_type chỉ có thể là 301 hoặc 302."
+  exit 1
 fi
 
-# Tạo bản sao lưu của tệp cấu hình
+# Đường dẫn file config Nginx
+CONFIG_FILE="/etc/nginx/sites-available/$DOMAIN"
+
+# Kiểm tra file cấu hình tồn tại không
+if [ ! -f "$CONFIG_FILE" ]; then
+  echo "Error: File cấu hình $CONFIG_FILE không tồn tại."
+  exit 1
+fi
+
+# Tạo bản sao lưu trước khi sửa
 cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
 
-# Chuẩn hóa danh sách server_name: Loại bỏ dấu chấm phẩy nếu có
-NORMALIZED_DOMAIN_OR_PATH=$(echo "$DOMAIN_OR_PATH" | tr ';' ' ')
+# Chèn redirect sau "listen 443 ssl;"
+sed -i '/listen 443 ssl;/a \    return '"$REDIRECT_TYPE"' '"$TARGET_URL"'$request_uri;' "$CONFIG_FILE"
 
-# Định dạng lại TARGET đúng cách
-ESCAPED_TARGET=$(printf '%s' "$TARGET" | sed 's/[&]/\\&/g')
+# Chèn redirect sau "listen 80;"
+sed -i '/listen 80;/a \    return '"$REDIRECT_TYPE"' '"$TARGET_URL"'$request_uri;' "$CONFIG_FILE"
 
-# Kiểm tra và ghi tệp
-if ! grep -q "server_name" "$CONFIG_FILE"; then
-  cat <<EOL >> "$CONFIG_FILE"
-
-server {
-    listen 80;
-    server_name $NORMALIZED_DOMAIN_OR_PATH;
-    return $REDIRECT_TYPE $ESCAPED_TARGET\$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    server_name $NORMALIZED_DOMAIN_OR_PATH;
-    
-    ssl_certificate /etc/letsencrypt/live/$NORMALIZED_DOMAIN_OR_PATH/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/$NORMALIZED_DOMAIN_OR_PATH/privkey.pem;
-    
-    return $REDIRECT_TYPE $ESCAPED_TARGET\$request_uri;
-}
-EOL
-else
-  if ! grep -q "location / {" "$CONFIG_FILE"; then
-    sed -i "/server_name/a \
-    location / {\n        return $REDIRECT_TYPE $ESCAPED_TARGET\$request_uri;\n    }" "$CONFIG_FILE"
-  else
-    sed -i "/location \/ {/!b;n;s/return [0-9]* .*/return $REDIRECT_TYPE $ESCAPED_TARGET\$request_uri;/" "$CONFIG_FILE"
-  fi
-fi
-
-# Kiểm tra lỗi cấu hình Nginx
+# Kiểm tra cấu hình Nginx
 if ! nginx -t; then
   echo "Error: Lỗi cấu hình Nginx. Khôi phục bản sao lưu."
   mv "$CONFIG_FILE.bak" "$CONFIG_FILE"
@@ -71,4 +50,4 @@ fi
 
 # Tải lại Nginx
 systemctl reload nginx
-echo "Setup redirect thành công"
+echo "✅ Cấu hình redirect ($REDIRECT_TYPE) thành công!"
