@@ -6,57 +6,57 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-# Kiểm tra xem có đủ tham số hay không
+# Kiểm tra tham số
 if [ "$#" -ne 3 ]; then
-  echo "Error: Su dung: $0 <domain_or_path> <redirect_type> <target>"
+  echo "Error: Sử dụng: $0 <domain> <redirect_type> <target_url>"
   exit 1
 fi
 
-DOMAIN_OR_PATH=$1
+DOMAIN=$1
 REDIRECT_TYPE=$2
-TARGET=$3
+TARGET_URL=$3
 
-# Kiểm tra quyền ghi tệp
-CONFIG_FILE="/etc/nginx/sites-available/$DOMAIN_OR_PATH.conf"
-
-if [ ! -f "$CONFIG_FILE" ]; then
-  echo "Tạo tệp cấu hình: $CONFIG_FILE"
-  touch "$CONFIG_FILE"
+# Kiểm tra redirect_type hợp lệ không
+if [[ "$REDIRECT_TYPE" != "301" && "$REDIRECT_TYPE" != "302" ]]; then
+  echo "Error: redirect_type chỉ có thể là 301 hoặc 302."
+  exit 1
 fi
 
-# Tạo bản sao lưu của tệp cấu hình
+# Loại bỏ dấu '/' ở cuối URL nếu có
+TARGET_URL=$(echo "$TARGET_URL" | sed 's:/*$::')
+
+# Đường dẫn file cấu hình
+CONFIG_FILE="/etc/nginx/sites-available/$DOMAIN"
+
+# Kiểm tra file cấu hình có tồn tại không
+if [ ! -f "$CONFIG_FILE" ]; then
+  echo "Error: File cấu hình $CONFIG_FILE không tồn tại."
+  exit 1
+fi
+
+# Tạo bản sao lưu trước khi sửa
 cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
 
-# Chuẩn hóa danh sách server_name: Loại bỏ dấu chấm phẩy nếu có
-NORMALIZED_DOMAIN_OR_PATH=$(echo "$DOMAIN_OR_PATH" | tr ';' ' ')
-
-# Thoát ký tự đặc biệt trong TARGET
-ESCAPED_TARGET=$(printf '%s' "$TARGET" | sed -e 's/[\/&]/\\&/g')
-
-# Kiểm tra và ghi tệp
-if ! grep -q "server_name" "$CONFIG_FILE"; then
-  cat <<EOL >> "$CONFIG_FILE"
-
-server {
-  listen 80;
-  server_name $NORMALIZED_DOMAIN_OR_PATH;
-
-  location / {
-    return $REDIRECT_TYPE $ESCAPED_TARGET;
-  }
-}
-EOL
-else
-  if ! grep -q "location / {" "$CONFIG_FILE"; then
-    sed -i "/server_name/a \    location / {
-        return $REDIRECT_TYPE $ESCAPED_TARGET;
-    }" "$CONFIG_FILE"
-  else
-    sed -i "/location \/ {/!b;n;s/return [0-9]* .*/return $REDIRECT_TYPE $ESCAPED_TARGET;/" "$CONFIG_FILE"
-  fi
+# Xóa dòng redirect cũ tương ứng với loại redirect được chọn
+if [ "$REDIRECT_TYPE" == "301" ]; then
+    sed -i '/return 301/d' "$CONFIG_FILE"
+elif [ "$REDIRECT_TYPE" == "302" ]; then
+    sed -i '/return 302/d' "$CONFIG_FILE"
 fi
 
-# Kiểm tra lỗi cấu hình Nginx
+
+# Kiểm tra nếu có "listen 443 ssl;" trong file thì mới thêm redirect
+if grep -q "listen 443 ssl;" "$CONFIG_FILE"; then
+    sed -i '/listen 443 ssl;/a \    return '"$REDIRECT_TYPE"' '"$TARGET_URL"'$request_uri;' "$CONFIG_FILE"
+fi
+
+# Kiểm tra nếu có "listen 80;" trong file thì mới thêm redirect
+if grep -q "listen 80;" "$CONFIG_FILE"; then
+    sed -i '/listen 80;/a \    return '"$REDIRECT_TYPE"' '"$TARGET_URL"'$request_uri;' "$CONFIG_FILE"
+fi
+
+
+# Kiểm tra cấu hình Nginx
 if ! nginx -t; then
   echo "Error: Lỗi cấu hình Nginx. Khôi phục bản sao lưu."
   mv "$CONFIG_FILE.bak" "$CONFIG_FILE"
@@ -65,4 +65,4 @@ fi
 
 # Tải lại Nginx
 systemctl reload nginx
-echo "Setup redirect thành công"
+echo "Cấu hình redirect ($REDIRECT_TYPE) đến $TARGET_URL thành công!"
