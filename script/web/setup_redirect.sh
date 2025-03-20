@@ -35,6 +35,8 @@ fi
 # Tạo bản sao lưu trước khi sửa
 cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
 
+TARGET_URL=$(echo "$TARGET_URL" | sed 's:/*$::')
+
 # Chèn redirect sau "listen 443 ssl;"
 sed -i '/listen 443 ssl;/a \    return '"$REDIRECT_TYPE"' '"$TARGET_URL"'$request_uri;' "$CONFIG_FILE"
 
@@ -50,4 +52,4 @@ fi
 
 # Tải lại Nginx
 systemctl reload nginx
-echo "✅ Cấu hình redirect ($REDIRECT_TYPE) thành công!"
+echo "Cấu hình redirect ($REDIRECT_TYPE) thành công!"
