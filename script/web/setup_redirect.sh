@@ -16,6 +16,12 @@ DOMAIN=$1
 TARGET_URL=$2
 REDIRECT_TYPE=$3
 
+# Kiểm tra redirect_type hợp lệ không
+if [[ "$REDIRECT_TYPE" != "301" && "$REDIRECT_TYPE" != "302" ]]; then
+  echo "Error: redirect_type chỉ có thể là 301 hoặc 302."
+  exit 1
+fi
+
 # Loại bỏ dấu '/' ở cuối URL nếu có
 TARGET_URL=$(echo "$TARGET_URL" | sed 's:/*$::')
 
@@ -31,15 +37,24 @@ fi
 # Tạo bản sao lưu trước khi sửa
 cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
 
-# Xóa dòng redirect cũ (nếu có)
-sed -i '/return 301/d' "$CONFIG_FILE"
-sed -i '/return 302/d' "$CONFIG_FILE"
+# Xóa dòng redirect cũ tương ứng với loại redirect được chọn
+if [ "$REDIRECT_TYPE" == "301" ]; then
+    sed -i '/return 301/d' "$CONFIG_FILE"
+elif [ "$REDIRECT_TYPE" == "302" ]; then
+    sed -i '/return 302/d' "$CONFIG_FILE"
+fi
 
-# Thêm redirect mới sau "listen 443 ssl;"
-sed -i '/listen 443 ssl;/a \    return '"$REDIRECT_TYPE"' '"$TARGET_URL"'$request_uri;' "$CONFIG_FILE"
 
-# Thêm redirect mới sau "listen 80;"
-sed -i '/listen 80;/a \    return '"$REDIRECT_TYPE"' '"$TARGET_URL"'$request_uri;' "$CONFIG_FILE"
+# Kiểm tra nếu có "listen 443 ssl;" trong file thì mới thêm redirect
+if grep -q "listen 443 ssl;" "$CONFIG_FILE"; then
+    sed -i '/listen 443 ssl;/a \    return '"$REDIRECT_TYPE"' '"$TARGET_URL"'$request_uri;' "$CONFIG_FILE"
+fi
+
+# Kiểm tra nếu có "listen 80;" trong file thì mới thêm redirect
+if grep -q "listen 80;" "$CONFIG_FILE"; then
+    sed -i '/listen 80;/a \    return '"$REDIRECT_TYPE"' '"$TARGET_URL"'$request_uri;' "$CONFIG_FILE"
+fi
+
 
 # Kiểm tra cấu hình Nginx
 if ! nginx -t; then
