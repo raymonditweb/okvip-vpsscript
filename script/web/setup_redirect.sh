@@ -30,29 +30,35 @@ cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
 # Chuẩn hóa danh sách server_name: Loại bỏ dấu chấm phẩy nếu có
 NORMALIZED_DOMAIN_OR_PATH=$(echo "$DOMAIN_OR_PATH" | tr ';' ' ')
 
-# Thoát ký tự đặc biệt trong TARGET
-ESCAPED_TARGET=$(printf '%s' "$TARGET" | sed -e 's/[\/&]/\\&/g')
+# Định dạng lại TARGET đúng cách
+ESCAPED_TARGET=$(printf '%s' "$TARGET" | sed 's/[&]/\\&/g')
 
 # Kiểm tra và ghi tệp
 if ! grep -q "server_name" "$CONFIG_FILE"; then
   cat <<EOL >> "$CONFIG_FILE"
 
 server {
-  listen 80;
-  server_name $NORMALIZED_DOMAIN_OR_PATH;
+    listen 80;
+    server_name $NORMALIZED_DOMAIN_OR_PATH;
+    return $REDIRECT_TYPE $ESCAPED_TARGET\$request_uri;
+}
 
-  location / {
-    return $REDIRECT_TYPE $ESCAPED_TARGET;
-  }
+server {
+    listen 443 ssl;
+    server_name $NORMALIZED_DOMAIN_OR_PATH;
+    
+    ssl_certificate /etc/letsencrypt/live/$NORMALIZED_DOMAIN_OR_PATH/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/$NORMALIZED_DOMAIN_OR_PATH/privkey.pem;
+    
+    return $REDIRECT_TYPE $ESCAPED_TARGET\$request_uri;
 }
 EOL
 else
   if ! grep -q "location / {" "$CONFIG_FILE"; then
-    sed -i "/server_name/a \    location / {
-        return $REDIRECT_TYPE $ESCAPED_TARGET;
-    }" "$CONFIG_FILE"
+    sed -i "/server_name/a \
+    location / {\n        return $REDIRECT_TYPE $ESCAPED_TARGET\$request_uri;\n    }" "$CONFIG_FILE"
   else
-    sed -i "/location \/ {/!b;n;s/return [0-9]* .*/return $REDIRECT_TYPE $ESCAPED_TARGET;/" "$CONFIG_FILE"
+    sed -i "/location \/ {/!b;n;s/return [0-9]* .*/return $REDIRECT_TYPE $ESCAPED_TARGET\$request_uri;/" "$CONFIG_FILE"
   fi
 fi
 
