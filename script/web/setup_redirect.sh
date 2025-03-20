@@ -13,8 +13,8 @@ if [ "$#" -ne 3 ]; then
 fi
 
 DOMAIN=$1
-TARGET_URL=$2
-REDIRECT_TYPE=$3
+REDIRECT_TYPE=$2
+TARGET_URL=$3
 
 # Kiểm tra redirect_type hợp lệ không
 if [[ "$REDIRECT_TYPE" != "301" && "$REDIRECT_TYPE" != "302" ]]; then
