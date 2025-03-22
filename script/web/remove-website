@@ -50,7 +50,7 @@ else
   echo "Không xóa database"
 fi
 
-
+WEB_ROOT="/var/www/$DOMAIN"
 # Kiểm tra và xóa thư mục web
 if [ "$IS_DELETE_FOLDER_DOMAIN" = "true" ]; then
 
