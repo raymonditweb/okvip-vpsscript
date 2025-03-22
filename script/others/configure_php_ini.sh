@@ -7,39 +7,13 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Kiểm tra số lượng tham số
-if [ $# -lt 2 ]; then
-  echo "Sử dụng: $0 domain property1:value1 property2:value2 ..."
+if [ $# -eq 0 ]; then
+  echo "Sử dụng: $0 property1:value1 property2:value2 ..."
   exit 1
 fi
 
-# Lấy domain
-DOMAIN=$1
-shift # Bỏ domain khỏi danh sách tham số
-
-# Tìm thư mục cấu hình PHP-FPM của domain
-PHP_FPM_CONF_DIR="/etc/php-fpm.d"
-PHP_INI_DIR="/etc/php"
-
-# Kiểm tra domain có file cấu hình PHP-FPM không
-PHP_FPM_CONF_FILE="$PHP_FPM_CONF_DIR/${DOMAIN}.conf"
-if [ ! -f "$PHP_FPM_CONF_FILE" ]; then
-  echo "Error: Không tìm thấy file cấu hình PHP-FPM cho domain: $DOMAIN"
-  exit 1
-fi
-
-# Tìm file php.ini cho domain
-PHP_INI=$(grep -oP '(?<=php_admin_value\[php.ini\] = ).*' "$PHP_FPM_CONF_FILE" | tr -d ' ')
-
-if [ -z "$PHP_INI" ] || [ ! -f "$PHP_INI" ]; then
-  PHP_INI="$PHP_INI_DIR/${DOMAIN}/php.ini"
-fi
-
-if [ ! -f "$PHP_INI" ]; then
-  echo "Error: Không tìm thấy file php.ini cho domain: $DOMAIN"
-  exit 1
-fi
-
-echo "Sử dụng file php.ini: $PHP_INI"
+# Tìm file php.ini
+PHP_INI=$(php -i | grep "Loaded Configuration File" | awk '{print $4}')
 
 # Hàm restore backup và thoát
 restore_and_exit() {
@@ -55,6 +29,8 @@ restore_and_exit() {
     # Khởi động lại các dịch vụ sau khi restore
     if systemctl is-active --quiet php-fpm; then
       systemctl restart php-fpm
+    elif systemctl is-active --quiet php7.4-fpm; then
+      systemctl restart php7.4-fpm
     fi
 
     if systemctl is-active --quiet nginx; then
@@ -68,10 +44,15 @@ restore_and_exit() {
 }
 
 # Tạo backup
-BACKUP_FILE="/var/backups/${DOMAIN}_php_ini_backup_$(date +%Y%m%d_%H%M%S)"
+BACKUP_FILE="/var/backups/${PHP_INI##*/}_backup_$(date +%Y%m%d_%H%M%S)"
 mkdir -p /var/backups
 cp "$PHP_INI" "$BACKUP_FILE" || restore_and_exit 1 "Không thể tạo backup"
 echo "Đã tạo backup tại: $BACKUP_FILE"
+
+# Kiểm tra file php.ini có tồn tại không
+if [ ! -f "$PHP_INI" ]; then
+  restore_and_exit 1 "Không tìm thấy file php.ini"
+fi
 
 # Hàm cập nhật giá trị trong php.ini
 update_php_ini() {
@@ -118,6 +99,10 @@ if systemctl is-active --quiet php-fpm; then
   systemctl restart php-fpm || restore_and_exit 1 "Không thể khởi động lại PHP-FPM"
   PHP_FPM_RESTARTED=true
   echo "Đã khởi động lại PHP-FPM"
+elif systemctl is-active --quiet php7.4-fpm; then
+  systemctl restart php7.4-fpm || restore_and_exit 1 "Không thể khởi động lại PHP7.4-FPM"
+  PHP_FPM_RESTARTED=true
+  echo "Đã khởi động lại PHP7.4-FPM"
 fi
 
 if [ "$PHP_FPM_RESTARTED" = false ]; then
