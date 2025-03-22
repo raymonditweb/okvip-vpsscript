@@ -60,12 +60,15 @@ else
 fi
 
 # Kiểm tra và xóa thư mục web
-WEB_ROOT="/var/www/$DOMAIN"
-if [ -d "$WEB_ROOT" ]; then
-  rm -rf "$WEB_ROOT"
-  echo "Đã xóa thư mục web tại $WEB_ROOT."
+if [ "$IS_DELETE_FOLDER_DOMAIN" = "true" ]; then
+  if [ -d "$WEB_ROOT" ]; then
+    rm -rf "$WEB_ROOT"
+    echo "Đã xóa thư mục web tại $WEB_ROOT."
+  else
+    echo "Thư mục web không tồn tại."
+  fi
 else
-  echo "Thư mục web không tồn tại."
+  echo "Không xóa thư mục "
 fi
 
 # Kiểm tra và xóa tham chiếu trong nginx.conf
