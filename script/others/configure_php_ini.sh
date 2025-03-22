@@ -13,7 +13,7 @@ if [ $# -eq 0 ]; then
 fi
 
 # Tìm file php.ini
-PHP_INI=$(php -i | grep "Loaded Configuration File" | awk '{print $4}')
+PHP_INI=$(php -i | grep "Loaded Configuration File" | awk '{print $NF}')
 
 # Hàm restore backup và thoát
 restore_and_exit() {
