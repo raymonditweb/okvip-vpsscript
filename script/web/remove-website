@@ -9,6 +9,8 @@ fi
 # Đọc thông tin đầu vào
 DOMAIN=$1
 MYSQL_ROOT_PASSWORD=$2
+IS_DELETE_FOLDER_DOMAIN=$3
+IS_DELETE_DATABASE=$4
 
 if [ -z "$DOMAIN" ] || [ -z "$MYSQL_ROOT_PASSWORD" ]; then
   echo "Error: Sử dụng: ./remove-website.sh <domain> <mysql_root_password>"
@@ -19,22 +21,6 @@ fi
 DB_NAME="${DOMAIN//./_}" # Tên cơ sở dữ liệu, thay thế dấu chấm bằng dấu gạch dưới
 DB_USER="${DB_NAME}_user"
 
-# Xóa tệp cấu hình Nginx
-if [ -f "/etc/nginx/sites-available/$DOMAIN" ]; then
-  rm /etc/nginx/sites-available/$DOMAIN
-  echo "Đã xóa tệp cấu hình Nginx trong sites-available."
-else
-  echo "Tệp cấu hình không tồn tại trong sites-available."
-fi
-
-# Xóa liên kết tượng trưng
-if [ -L "/etc/nginx/sites-enabled/$DOMAIN" ]; then
-  rm /etc/nginx/sites-enabled/$DOMAIN
-  echo "Đã xóa liên kết tượng trưng trong sites-enabled."
-else
-  echo "Liên kết tượng trưng không tồn tại trong sites-enabled."
-fi
-
 # Xóa chứng chỉ SSL
 if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
   certbot delete --cert-name "$DOMAIN" -n
@@ -44,28 +30,55 @@ else
 fi
 
 # Kiểm tra và xóa database MySQL
-if mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DB_NAME';" | grep -q "$DB_NAME"; then
-  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;"
-  echo "Đã xóa database MySQL cho domain $DOMAIN."
+if [ "$IS_DELETE_DATABASE" = "true" ]; then
+  # Xóa database
+  if mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SHOW DATABASES LIKE '$DB_NAME';" | grep -q "$DB_NAME"; then
+    mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE $DB_NAME;"
+    echo "Đã xóa database MySQL cho domain $DOMAIN."
+  else
+    echo "Database không tồn tại hoặc không thể truy cập."
+  fi
+
+  # Kiểm tra và xóa người dùng MySQL
+  if mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SELECT User FROM mysql.user WHERE User = '$DB_USER';" | grep -q "$DB_USER"; then
+    mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP USER '$DB_USER'@'localhost';"
+    echo "Đã xóa người dùng MySQL liên kết với database $DB_NAME."
+  else
+    echo "Người dùng không tồn tại hoặc không thể truy cập."
+  fi
 else
-  echo "Database không tồn tại hoặc không thể truy cập."
+  echo "Không xóa database"
 fi
 
-# Kiểm tra và xóa người dùng MySQL
-if mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SELECT User FROM mysql.user WHERE User = '$DB_USER';" | grep -q "$DB_USER"; then
-  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP USER '$DB_USER'@'localhost';"
-  echo "Đã xóa người dùng MySQL liên kết với database $DB_NAME."
-else
-  echo "Người dùng không tồn tại hoặc không thể truy cập."
-fi
-
-# Kiểm tra và xóa thư mục web
 WEB_ROOT="/var/www/$DOMAIN"
-if [ -d "$WEB_ROOT" ]; then
-  rm -rf "$WEB_ROOT"
-  echo "Đã xóa thư mục web tại $WEB_ROOT."
+# Kiểm tra và xóa thư mục web
+if [ "$IS_DELETE_FOLDER_DOMAIN" = "true" ]; then
+
+  # Xóa thư mục web
+  if [ -d "$WEB_ROOT" ]; then
+    rm -rf "$WEB_ROOT"
+    echo "Đã xóa thư mục web tại $WEB_ROOT."
+  else
+    echo "Thư mục web không tồn tại."
+  fi
+
+  # Xóa tệp cấu hình Nginx
+  if [ -f "/etc/nginx/sites-available/$DOMAIN" ]; then
+    rm /etc/nginx/sites-available/$DOMAIN
+    echo "Đã xóa tệp cấu hình Nginx trong sites-available."
+  else
+    echo "Tệp cấu hình không tồn tại trong sites-available."
+  fi
+
+  # Xóa liên kết tượng trưng
+  if [ -L "/etc/nginx/sites-enabled/$DOMAIN" ]; then
+    rm /etc/nginx/sites-enabled/$DOMAIN
+    echo "Đã xóa liên kết tượng trưng trong sites-enabled."
+  else
+    echo "Liên kết tượng trưng không tồn tại trong sites-enabled."
+  fi
 else
-  echo "Thư mục web không tồn tại."
+  echo "Không xóa thư mục "
 fi
 
 # Kiểm tra và xóa tham chiếu trong nginx.conf
