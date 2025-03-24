@@ -7,7 +7,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Kiểm tra tham số
-if [ "$#" -ne 4 ]; then
+if [ "$#" -ne 5 ]; then
   echo "Error: Sử dụng: $0 <domain> <redirect_type> <target_url> <target_new_url> <new_redirect_type>"
   exit 1
 fi
