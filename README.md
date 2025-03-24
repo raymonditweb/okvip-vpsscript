@@ -13,9 +13,7 @@ For Ubuntu 20.04:
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/install-ubuntu-lemp-20.04 ) <mysql_root_password> <init_main_domain.com>
 ```
 
-`
-vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/install-ubuntu-lemp-20.04 ) okvip@P@ssw0rd2024
-`
+`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/install-ubuntu-lemp-20.04 ) okvip@P@ssw0rd2024`
 
 ### Go Cài đặt LEMP - LEMP Uninstallation
 
@@ -25,9 +23,7 @@ For Ubuntu 20.04:
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/remove-ubuntu-lemp-20.04 )
 ```
 
-`
-vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/remove-ubuntu-lemp-20.04 )
-`
+`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/remove-ubuntu-lemp-20.04 )`
 
 ### Check VPS status
 
@@ -392,8 +388,8 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/list-websites) <directory*>
 ```
 
-- <directory*> có thể co hoăc khong
-Example:
+- <directory\*> có thể co hoăc khong
+  Example:
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/list-websites) /var/www/
@@ -504,17 +500,25 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/multiple_redirects.sh ) <main-domain*> <domain1.com*> <domain2.com*> <domain3.com*> <https://targeturl.com*>
 ```
-`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/remove_redirect.sh ) example.com 301 http://b1.com`
 
 #### Xoá redirect
-```bash
+
+````bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/remove-redirect.sh) <domain/path> <redirect-type> <target>
+
+`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/remove_redirect.sh ) example.com 301 http://b1.com`
+
+#### Change redirect
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/change-redirect.sh) <domain/path> <redirect-type> <target> <new_target>
+
+`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/remove_redirect.sh ) example.com 301 http://b1.com http://b2.com`
 
 #### Lấy thông tin cấu hình redirect (301, 302) - Redirect configuration Information (301, 302, etc.)
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/get_redirect.sh ) <domain/path>
-```
+````
 
 `vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/get_redirect.sh ) example.com`
 

@@ -15,6 +15,7 @@ fi
 DOMAIN=$1
 REDIRECT_TYPE=$2
 TARGET_URL=$3
+TARGET_NEW_URL=$4
 
 # Kiểm tra redirect_type hợp lệ không
 if [[ "$REDIRECT_TYPE" != "301" && "$REDIRECT_TYPE" != "302" ]]; then
@@ -37,16 +38,8 @@ fi
 # Tạo bản sao lưu trước khi sửa
 cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
 
-# Kiểm tra nếu có "listen 443 ssl;" trong file thì mới thêm redirect
-if grep -q "listen 443 ssl;" "$CONFIG_FILE"; then
-    sed -i '/listen 443 ssl;/a \    return '"$REDIRECT_TYPE"' '"$TARGET_URL"'$request_uri;' "$CONFIG_FILE"
-fi
-
-# Kiểm tra nếu có "listen 80;" trong file thì mới thêm redirect
-if grep -q "listen 80;" "$CONFIG_FILE"; then
-    sed -i '/listen 80;/a \    return '"$REDIRECT_TYPE"' '"$TARGET_URL"'$request_uri;' "$CONFIG_FILE"
-fi
-
+# Xóa dòng redirect cũ tương ứng với loại redirect được chọn
+sed -i "s|return $REDIRECT_TYPE $TARGET_URL\$request_uri;|return $REDIRECT_TYPE $TARGET_NEW_URL\$request_uri;|g" "$CONFIG_FILE"
 
 # Kiểm tra cấu hình Nginx
 if ! nginx -t; then

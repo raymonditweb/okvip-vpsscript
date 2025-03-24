@@ -38,11 +38,7 @@ fi
 cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
 
 # Xóa dòng redirect cũ tương ứng với loại redirect được chọn
-if [ "$REDIRECT_TYPE" == "301" ]; then
-    sed -i '/return 301/d' "$CONFIG_FILE"
-elif [ "$REDIRECT_TYPE" == "302" ]; then
-    sed -i '/return 302/d' "$CONFIG_FILE"
-fi
+sed -i "/return $REDIRECT_TYPE $TARGET_URL/d" "$CONFIG_FILE"
 
 # Kiểm tra cấu hình Nginx
 if ! nginx -t; then
