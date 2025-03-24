@@ -51,4 +51,4 @@ fi
 
 # Tải lại Nginx
 systemctl reload nginx
-echo "Thay đổi cấu hình redirect ($REDIRECT_TYPE) đến $TARGET_URL thành công!"
+echo "Thay đổi cấu hình redirect ($REDIRECT_TYPE) thành redirect ($NEW_REDIRECT_TYPE) $TARGET_NEW_URL thành công!"
