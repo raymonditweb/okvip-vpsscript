@@ -7,8 +7,8 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # Kiểm tra tham số
-if [ "$#" -ne 4 ]; then
-  echo "Error: Sử dụng: $0 <domain> <redirect_type> <target_url> <target_new_url>"
+if [ "$#" -ne 5 ]; then
+  echo "Error: Sử dụng: $0 <domain> <redirect_type> <target_url> <target_new_url> <new_redirect_type>"
   exit 1
 fi
 
@@ -16,10 +16,11 @@ DOMAIN=$1
 REDIRECT_TYPE=$2
 TARGET_URL=$3
 TARGET_NEW_URL=$4
+NEW_REDIRECT_TYPE=$5
 
 # Kiểm tra redirect_type hợp lệ không
-if [[ "$REDIRECT_TYPE" != "301" && "$REDIRECT_TYPE" != "302" ]]; then
-  echo "Error: redirect_type chỉ có thể là 301 hoặc 302."
+if [[ "$REDIRECT_TYPE" != "301" && "$REDIRECT_TYPE" != "302" && "$NEW_REDIRECT_TYPE" != "301" && "$NEW_REDIRECT_TYPE" != "302" ]]; then
+  echo "Error: Chế độ redirect chỉ có thể là 301 hoặc 302."
   exit 1
 fi
 
@@ -39,7 +40,7 @@ fi
 cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
 
 # Xóa dòng redirect cũ tương ứng với loại redirect được chọn
-sed -i "s|return $REDIRECT_TYPE $TARGET_URL\$request_uri;|return $REDIRECT_TYPE $TARGET_NEW_URL\$request_uri;|g" "$CONFIG_FILE"
+sed -i "s|return $REDIRECT_TYPE $TARGET_URL\$request_uri;|return $NEW_REDIRECT_TYPE $TARGET_NEW_URL\$request_uri;|g" "$CONFIG_FILE"
 
 # Kiểm tra cấu hình Nginx
 if ! nginx -t; then
@@ -50,4 +51,4 @@ fi
 
 # Tải lại Nginx
 systemctl reload nginx
-echo "Thay đổi cấu hình redirect ($REDIRECT_TYPE) đến $TARGET_URL thành công!"
+echo "Thay đổi cấu hình redirect ($REDIRECT_TYPE) thành redirect ($NEW_REDIRECT_TYPE) $TARGET_NEW_URL thành công!"
