@@ -38,7 +38,7 @@ fi
 cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
 
 # Xóa dòng redirect cũ tương ứng với loại redirect được chọn
-sed -i "/return $REDIRECT_TYPE $TARGET_URL/d" "$CONFIG_FILE"
+sed -i "\|return $REDIRECT_TYPE $TARGET_URL|d" "$CONFIG_FILE"
 
 # Kiểm tra cấu hình Nginx
 if ! nginx -t; then
@@ -49,4 +49,4 @@ fi
 
 # Tải lại Nginx
 systemctl reload nginx
-echo "Cấu hình redirect ($REDIRECT_TYPE) đến $TARGET_URL thành công!"
+echo "Xóa cấu hình redirect ($REDIRECT_TYPE) đến $TARGET_URL thành công!"
