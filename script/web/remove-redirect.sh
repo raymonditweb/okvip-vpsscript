@@ -37,16 +37,8 @@ fi
 # Tạo bản sao lưu trước khi sửa
 cp "$CONFIG_FILE" "$CONFIG_FILE.bak"
 
-# Kiểm tra nếu có "listen 443 ssl;" trong file thì mới thêm redirect
-if grep -q "listen 443 ssl;" "$CONFIG_FILE"; then
-    sed -i '/listen 443 ssl;/a \    return '"$REDIRECT_TYPE"' '"$TARGET_URL"'$request_uri;' "$CONFIG_FILE"
-fi
-
-# Kiểm tra nếu có "listen 80;" trong file thì mới thêm redirect
-if grep -q "listen 80;" "$CONFIG_FILE"; then
-    sed -i '/listen 80;/a \    return '"$REDIRECT_TYPE"' '"$TARGET_URL"'$request_uri;' "$CONFIG_FILE"
-fi
-
+# Xóa dòng redirect cũ tương ứng với loại redirect được chọn
+sed -i "\|return $REDIRECT_TYPE $TARGET_URL|d" "$CONFIG_FILE"
 
 # Kiểm tra cấu hình Nginx
 if ! nginx -t; then
@@ -57,4 +49,4 @@ fi
 
 # Tải lại Nginx
 systemctl reload nginx
-echo "Cấu hình redirect ($REDIRECT_TYPE) đến $TARGET_URL thành công!"
+echo "Xóa cấu hình redirect ($REDIRECT_TYPE) đến $TARGET_URL thành công!"
