@@ -504,6 +504,11 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/multiple_redirects.sh ) <main-domain*> <domain1.com*> <domain2.com*> <domain3.com*> <https://targeturl.com*>
 ```
+`vi du: bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/remove_redirect.sh ) example.com 301 http://b1.com`
+
+#### Xoá redirect
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/remove-redirect.sh) <domain/path> <redirect-type> <target>
 
 #### Lấy thông tin cấu hình redirect (301, 302) - Redirect configuration Information (301, 302, etc.)
 
