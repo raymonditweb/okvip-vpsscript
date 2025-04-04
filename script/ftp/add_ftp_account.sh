@@ -159,7 +159,7 @@ add_account() {
     useradd -d "$full_path" -s "$FTP_SHELL" "$username"
     echo "$username:$password" | chpasswd
   fi
-
+  echo "yes" > /etc/pure-ftpd/conf/VirtualChroot
   # phân quyền root
   chmod 755 /var
   chmod 755 /var/www
@@ -178,7 +178,7 @@ add_account() {
 
   # Tạo tài khoản Pure-FTPd (chroot trực tiếp vào full_path)
   expect -c "
-  spawn pure-pw useradd $username -u $uid -g $gid -d $full_path -m
+  spawn pure-pw useradd $username -u $uid -g $gid -d /$folder -m
   expect \"Password:\"
   send \"$password\r\"
   expect \"Repeat password:\"
