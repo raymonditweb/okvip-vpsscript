@@ -224,7 +224,9 @@ restart_pure_ftpd() {
   else
     # Nếu không có service, thử khởi động trực tiếp
     killall -9 pure-ftpd 2>/dev/null || true
-    pure-ftpd -B -C 10 -c 50 -E -H -R -Y 2 &
+    pure-ftpd \
+  -l puredb:/etc/pure-ftpd/auth/pureftpd.pdb \
+  -B -C 10 -c 50 -E -H -R -Y 2 -A -j -u 1000 &
     if [ $? -ne 0 ]; then
       echo "Error: Không thể khởi động Pure-FTPd."
       exit 1
