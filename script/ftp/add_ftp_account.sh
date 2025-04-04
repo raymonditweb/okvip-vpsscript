@@ -194,25 +194,29 @@ add_account() {
 
 # Khởi động lại Pure-FTPd
 restart_pure_ftpd() {
-  # Kiểm tra nếu đang chạy như một service
-  if systemctl is-active --quiet pure-ftpd; then
+  echo "Đang khởi động lại Pure-FTPd..."
+
+  if systemctl list-unit-files | grep -q "pure-ftpd.service"; then
+    echo "Sử dụng systemd để restart pure-ftpd"
     systemctl restart pure-ftpd || {
       echo "Error: Không thể khởi động lại Pure-FTPd service."
       exit 1
     }
   else
-    # Nếu không có service, thử khởi động trực tiếp
+    echo "Không tìm thấy systemd service, sẽ khởi chạy trực tiếp"
     killall -9 pure-ftpd 2>/dev/null || true
+
     pure-ftpd \
-  -l puredb:/etc/pure-ftpd/auth/pureftpd.pdb \
-  -B -C 10 -c 50 -E -H -R -Y 2 -A -j -u 1000 &
-    if [ $? -ne 0 ]; then
-      echo "Error: Không thể khởi động Pure-FTPd."
-      exit 1
-    fi
+      -l puredb:/etc/pure-ftpd/auth/pureftpd.pdb \
+      -B -C 10 -c 50 -E -H -R -Y 2 -A -j -u 1000 || {
+        echo "Error: Không thể khởi động Pure-FTPd theo cách thủ công."
+        exit 1
+      }
   fi
-  echo "Pure-FTPd đã được khởi động lại."
+
+  echo "Pure-FTPd đã được khởi động lại thành công."
 }
+
 
 # Tạo systemd service nếu chưa có
 create_systemd_service() {
