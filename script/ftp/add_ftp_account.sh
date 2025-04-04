@@ -154,7 +154,7 @@ add_account() {
   local directory="$3"
   
   # Đảm bảo đường dẫn thư mục là tương đối và không có dấu / ở đầu
-  directory=$(echo "$directory" | sed 's:^/*::' | sed 's:/*$::')
+  directory="/$directory"
   
   # Đường dẫn đầy đủ tới thư mục home của user FTP
   local full_path="$FTP_HOME/$directory"
@@ -165,11 +165,11 @@ add_account() {
   fi
 
   # Tạo thư mục nếu chưa tồn tại
-  mkdir -p "$full_path"
+  mkdir -p "$directory"
   
   # Tạo tài khoản hệ thống nếu chưa tồn tại
   if ! id -u "$username" &>/dev/null; then
-    useradd -m -d "$full_path" -s "$FTP_SHELL" "$username" || {
+    useradd -m -d "$directory" -s "$FTP_SHELL" "$username" || {
       echo "Error: Không thể tạo tài khoản hệ thống $username."
       return 1
     }
@@ -178,11 +178,11 @@ add_account() {
       return 1
     }
   fi
-  chmod 750 "$full_path"  # Giảm quyền xuống chỉ read/write/execute cho owner, read/execute cho group
-  chown -R "$username:$username" "$full_path"
+  chmod 750 "$directory"  # Giảm quyền xuống chỉ read/write/execute cho owner, read/execute cho group
+  chown -R "$username:$username" "$directory"
 
   # Thêm vào file quản lý
-  echo "$username:$password:$full_path" >>"$FTP_USER_FILE"
+  echo "$username:$password:$directory" >>"$FTP_USER_FILE"
 
   local uid gid
   uid=$(id -u "$username")
@@ -191,7 +191,7 @@ add_account() {
   # Thêm vào Pure-FTPd database
   if ! pure-pw show "$username" &>/dev/null; then
     expect -c "
-    spawn pure-pw useradd $username -u $uid -g $gid -d /$directory -m
+    spawn pure-pw useradd $username -u $uid -g $gid -d $directory -m
     expect \"Password:\"
     send \"$password\r\"
     expect \"Repeat password:\"
