@@ -180,10 +180,8 @@ add_account() {
   uid=$(id -u "$username")
   gid=$(id -g "$username")
 
-  # ✅ Đặt /./ để kích hoạt chroot đúng vị trí
-  local chroot_path="/./var/www/$folder"
-
   # Thêm vào PureDB
+  local chroot_path="/var/www/./$folder"
   expect -c "
   spawn pure-pw useradd $username -u $uid -g $gid -d $chroot_path -m
   expect \"Password:\"
