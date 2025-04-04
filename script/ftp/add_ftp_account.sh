@@ -178,7 +178,7 @@ add_account() {
 
   # Tạo tài khoản Pure-FTPd (chroot trực tiếp vào full_path)
   expect -c "
-  spawn pure-pw useradd $username -u $uid -g $gid -d /$folder -m
+  spawn pure-pw useradd $username -u $uid -g $gid -d $full_path -m
   expect \"Password:\"
   send \"$password\r\"
   expect \"Repeat password:\"
