@@ -115,38 +115,34 @@ open_ports_ufw() {
 # Hàm để thêm tài khoản FTP
 add_account() {
   if [ "$#" -lt 3 ]; then
-    echo "Error: Hàm add_account yêu cầu 3 tham số: username, password, và thư mục."
-    echo "Sử dụng: add_account <username> <password> <directory>"
+    echo "Usage: add_account <username> <password> <folder>"
     return 1
   fi
 
   local username="$1"
   local password="$2"
-  local folder_name="$3"
-  local chroot_dir="$FTP_HOME"
-  local work_dir="$FTP_HOME/$folder_name"
+  local folder="$3"
+  local full_path="/var/www/$folder"
+
+  groupadd -f ftpusers
+  mkdir -p "$full_path"
 
   # Tạo user hệ thống nếu chưa có
   if ! id -u "$username" &>/dev/null; then
-    echo "[+] Tạo user hệ thống $username..."
-    useradd -d "$chroot_dir" -s "$FTP_SHELL" "$username"
+    useradd -d "$full_path" -s /sbin/nologin -G ftpusers "$username"
     echo "$username:$password" | chpasswd
   fi
 
-  echo "[+] Tạo thư mục làm việc: $work_dir"
-  mkdir -p "$work_dir"
+  # Cấp quyền thư mục
+  chown -R "$username:ftpusers" "$full_path"
+  chmod 750 "$full_path"
 
-  # Đảm bảo thư mục chroot thuộc root
-  chown root:root "$chroot_dir"
-  chmod 755 "$chroot_dir"
+  # Cấu hình TrustedGID
+  echo "$(getent group ftpusers | cut -d: -f3)" > /etc/pure-ftpd/conf/TrustedGID
 
-  # Thư mục làm việc được sở hữu bởi user
-  chown -R "$username:$username" "$work_dir"
-  chmod 750 "$work_dir"
-
-  echo "[+] Thêm vào Pure-FTPd DB..."
+  # Tạo tài khoản FTP
   expect -c "
-  spawn pure-pw useradd $username -u $(id -u $username) -g $(id -g $username) -d $work_dir -r -m
+  spawn pure-pw useradd $username -u $(id -u $username) -g $(getent group ftpusers | cut -d: -f3) -d $full_path -r -m
   expect \"Password:\"
   send \"$password\r\"
   expect \"Repeat password:\"
@@ -155,9 +151,11 @@ add_account() {
   "
 
   pure-pw mkdb
+  systemctl restart pure-ftpd
 
-  echo "Tài khoản '$username' đã được chroot vào '$chroot_dir', chỉ có quyền trong '$folder_name'."
+  echo "Tài khoản '$username' đã được chroot vào '$full_path'. Khi đăng nhập, thư mục đó sẽ là '/'."
 }
+
 
 
 
