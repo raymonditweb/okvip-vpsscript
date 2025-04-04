@@ -122,58 +122,41 @@ add_account() {
 
   local username="$1"
   local password="$2"
-  local directory="$FTP_HOME/$3"
+  local chroot_dir="$FTP_HOME"
+  local work_dir="$FTP_HOME/$3"
 
-  directory="${directory#/}" # Đảm bảo đường dẫn không bắt đầu bằng "/"
-  directory="/$directory"
+  # Tạo thư mục nếu chưa có
+  mkdir -p "$work_dir"
 
-  if grep -q "^$username:" "$FTP_USER_FILE"; then
-    echo "Error: Tài khoản $username đã tồn tại."
-    return 1
-  fi
+  # Đảm bảo thư mục chroot thuộc root
+  chown root:root "$chroot_dir"
+  chmod 755 "$chroot_dir"
 
+  # Thư mục làm việc bên trong được cấp quyền user
+  chown -R "$username:$username" "$work_dir"
+  chmod 750 "$work_dir"
+
+  # Tạo user hệ thống nếu chưa có
   if ! id -u "$username" &>/dev/null; then
-    useradd -m -d "$directory" -s "$FTP_SHELL" "$username" || {
-      echo "Error: Không thể tạo tài khoản hệ thống $username."
-      return 1
-    }
-    echo "$username:$password" | chpasswd || {
-      echo "Error: Không thể đặt mật khẩu cho tài khoản $username."
-      return 1
-    }
+    useradd -d "$chroot_dir" -s "$FTP_SHELL" "$username"
+    echo "$username:$password" | chpasswd
   fi
 
-  mkdir -p "$directory"
-  chmod 770 "$directory"
-  chown -R "$username:$username" "$directory"
+  # Tạo tài khoản FTP với chroot và thư mục làm việc
+  expect -c "
+  spawn pure-pw useradd $username -u $(id -u $username) -g $(id -g $username) -d $work_dir -r -m
+  expect \"Password:\"
+  send \"$password\r\"
+  expect \"Repeat password:\"
+  send \"$password\r\"
+  expect eof
+  "
 
-  echo "$username:$password:$directory" >>"$FTP_USER_FILE"
+  pure-pw mkdb
 
-  local uid gid
-  uid=$(id -u "$username")
-  gid=$(id -g "$username")
-
-  if ! pure-pw show "$username" &>/dev/null; then
-    expect -c "
-    spawn pure-pw useradd $username -u $uid -g $gid -d $directory -r
-    expect \"Password:\"
-    send \"$password\r\"
-    expect \"Repeat password:\"
-    send \"$password\r\"
-    expect eof
-    " || {
-      echo "Error: Không thể thêm tài khoản FTP $username vào Pure-FTPd."
-      return 1
-    }
-    pure-pw mkdb || {
-      echo "Error: Không thể cập nhật cơ sở dữ liệu Pure-FTPd."
-      return 1
-    }
-  fi
-
-  echo "$username" >> /etc/pure-ftpd/conf/ChrootUsers
-  echo "Tài khoản FTP $username đã được thêm thành công với đầy đủ quyền."
+  echo "✅ Tài khoản '$username' đã được chroot vào '$chroot_dir', chỉ có quyền trong 'linkokvipb3.com'."
 }
+
 
 # Khởi động lại Pure-FTPd
 restart_pure_ftpd() {
