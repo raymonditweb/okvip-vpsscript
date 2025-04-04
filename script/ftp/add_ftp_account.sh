@@ -160,6 +160,9 @@ add_account() {
     echo "$username:$password" | chpasswd
   fi
 
+  # phân quyền root
+  chmod 755 /var
+  chmod 755 /var/www
   # Tạo thư mục và phân quyền
   mkdir -p "$full_path"
   chown -R "$username:$username" "$full_path"
