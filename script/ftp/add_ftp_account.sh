@@ -166,6 +166,11 @@ add_account() {
 
   # Tạo thư mục nếu chưa tồn tại
   mkdir -p "$directory"
+  if [ -d "$full_path" ]; then
+  echo "📁 Thư mục $full_path đã tồn tại. Sẽ sao chép sang $directory"
+
+  cp -a "$full_path/." "$directory/"
+fi
   
   # Tạo tài khoản hệ thống nếu chưa tồn tại
   if ! id -u "$username" &>/dev/null; then
