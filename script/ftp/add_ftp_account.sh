@@ -151,77 +151,90 @@ add_account() {
 
   local username="$1"
   local password="$2"
-  local folder="$3"
-  local full_path="$FTP_HOME/$folder"
-  local chroot_path="$FTP_HOME/./$folder"
+  local directory="$3"
+  
+  # Đảm bảo đường dẫn thư mục là tương đối và không có dấu / ở đầu
+  directory=$(echo "$directory" | sed 's:^/*::')
+  
+  # Đường dẫn đầy đủ tới thư mục home của user FTP
+  local full_path="$FTP_HOME/$directory"
 
-  # Bật VirtualChroot
-  echo "yes" > /etc/pure-ftpd/conf/VirtualChroot
-
-  # Phân quyền cha để chroot hoạt động
-  chmod 755 /var
-  chmod 755 /var/www
-
-  # Tạo user hệ thống nếu chưa có
-  if ! id -u "$username" &>/dev/null; then
-    useradd -d "$full_path" -s "$FTP_SHELL" "$username"
-    echo "$username:$password" | chpasswd
+  if grep -q "^$username:" "$FTP_USER_FILE" 2>/dev/null; then
+    echo "Error: Tài khoản $username đã tồn tại."
+    return 1
   fi
 
-  # Tạo thư mục và phân quyền
+  # Tạo thư mục nếu chưa tồn tại
   mkdir -p "$full_path"
+  
+  # Tạo tài khoản hệ thống nếu chưa tồn tại
+  if ! id -u "$username" &>/dev/null; then
+    useradd -m -d "$full_path" -s "$FTP_SHELL" "$username" || {
+      echo "Error: Không thể tạo tài khoản hệ thống $username."
+      return 1
+    }
+    echo "$username:$password" | chpasswd || {
+      echo "Error: Không thể đặt mật khẩu cho tài khoản $username."
+      return 1
+    }
+  fi
+  # Đặt quyền cho thư mục
+  chmod 755 /var
+  chmod 755 /var/www
+  chmod 750 "$full_path"  # Giảm quyền xuống chỉ read/write/execute cho owner, read/execute cho group
   chown -R "$username:$username" "$full_path"
-  chmod 750 "$full_path"
 
-  # Ghi vào file theo dõi
-  echo "$username:$password:$full_path" >> "$FTP_USER_FILE"
+  # Thêm vào file quản lý
+  echo "$username:$password:$full_path" >>"$FTP_USER_FILE"
 
-  # Lấy UID/GID
   local uid gid
   uid=$(id -u "$username")
   gid=$(id -g "$username")
 
-  # Thêm vào PureDB (dùng path chroot chính xác)
-  expect -c "
-  spawn pure-pw useradd $username -u $uid -g $gid -d $chroot_path -m
-  expect \"Password:\"
-  send \"$password\r\"
-  expect \"Repeat password:\"
-  send \"$password\r\"
-  expect eof
-  "
+  # Thêm vào Pure-FTPd database
+  if ! pure-pw show "$username" &>/dev/null; then
+    expect -c "
+    spawn pure-pw useradd $username -u $uid -g $gid -d /$FTP_HOME/./$directory -m
+    expect \"Password:\"
+    send \"$password\r\"
+    expect \"Repeat password:\"
+    send \"$password\r\"
+    expect eof
+    " || {
+      echo "Error: Không thể thêm tài khoản FTP $username vào Pure-FTPd."
+      return 1
+    }
+    pure-pw mkdb "$PURE_FTPD_AUTH_DIR/pureftpd.pdb" || {
+      echo "Error: Không thể cập nhật cơ sở dữ liệu Pure-FTPd."
+      return 1
+    }
+  fi
 
-  # Cập nhật PureDB
-  pure-pw mkdb "$PURE_FTPD_AUTH_DIR/pureftpd.pdb"
-
-  echo "✅ Tài khoản FTP '$username' đã được tạo và chroot chính xác vào '$folder'."
+  echo "Tài khoản FTP $username đã được thêm thành công với quyền giới hạn trong thư mục $full_path."
 }
-
-
 
 # Khởi động lại Pure-FTPd
 restart_pure_ftpd() {
   echo "Đang khởi động lại Pure-FTPd..."
 
   if systemctl list-unit-files | grep -q "pure-ftpd.service"; then
-    echo "Sử dụng systemd để restart pure-ftpd"
     systemctl restart pure-ftpd || {
       echo "Error: Không thể khởi động lại Pure-FTPd service."
       exit 1
     }
   else
-    echo "Không tìm thấy systemd service, sẽ khởi chạy trực tiếp"
+    echo "⚙️ Không có systemd service, chạy trực tiếp..."
     killall -9 pure-ftpd 2>/dev/null || true
 
     pure-ftpd \
       -l puredb:/etc/pure-ftpd/auth/pureftpd.pdb \
       -B -C 10 -c 50 -E -H -R -Y 2 -A -j -u 1000 || {
-        echo "Error: Không thể khởi động Pure-FTPd theo cách thủ công."
+        echo "Error: Không thể khởi động Pure-FTPd thủ công."
         exit 1
       }
   fi
 
-  echo "Pure-FTPd đã được khởi động lại thành công."
+  echo "✅ Pure-FTPd đã được khởi động lại."
 }
 
 
