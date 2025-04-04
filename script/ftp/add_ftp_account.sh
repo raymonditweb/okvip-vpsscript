@@ -122,27 +122,29 @@ add_account() {
 
   local username="$1"
   local password="$2"
+  local folder_name="$3"
   local chroot_dir="$FTP_HOME"
-  local work_dir="$FTP_HOME/$3"
+  local work_dir="$FTP_HOME/$folder_name"
 
-  # Tạo thư mục nếu chưa có
+  # Tạo user hệ thống nếu chưa có
+  if ! id -u "$username" &>/dev/null; then
+    echo "[+] Tạo user hệ thống $username..."
+    useradd -d "$chroot_dir" -s "$FTP_SHELL" "$username"
+    echo "$username:$password" | chpasswd
+  fi
+
+  echo "[+] Tạo thư mục làm việc: $work_dir"
   mkdir -p "$work_dir"
 
   # Đảm bảo thư mục chroot thuộc root
   chown root:root "$chroot_dir"
   chmod 755 "$chroot_dir"
 
-  # Thư mục làm việc bên trong được cấp quyền user
+  # Thư mục làm việc được sở hữu bởi user
   chown -R "$username:$username" "$work_dir"
   chmod 750 "$work_dir"
 
-  # Tạo user hệ thống nếu chưa có
-  if ! id -u "$username" &>/dev/null; then
-    useradd -d "$chroot_dir" -s "$FTP_SHELL" "$username"
-    echo "$username:$password" | chpasswd
-  fi
-
-  # Tạo tài khoản FTP với chroot và thư mục làm việc
+  echo "[+] Thêm vào Pure-FTPd DB..."
   expect -c "
   spawn pure-pw useradd $username -u $(id -u $username) -g $(id -g $username) -d $work_dir -r -m
   expect \"Password:\"
@@ -154,8 +156,9 @@ add_account() {
 
   pure-pw mkdb
 
-  echo "✅ Tài khoản '$username' đã được chroot vào '$chroot_dir', chỉ có quyền trong 'linkokvipb3.com'."
+  echo "Tài khoản '$username' đã được chroot vào '$chroot_dir', chỉ có quyền trong '$folder_name'."
 }
+
 
 
 # Khởi động lại Pure-FTPd
