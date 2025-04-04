@@ -154,15 +154,13 @@ add_account() {
   local folder="$3"
   local full_path="$FTP_HOME/$folder"
 
-  # Kiểm tra user đã tồn tại trong hệ thống chưa
-  if ! id -u "$username" &>/dev/null; then
-    useradd -d "$full_path" -s "$FTP_SHELL" "$username"
-    echo "$username:$password" | chpasswd
-  fi
+  # Bật VirtualChroot
   echo "yes" > /etc/pure-ftpd/conf/VirtualChroot
-  # phân quyền root
+
+  # Phân quyền cha để user có thể chroot tới
   chmod 755 /var
   chmod 755 /var/www
+
   # Tạo thư mục và phân quyền
   mkdir -p "$full_path"
   chown -R "$username:$username" "$full_path"
@@ -171,14 +169,23 @@ add_account() {
   # Ghi vào file theo dõi
   echo "$username:$password:$full_path" >> "$FTP_USER_FILE"
 
+  # Tạo user hệ thống nếu chưa tồn tại
+  if ! id -u "$username" &>/dev/null; then
+    useradd -d "$full_path" -s "$FTP_SHELL" "$username"
+    echo "$username:$password" | chpasswd
+  fi
+
   # Lấy UID/GID
   local uid gid
   uid=$(id -u "$username")
   gid=$(id -g "$username")
 
-  # Tạo tài khoản Pure-FTPd (chroot trực tiếp vào full_path)
+  # ✅ Đặt /./ để kích hoạt chroot đúng vị trí
+  local chroot_path="/./var/www/$folder"
+
+  # Thêm vào PureDB
   expect -c "
-  spawn pure-pw useradd $username -u $uid -g $gid -d $full_path -m
+  spawn pure-pw useradd $username -u $uid -g $gid -d $chroot_path -m
   expect \"Password:\"
   send \"$password\r\"
   expect \"Repeat password:\"
@@ -188,7 +195,8 @@ add_account() {
 
   # Cập nhật cơ sở dữ liệu PureDB
   pure-pw mkdb "$PURE_FTPD_AUTH_DIR/pureftpd.pdb"
-  echo "Tài khoản FTP '$username' đã được tạo và chroot vào '$full_path'."
+
+  echo "✅ Tài khoản FTP '$username' đã được tạo và chroot chính xác vào '$full_path'."
 }
 
 
