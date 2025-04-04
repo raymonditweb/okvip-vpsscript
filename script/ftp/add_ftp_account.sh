@@ -151,67 +151,43 @@ add_account() {
 
   local username="$1"
   local password="$2"
-  local directory="$3"
-  
-  # Đảm bảo đường dẫn thư mục là tương đối và không có dấu / ở đầu
-  directory=$(echo "$directory" | sed 's:^/*::')
-  
-  # Đường dẫn đầy đủ tới thư mục home của user FTP
-  local full_path="$FTP_HOME/$directory"
+  local folder="$3"
+  local full_path="$FTP_HOME/$folder"
 
-  if grep -q "^$username:" "$FTP_USER_FILE" 2>/dev/null; then
-    echo "Error: Tài khoản $username đã tồn tại."
-    return 1
-  fi
-
-  # Tạo thư mục nếu chưa tồn tại
-  mkdir -p "$full_path"
-  
-  # Tạo tài khoản hệ thống nếu chưa tồn tại
+  # Kiểm tra user đã tồn tại trong hệ thống chưa
   if ! id -u "$username" &>/dev/null; then
-    useradd -m -d "$full_path" -s "$FTP_SHELL" "$username" || {
-      echo "Error: Không thể tạo tài khoản hệ thống $username."
-      return 1
-    }
-    echo "$username:$password" | chpasswd || {
-      echo "Error: Không thể đặt mật khẩu cho tài khoản $username."
-      return 1
-    }
+    useradd -d "$full_path" -s "$FTP_SHELL" "$username"
+    echo "$username:$password" | chpasswd
   fi
-   # Thiết lập quyền thư mục
-  mkdir -p "$directory"
 
-  chmod 770 "$directory"
-  chown -R "$username:$username" "$directory"
+  # Tạo thư mục và phân quyền
+  mkdir -p "$full_path"
+  chown -R "$username:$username" "$full_path"
+  chmod 750 "$full_path"
 
-  # Thêm vào file quản lý
-  echo "$username:$password:$directory" >>"$FTP_USER_FILE"
+  # Ghi vào file theo dõi
+  echo "$username:$password:$full_path" >> "$FTP_USER_FILE"
 
+  # Lấy UID/GID
   local uid gid
   uid=$(id -u "$username")
   gid=$(id -g "$username")
 
-  # Thêm vào Pure-FTPd database
-  if ! pure-pw show "$username" &>/dev/null; then
-    expect -c "
-    spawn pure-pw useradd $username -u $uid -g $gid -d /$directory -m
-    expect \"Password:\"
-    send \"$password\r\"
-    expect \"Repeat password:\"
-    send \"$password\r\"
-    expect eof
-    " || {
-      echo "Error: Không thể thêm tài khoản FTP $username vào Pure-FTPd."
-      return 1
-    }
-    pure-pw mkdb "$PURE_FTPD_AUTH_DIR/pureftpd.pdb" || {
-      echo "Error: Không thể cập nhật cơ sở dữ liệu Pure-FTPd."
-      return 1
-    }
-  fi
+  # Tạo tài khoản Pure-FTPd (chroot trực tiếp vào full_path)
+  expect -c "
+  spawn pure-pw useradd $username -u $uid -g $gid -d $full_path -m
+  expect \"Password:\"
+  send \"$password\r\"
+  expect \"Repeat password:\"
+  send \"$password\r\"
+  expect eof
+  "
 
-  echo "Tài khoản FTP $username đã được thêm thành công với quyền giới hạn trong thư mục $full_path."
+  # Cập nhật cơ sở dữ liệu PureDB
+  pure-pw mkdb "$PURE_FTPD_AUTH_DIR/pureftpd.pdb"
+  echo "Tài khoản FTP '$username' đã được tạo và chroot vào '$full_path'."
 }
+
 
 # Khởi động lại Pure-FTPd
 restart_pure_ftpd() {
