@@ -162,16 +162,16 @@ add_account() {
   chmod 700 /var/www
 
   # Tạo thư mục và phân quyền
-  mkdir -p "$folder"
-  chown -R "$username:$username" "$folder"
-  chmod 750 "$folder"
+  mkdir -p "$full_path"
+  chown -R "$username:$username" "$full_path"
+  chmod 750 "$full_path"
 
   # Ghi vào file theo dõi
-  echo "$username:$password:$folder" >> "$FTP_USER_FILE"
+  echo "$username:$password:$full_path" >> "$FTP_USER_FILE"
 
   # Tạo user hệ thống nếu chưa tồn tại
   if ! id -u "$username" &>/dev/null; then
-    useradd -d "$folder" -s "$FTP_SHELL" "$username"
+    useradd -d "$full_path" -s "$FTP_SHELL" "$username"
     echo "$username:$password" | chpasswd
   fi
 
@@ -183,7 +183,7 @@ add_account() {
   # Thêm vào PureDB
   # local chroot_path="/var/www/./$folder"
   expect -c "
-  spawn pure-pw useradd $username -u $uid -g $gid -d $folder -m
+  spawn pure-pw useradd $username -u $uid -g $gid -d $full_path -m
   expect \"Password:\"
   send \"$password\r\"
   expect \"Repeat password:\"
