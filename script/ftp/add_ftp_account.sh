@@ -154,7 +154,7 @@ add_account() {
   local directory="$3"
   
   # Đảm bảo đường dẫn thư mục là tương đối và không có dấu / ở đầu
-  directory=$(echo "$directory" | sed 's:^/*::')
+  directory=$(echo "$directory" | sed 's:^/*::' | sed 's:/*$::')
   
   # Đường dẫn đầy đủ tới thư mục home của user FTP
   local full_path="$FTP_HOME/$directory"
@@ -179,8 +179,8 @@ add_account() {
     }
   fi
   # Đặt quyền cho thư mục
-  chmod 755 /var
-  chmod 755 /var/www
+  chmod 700 "/var"
+  chmod 700 "$FTP_HOME"
   chmod 750 "$full_path"  # Giảm quyền xuống chỉ read/write/execute cho owner, read/execute cho group
   chown -R "$username:$username" "$full_path"
 
@@ -278,6 +278,7 @@ restart_pure_ftpd
 # Kiểm tra tham số dòng lệnh và thêm tài khoản nếu đủ
 if [ $# -ge 3 ]; then
   add_account "$1" "$2" "$3"
+  restart_pure_ftpd
 else
   echo "Sử dụng: $0 <username> <password> <directory>"
   echo "Ví dụ: $0 user1 password123 site1"
