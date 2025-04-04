@@ -178,9 +178,6 @@ add_account() {
       return 1
     }
   fi
-  # Đặt quyền cho thư mục
-  chmod 700 "/var"
-  chmod 700 "$FTP_HOME"
   chmod 750 "$full_path"  # Giảm quyền xuống chỉ read/write/execute cho owner, read/execute cho group
   chown -R "$username:$username" "$full_path"
 
@@ -194,7 +191,7 @@ add_account() {
   # Thêm vào Pure-FTPd database
   if ! pure-pw show "$username" &>/dev/null; then
     expect -c "
-    spawn pure-pw useradd $username -u $uid -g $gid -d $FTP_HOME/./$directory -m
+    spawn pure-pw useradd $username -u $uid -g $gid -d /$directory -m
     expect \"Password:\"
     send \"$password\r\"
     expect \"Repeat password:\"
