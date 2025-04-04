@@ -178,13 +178,14 @@ add_account() {
       return 1
     }
   fi
+   # Thiết lập quyền thư mục
+  mkdir -p "$directory"
 
-  # Đặt quyền cho thư mục
-  chmod 750 "$full_path"  # Giảm quyền xuống chỉ read/write/execute cho owner, read/execute cho group
-  chown -R "$username:$username" "$full_path"
+  chmod 770 "$directory"
+  chown -R "$username:$username" "$directory"
 
   # Thêm vào file quản lý
-  echo "$username:$password:$full_path" >>"$FTP_USER_FILE"
+  echo "$username:$password:$directory" >>"$FTP_USER_FILE"
 
   local uid gid
   uid=$(id -u "$username")
