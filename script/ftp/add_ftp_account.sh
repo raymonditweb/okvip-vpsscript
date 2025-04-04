@@ -155,7 +155,7 @@ add_account() {
 
   if ! pure-pw show "$username" &>/dev/null; then
     expect -c "
-    spawn pure-pw useradd $username -u $uid -g $gid -d $directory
+    spawn pure-pw useradd $username -u $uid -g $gid -d $directory -r
     expect \"Password:\"
     send \"$password\r\"
     expect \"Repeat password:\"
