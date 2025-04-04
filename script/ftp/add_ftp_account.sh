@@ -154,6 +154,7 @@ add_account() {
   local directory="$3"
   
   # Đảm bảo đường dẫn thư mục là tương đối và không có dấu / ở đầu
+  directory=$(echo "$directory" | sed 's:^/*::' | sed 's:/*$::')
   directory="/$directory"
   
   # Đường dẫn đầy đủ tới thư mục home của user FTP
@@ -167,10 +168,8 @@ add_account() {
   # Tạo thư mục nếu chưa tồn tại
   mkdir -p "$directory"
   if [ -d "$full_path" ]; then
-  echo "📁 Thư mục $full_path đã tồn tại. Sẽ sao chép sang $directory"
-
-  cp -a "$full_path/." "$directory/"
-fi
+    cp -a "$full_path/." "$directory/"
+  fi
   
   # Tạo tài khoản hệ thống nếu chưa tồn tại
   if ! id -u "$username" &>/dev/null; then
@@ -212,7 +211,7 @@ fi
     }
   fi
 
-  echo "Tài khoản FTP $username đã được thêm thành công với quyền giới hạn trong thư mục $full_path."
+  echo "Tài khoản FTP $username đã được thêm thành công với quyền giới hạn trong thư mục $directory."
 }
 
 # Khởi động lại Pure-FTPd
@@ -236,7 +235,7 @@ restart_pure_ftpd() {
       }
   fi
 
-  echo "✅ Pure-FTPd đã được khởi động lại."
+  echo "Pure-FTPd đã được khởi động lại."
 }
 
 
