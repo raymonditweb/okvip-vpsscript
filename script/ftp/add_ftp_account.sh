@@ -154,7 +154,8 @@ add_account() {
   local directory="$3"
   
   # Đảm bảo đường dẫn thư mục là tương đối và không có dấu / ở đầu
-  directory=$(echo "$directory" | sed 's:^/*::')
+  directory=$(echo "$directory" | sed 's:^/*::' | sed 's:/*$::')
+  directory="/$directory"
   
   # Đường dẫn đầy đủ tới thư mục home của user FTP
   local full_path="$FTP_HOME/$directory"
@@ -165,11 +166,14 @@ add_account() {
   fi
 
   # Tạo thư mục nếu chưa tồn tại
-  mkdir -p "$full_path"
+  mkdir -p "$directory"
+  if [ -d "$full_path" ]; then
+    cp -a "$full_path/." "$directory/"
+  fi
   
   # Tạo tài khoản hệ thống nếu chưa tồn tại
   if ! id -u "$username" &>/dev/null; then
-    useradd -m -d "$full_path" -s "$FTP_SHELL" "$username" || {
+    useradd -m -d "$directory" -s "$FTP_SHELL" "$username" || {
       echo "Error: Không thể tạo tài khoản hệ thống $username."
       return 1
     }
@@ -178,13 +182,11 @@ add_account() {
       return 1
     }
   fi
-
-  # Đặt quyền cho thư mục
-  chmod 750 "$full_path"  # Giảm quyền xuống chỉ read/write/execute cho owner, read/execute cho group
-  chown -R "$username:$username" "$full_path"
+  chmod 750 "$directory"  # Giảm quyền xuống chỉ read/write/execute cho owner, read/execute cho group
+  chown -R "$username:$username" "$directory"
 
   # Thêm vào file quản lý
-  echo "$username:$password:$full_path" >>"$FTP_USER_FILE"
+  echo "$username:$password:$directory" >>"$FTP_USER_FILE"
 
   local uid gid
   uid=$(id -u "$username")
@@ -193,7 +195,7 @@ add_account() {
   # Thêm vào Pure-FTPd database
   if ! pure-pw show "$username" &>/dev/null; then
     expect -c "
-    spawn pure-pw useradd $username -u $uid -g $gid -d /$directory -m
+    spawn pure-pw useradd $username -u $uid -g $gid -d $directory -m
     expect \"Password:\"
     send \"$password\r\"
     expect \"Repeat password:\"
@@ -209,28 +211,33 @@ add_account() {
     }
   fi
 
-  echo "Tài khoản FTP $username đã được thêm thành công với quyền giới hạn trong thư mục $full_path."
+  echo "Tài khoản FTP $username đã được thêm thành công với quyền giới hạn trong thư mục $directory."
 }
 
 # Khởi động lại Pure-FTPd
 restart_pure_ftpd() {
-  # Kiểm tra nếu đang chạy như một service
-  if systemctl is-active --quiet pure-ftpd; then
+  echo "Đang khởi động lại Pure-FTPd..."
+
+  if systemctl list-unit-files | grep -q "pure-ftpd.service"; then
     systemctl restart pure-ftpd || {
       echo "Error: Không thể khởi động lại Pure-FTPd service."
       exit 1
     }
   else
-    # Nếu không có service, thử khởi động trực tiếp
+    echo "⚙️ Không có systemd service, chạy trực tiếp..."
     killall -9 pure-ftpd 2>/dev/null || true
-    pure-ftpd -B -C 10 -c 50 -E -H -R -Y 2 &
-    if [ $? -ne 0 ]; then
-      echo "Error: Không thể khởi động Pure-FTPd."
-      exit 1
-    fi
+
+    pure-ftpd \
+      -l puredb:/etc/pure-ftpd/auth/pureftpd.pdb \
+      -B -C 10 -c 50 -E -H -R -Y 2 -A -j -u 1000 || {
+        echo "Error: Không thể khởi động Pure-FTPd thủ công."
+        exit 1
+      }
   fi
+
   echo "Pure-FTPd đã được khởi động lại."
 }
+
 
 # Tạo systemd service nếu chưa có
 create_systemd_service() {
@@ -272,6 +279,7 @@ restart_pure_ftpd
 # Kiểm tra tham số dòng lệnh và thêm tài khoản nếu đủ
 if [ $# -ge 3 ]; then
   add_account "$1" "$2" "$3"
+  restart_pure_ftpd
 else
   echo "Sử dụng: $0 <username> <password> <directory>"
   echo "Ví dụ: $0 user1 password123 site1"
