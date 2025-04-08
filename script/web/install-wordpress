@@ -146,6 +146,12 @@ ln -s /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
 nginx -t
 systemctl reload nginx
 
+# Kiểm tra và cài plugin nginx cho Certbot nếu chưa có
+if ! certbot plugins | grep -q 'nginx'; then
+  echo "Chưa có plugin nginx cho Certbot. Đang cài đặt..."
+  apt update && apt install python3-certbot-nginx -y
+fi
+
 # Cài đặt SSL
 if ! certbot certificates | grep -q "$DOMAIN"; then
   certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m no-reply@$DOMAIN --redirect
