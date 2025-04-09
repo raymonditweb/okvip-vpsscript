@@ -46,9 +46,9 @@ if [ -f "$NGINX_CONF" ]; then
     awk -v config="$EXTRA_CONFIG" '
       BEGIN { added=0 }
       /error_log/ && added==0 {
-        print "# AUTO CONFIG START"
+        print "# Rewrite start"
         print config
-        print "# AUTO CONFIG END"
+        print "# Rewrite end"
         added=1
       }
       { print }
