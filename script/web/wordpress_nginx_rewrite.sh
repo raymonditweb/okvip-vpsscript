@@ -41,7 +41,7 @@ if [ -f "$NGINX_CONF" ]; then
     echo "Error: Đoạn cấu hình đã tồn tại, không cần thêm."
   else
     echo "Thêm đoạn cấu hình vào file..."
-    sed -i "/^    error_log /i \    $EXTRA_CONFIG" "$NGINX_CONF"
+    echo -e "\n# AUTO-CONFIG\n$EXTRA_CONFIG\n" >> "$NGINX_CONF"
   fi
 else
   echo "Tạo file cấu hình Nginx mới tại: $NGINX_CONF"
