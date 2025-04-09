@@ -112,6 +112,23 @@ else
   echo "Error: Không tìm thấy file db.sql trong template. Dừng lại."
   exit 1
 fi
+REWRITE_FILE="/etc/nginx/rewrite/$DOMAIN.conf"
+
+# Tạo thư mục chứa rewrite nếu chưa có
+mkdir -p /etc/nginx/rewrite/
+
+# Ghi nội dung rewrite vào file (ghi đè toàn bộ)
+cat > "$REWRITE_FILE" <<EOF
+location / {
+        try_files \$uri \$uri/ /index.php?\$args;
+}
+
+location ~ /\.ht {
+        deny all;
+}
+EOF
+
+echo "Đã tạo file rewrite: $REWRITE_FILE"
 
 
 # Cấu hình Nginx
@@ -123,19 +140,14 @@ server {
 
     index index.php index.html index.htm;
 
-    location / {
-        try_files \$uri \$uri/ /index.php?\$args;
-    }
+    # Include rewrite rules
+    include $REWRITE_FILE;
 
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
         include fastcgi_params;
-    }
-
-    location ~ /\.ht {
-        deny all;
     }
 
     error_log /var/log/nginx/$DOMAIN-error.log;

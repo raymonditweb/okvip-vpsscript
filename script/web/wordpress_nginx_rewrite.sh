@@ -59,9 +59,8 @@ server {
     root $WEB_ROOT;
     index index.php index.html index.htm;
 
-    location / {
-        try_files \$uri \$uri/ /index.php?\$args;
-    }
+    # Include rewrite rules
+    include $REWRITE_FILE;
 
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
@@ -79,14 +78,6 @@ server {
     location = /favicon.ico { log_not_found off; access_log off; }
 
     error_page 404 /index.php;
-
-    location ~ /\.ht {
-        deny all;
-    }
-
-    rewrite /wp-admin$ \$scheme://\$host\$uri/ permanent;
-    # Include rewrite rules
-    include /etc/nginx/rewrite/$DOMAIN.conf;
 }
 EOF
 fi
