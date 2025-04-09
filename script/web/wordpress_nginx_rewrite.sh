@@ -39,7 +39,16 @@ if [ -f "$NGINX_CONF" ]; then
   # Kiểm tra xem đoạn cấu hình đã tồn tại chưa
   if ! grep -qE "location / ?\{|\blocation /typecho/|\brewrite\b" "$NGINX_CONF"; then
     echo "Thêm đoạn cấu hình vào file..."
-    sed -i "/^    error_log /i \    $EXTRA_CONFIG" "$NGINX_CONF"
+    awk -v config="$EXTRA_CONFIG" '
+    BEGIN { added=0 }
+    /error_log/ && added==0 {
+      print "# AUTO CONFIG START"
+      print config
+      print "# AUTO CONFIG END"
+      added=1
+    }
+    { print }
+  ' "$NGINX_CONF" > "${NGINX_CONF}.tmp" && mv "${NGINX_CONF}.tmp" "$NGINX_CONF"
   else
     echo "Error: Đoạn cấu hình đã tồn tại, không cần thêm."
   fi
