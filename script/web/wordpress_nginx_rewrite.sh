@@ -36,26 +36,19 @@ if [ -f "$NGINX_CONF" ]; then
   cp "$NGINX_CONF" "$NGINX_CONF.bak"
   echo "Đã backup cấu hình Nginx tại: $NGINX_CONF.bak"
 fi
+REWRITE_FILE="/etc/nginx/rewrite/$DOMAIN.conf"
+
+# Tạo thư mục chứa rewrite nếu chưa có
+mkdir -p /etc/nginx/rewrite/
+
+# Ghi đè nội dung mới vào file rewrite (tạo mới nếu chưa có)
+echo "$EXTRA_CONFIG" > "$REWRITE_FILE"
+echo "Đã ghi nội dung mới vào file rewrite: $REWRITE_FILE"
+
 
 # Nếu file cấu hình đã tồn tại, chỉ cập nhật thêm rewrite
 if [ -f "$NGINX_CONF" ]; then
   echo "File cấu hình Nginx đã tồn tại. Kiểm tra và cập nhật..."
-
-  if ! grep -qE "location / ?\{|\blocation /typecho/|\brewrite\b" "$NGINX_CONF"; then
-    echo "Thêm đoạn cấu hình vào file..."
-    awk -v config="$EXTRA_CONFIG" '
-      BEGIN { added=0 }
-      /error_log/ && added==0 {
-        print "# Rewrite start"
-        print config
-        print "# Rewrite end"
-        added=1
-      }
-      { print }
-    ' "$NGINX_CONF" > "${NGINX_CONF}.tmp" && mv "${NGINX_CONF}.tmp" "$NGINX_CONF"
-  else
-    echo "Error: Đoạn cấu hình đã tồn tại, không cần thêm."
-  fi
 else
   echo "Tạo file cấu hình Nginx mới tại: $NGINX_CONF"
 
@@ -92,10 +85,8 @@ server {
     }
 
     rewrite /wp-admin$ \$scheme://\$host\$uri/ permanent;
-
-    # AUTO CONFIG START
-    $EXTRA_CONFIG
-    # AUTO CONFIG END
+    # Include rewrite rules
+    include /etc/nginx/rewrite/$DOMAIN.conf;
 }
 EOF
 fi
