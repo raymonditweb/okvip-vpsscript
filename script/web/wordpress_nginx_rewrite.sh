@@ -37,7 +37,7 @@ if [ -f "$NGINX_CONF" ]; then
   echo "File cấu hình Nginx đã tồn tại. Kiểm tra và cập nhật..."
   
   # Kiểm tra xem đoạn cấu hình đã tồn tại chưa
-  if ! grep -qF "$EXTRA_CONFIG" "$NGINX_CONF"; then
+  if grep -qE "location / ?\{|\blocation /typecho/|\brewrite\b" "$NGINX_CONF"; then
     echo "Thêm đoạn cấu hình vào file..."
     sed -i "/^    error_log /i \    $EXTRA_CONFIG" "$NGINX_CONF"
   else
