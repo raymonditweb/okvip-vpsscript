@@ -17,10 +17,16 @@ if ! command -v jq >/dev/null 2>&1; then
 fi
 
 # Lấy tham số tìm kiếm và số trang
-SEARCH_TERM="$1"
-PAGE=${2:-1}
-PER_PAGE=${3:-10}
+PAGE=${1:-1}
+PER_PAGE=${2:-10}
+SEARCH_TERM="$3"
 
 # Gọi API và xử lý dữ liệu
-curl -s "https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[search]=$SEARCH_TERM&request[page]=$PAGE&request[per_page]=$PER_PAGE" \
-| jq '.plugins[] | {name, slug, rating}'
+# Nếu có search_term, thực hiện tìm kiếm
+if [ -n "$SEARCH_TERM" ]; then
+  curl -s "https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[search]=$SEARCH_TERM&request[page]=$PAGE&request[per_page]=$PER_PAGE" \
+  | jq '.plugins[] | {name, slug, rating}'
+else
+  curl -s "https://api.wordpress.org/plugins/info/1.2/?action=query_plugins&request[page]=$PAGE&request[per_page]=$PER_PAGE" \
+  | jq '.plugins[] | {name, slug, rating}'
+fi
