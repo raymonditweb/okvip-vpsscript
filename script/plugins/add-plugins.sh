@@ -47,6 +47,3 @@ for DOMAIN in "${DOMAINS[@]}"; do
     echo "Error: Failed to install '$PLUGIN' on $DOMAIN"
   fi
 done
-# Tải lại Nginx
-nginx -t
-systemctl reload nginx
