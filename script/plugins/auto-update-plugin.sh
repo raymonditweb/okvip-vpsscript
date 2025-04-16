@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Tìm tất cả thư mục chứa wp-config.php
-echo "🔍 Đang tìm tất cả site WordPress trên VPS..."
+echo "Đang tìm tất cả site WordPress trên VPS..."
 WP_SITES=$(find / -type f -name wp-config.php 2>/dev/null | xargs -n1 dirname)
 
 # Kiểm tra nếu không có site nào
@@ -19,7 +19,7 @@ fi
 
 # Lặp qua từng site và bật / tắt auto update
 for SITE in $WP_SITES; do
-    echo "⚙️ Site: $SITE"
+    echo "Site: $SITE"
 
     {
         echo "  - $ACTION auto-update plugins..."
@@ -29,8 +29,4 @@ for SITE in $WP_SITES; do
     } || {
         echo "Lỗi xảy ra ở site: $SITE → bỏ qua và tiếp tục site khác."
     }
-
-    echo "------------------------------"
 done
-
-echo "🎉 Hoàn tất $ACTION auto-update cho tất cả site!"
