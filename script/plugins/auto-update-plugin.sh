@@ -25,9 +25,6 @@ for SITE in $WP_SITES; do
         echo "  - $ACTION auto-update plugins..."
         wp --path="$SITE" plugin list --field=name --allow-root | xargs -n1 -I {} wp --path="$SITE" plugin auto-updates "$ACTION" {} --allow-root
 
-        echo "  - $ACTION auto-update themes..."
-        wp --path="$SITE" theme list --field=name --allow-root | xargs -n1 -I {} wp --path="$SITE" theme auto-updates "$ACTION" {} --allow-root
-
         echo "Cài đặt auto update plugins trên $SITE thành công"
     } || {
         echo "Lỗi xảy ra ở site: $SITE → bỏ qua và tiếp tục site khác."
