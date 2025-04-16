@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Kiểm tra quyền root
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script này với quyền root."
+  exit 1
+fi
+
 ACTION=$1 # enable hoặc disable
 
 if [[ "$ACTION" != "enable" && "$ACTION" != "disable" ]]; then
