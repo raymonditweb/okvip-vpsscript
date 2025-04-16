@@ -40,12 +40,10 @@ for DOMAIN in "${DOMAINS[@]}"; do
   fi
 
   # Cài plugin và kích hoạt
-  wp plugin install "$PLUGIN" --activate --allow-root -- path=$SITE_PATH --quiet
+  wp plugin install "$PLUGIN" --activate --allow-root --path="$SITE_PATH" --quiet
   if [ $? -eq 0 ]; then
     echo "Installed '$PLUGIN' on $DOMAIN success"
   else
     echo "Error: Failed to install '$PLUGIN' on $DOMAIN"
   fi
 done
-
-echo "Done installing '$PLUGIN' on all provided domains."
