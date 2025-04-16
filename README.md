@@ -889,3 +889,15 @@ Example:
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/list-plugins.sh) 2 contact
 ```
+
+#### Add plugins
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/add-plugins.sh) <plugin_slug*> <domain1*> <domain2*> ... <domainN*>
+```
+
+Example:
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/add-plugins.sh) contact abc.com bcd.com
+```
