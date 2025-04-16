@@ -14,5 +14,5 @@ if [[ "$ACTION" != "enable" && "$ACTION" != "disable" ]]; then
 fi
 
 echo "$ACTION auto-update cho tất cả plugins..."
-wp plugin list --field=name | xargs -n1 wp plugin auto-updates "$ACTION"
+wp plugin list --field=name --allow-root | xargs -n1 -I {} wp plugin auto-updates "$ACTION" {} --allow-root
 
