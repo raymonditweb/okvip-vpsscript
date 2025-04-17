@@ -1,7 +1,16 @@
 #!/bin/bash
 
+# Kiểm tra quyền root
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script này với quyền root."
+  exit 1
+fi
+
+# Lấy domain
+DOMAIN="$1"
+
 # Đường dẫn site WordPress
-SITE_PATH="/var/www/linkokvipb4.com"
+SITE_PATH="/var/www/$DOMAIN"
 
 # Kiểm tra thư mục tồn tại
 if [ ! -d "$SITE_PATH" ]; then
