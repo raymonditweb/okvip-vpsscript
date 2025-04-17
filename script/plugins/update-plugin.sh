@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Kiểm tra quyền root
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script này với quyền root."
+  exit 1
+fi
+
 SITE_PATH="$1"
 PLUGINS=("${@:2}")
 
@@ -19,15 +25,15 @@ for plugin_info in "${PLUGINS[@]}"; do
 
     # Kích hoạt hoặc vô hiệu hóa plugin
     if [[ "$desired_status" == "active" ]]; then
-        wp plugin activate "$name" --path="$SITE_PATH"
+        wp plugin activate "$name" --path="$SITE_PATH" --allow-root 
     else
-        wp plugin deactivate "$name" --path="$SITE_PATH"
+        wp plugin deactivate "$name" --path="$SITE_PATH" --allow-root 
     fi
 
     # Bật hoặc tắt auto-update
     if [[ "$desired_update" == "enabled" ]]; then
-        wp plugin auto-updates enable "$name" --path="$SITE_PATH"
+        wp plugin auto-updates enable "$name" --path="$SITE_PATH" --allow-root 
     else
-        wp plugin auto-updates disable "$name" --path="$SITE_PATH"
+        wp plugin auto-updates disable "$name" --path="$SITE_PATH" --allow-root 
     fi
 done
