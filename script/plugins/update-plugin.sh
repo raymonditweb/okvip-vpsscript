@@ -6,7 +6,8 @@ if [ "$(id -u)" -ne 0 ]; then
   exit 1
 fi
 
-SITE_PATH="$1"
+DOMAIN="$1"
+SITE_PATH="/var/www/$DOMAIN"
 PLUGINS=("${@:2}")
 
 if [ -z "$SITE_PATH" ] || [ "$#" -lt 2 ]; then
