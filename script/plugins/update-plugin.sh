@@ -22,7 +22,7 @@ for plugin_info in "${PLUGINS[@]}"; do
     desired_status="${parts[1]}"
     desired_update="${parts[2]}"
 
-    echo "🔧 Đang xử lý plugin: $name"
+    echo "Đang xử lý plugin: $name"
 
     # Kích hoạt hoặc vô hiệu hóa plugin
     if [[ "$desired_status" == "active" ]]; then
