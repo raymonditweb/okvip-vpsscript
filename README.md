@@ -889,15 +889,25 @@ Example:
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/add-plugins.sh) contact abc.com bcd.com
 ```
-
-#### Add theme
+#### Check plugin
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/theme/add_theme.sh) <theme_slug*> <domain1*> <domain2*> ... <domainN*>
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/check-plugin.sh) abc.com
 ```
 
 Example:
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/theme/add_theme.sh) contact abc.com bcd.com
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/add-plugin.sh) abc.com
+```
+#### Update plugin
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/update-plugin.sh) linkokvipb4.com akismet:active:enabled
+```
+
+Example:
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/update-plugin.sh) linkokvipb4.com akismet:active:enabled
 ```
