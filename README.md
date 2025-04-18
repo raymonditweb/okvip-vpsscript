@@ -889,6 +889,7 @@ Example:
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/add-plugins.sh) contact abc.com bcd.com
 ```
+
 #### Check plugin
 
 ```bash
@@ -900,6 +901,7 @@ Example:
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/add-plugin.sh) abc.com
 ```
+
 #### Update plugin
 
 ```bash
@@ -910,4 +912,16 @@ Example:
 
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/update-plugin.sh) linkokvipb4.com akismet:active:enabled
+```
+
+#### Auto update plugin
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/auto-update-plugin.sh) <action*>
+```
+
+Example:
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/auto-update-plugin.sh) enabled
 ```
