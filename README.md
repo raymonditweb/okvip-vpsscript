@@ -925,3 +925,15 @@ Example:
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/auto-update-plugin.sh) enabled
 ```
+
+#### Active/Deactive maintenance mode
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/maintenance-website.sh) <status*> <domain1*> <domain2*> ... <domainN*>
+```
+
+Example:
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/maintenance-website.sh) activate abc.com bcd.com
+```
