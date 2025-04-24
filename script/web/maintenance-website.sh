@@ -41,7 +41,7 @@ for DOMAIN in "${DOMAINS[@]}"; do
   fi
 
   # Thực thi lệnh maintenance với quyền www-data
-  if sudo -u www-data wp maintenance-mode "$STATUS" --path="$SITE_PATH" >/dev/null 2>&1; then
+  if sudo -u www-data wp maintenance-mode "$STATUS" --path="$SITE_PATH" --allow-root>/dev/null 2>&1; then
     echo "Đã $STATUS chế độ bảo trì cho $DOMAIN"
   else
     echo "Lỗi khi $STATUS chế độ bảo trì cho $DOMAIN"
