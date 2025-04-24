@@ -40,6 +40,7 @@ for DOMAIN in "${DOMAINS[@]}"; do
     continue
   fi
     CURRENT_STATUS=$(wp maintenance-mode status --path="$SITE_PATH" --allow-root 2>/dev/null)
+    echo "'$CURRENT_STATUS'"
 
     if [[ "$CURRENT_STATUS" == *"is active"* && "$STATUS" == "active" ]]; then
     echo "✅ Maintenance mode đã được bật trước đó → Bỏ qua"
