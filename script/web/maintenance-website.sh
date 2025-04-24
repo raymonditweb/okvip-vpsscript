@@ -50,7 +50,7 @@ for DOMAIN in "${DOMAINS[@]}"; do
     fi
 
   # Thực thi lệnh maintenance
-  if wp maintenance-mode "$STATUS" --path="$SITE_PATH" --allow-root>/dev/null 2>&1; then
+  if wp maintenance-mode "$STATUS" --path="$SITE_PATH" --allow-root >/dev/null 2>&1; then
     echo "Đã $STATUS chế độ bảo trì cho $DOMAIN"
   else
     echo "Lỗi khi $STATUS chế độ bảo trì cho $DOMAIN"
