@@ -39,7 +39,7 @@ for DOMAIN in "${DOMAINS[@]}"; do
     echo "Lỗi: Không tìm thấy đường dẫn $SITE_PATH"
     continue
   fi
-    CURRENT_STATUS=$(wp maintenance-mode status --path="$SITE_PATH" --allow-root 2>/dev/null)
+    CURRENT_STATUS=$(wp maintenance-mode status --path="$SITE_PATH" --allow-root )
     echo "'$CURRENT_STATUS'"
 
     if [[ "$CURRENT_STATUS" == *"is active"* && "$STATUS" == "active" ]]; then
