@@ -41,10 +41,10 @@ for DOMAIN in "${DOMAINS[@]}"; do
   fi
     CURRENT_STATUS=$(wp maintenance-mode status --path="$SITE_PATH" --allow-root 2>/dev/null)
 
-    if [[ "$CURRENT_STATUS" == *"is active"* && "$STATUS" == "activate" ]]; then
+    if [[ "$CURRENT_STATUS" == *"is active"* && "$STATUS" == "active" ]]; then
     echo "✅ Maintenance mode đã được bật trước đó → Bỏ qua"
     continue
-    elif [[ "$CURRENT_STATUS" == *"is not active"* && "$STATUS" == "deactivate" ]]; then
+    elif [[ "$CURRENT_STATUS" == *"is not active"* && "$STATUS" == "deactive" ]]; then
     echo "✅ Maintenance mode đã tắt → Bỏ qua"
     continue
     fi
