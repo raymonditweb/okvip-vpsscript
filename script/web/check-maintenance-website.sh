@@ -28,8 +28,6 @@ fi
 for DOMAIN in "$@"; do
   SITE_PATH="/var/www/$DOMAIN"
 
-  echo "Đang kiểm tra: $DOMAIN"
-
   if [ ! -d "$SITE_PATH" ]; then
     echo "Error: Không tìm thấy đường dẫn $SITE_PATH"
     continue
