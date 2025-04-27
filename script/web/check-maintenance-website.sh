@@ -36,7 +36,7 @@ for DOMAIN in "$@"; do
   STATUS_OUTPUT=$(wp maintenance-mode status --path="$SITE_PATH" --allow-root 2>&1)
 
   if echo "$STATUS_OUTPUT" | grep -q "is active"; then
-    echo "🛠️  $DOMAIN đang ở chế độ bảo trì"
+    echo "$DOMAIN đang ở chế độ bảo trì"
   elif echo "$STATUS_OUTPUT" | grep -q "is not active"; then
     echo "$DOMAIN đang hoạt động bình thường"
   else
