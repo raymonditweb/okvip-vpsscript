@@ -2,65 +2,53 @@
 
 # Kiểm tra quyền root
 if [ "$EUID" -ne 0 ]; then
-  echo "Error: Vui lòng chạy với quyền root."
+  echo "⚠️  Vui lòng chạy script với quyền root."
   exit 1
 fi
 
 # Kiểm tra tham số
 if [ "$#" -lt 1 ]; then
-  echo "Cách dùng: $0 <domain1> [domain2] [domain3] ..."
-  echo "Ví dụ: $0 abc.com xyz.net"
+  echo "Cách dùng: $0 domain1.com domain2.com domain3.com ..."
   exit 1
 fi
 
-DOMAINS=("$@")
+# Kiểm tra wp-cli
+if ! command -v wp &>/dev/null; then
+  echo "❌ wp-cli chưa cài, hãy cài trước!"
+  exit 1
+fi
 
-REWRITE_DIR="/etc/nginx/rewrite"
+# Lặp qua từng domain
+for DOMAIN in "$@"; do
+  WEB_ROOT="/var/www/$DOMAIN"
 
-for DOMAIN in "${DOMAINS[@]}"; do
-  REWRITE_FILE="$REWRITE_DIR/$DOMAIN.conf"
+  echo "==============================="
+  echo "🔍 Xử lý domain: $DOMAIN"
 
-  if [ ! -f "$REWRITE_FILE" ]; then
-    echo "Không tìm thấy file rewrite cho domain: $DOMAIN ($REWRITE_FILE)"
+  # Kiểm tra thư mục web
+  if [ ! -d "$WEB_ROOT" ]; then
+    echo "❌ Không tìm thấy web root: $WEB_ROOT, bỏ qua."
     continue
   fi
 
-  echo "Đang xử lý domain: $DOMAIN"
-
-  # Tạo slug gọn: bỏ đuôi .com, .net, .org, .vn, .info, .co.uk...
-  MAIN_PART=$(echo "$DOMAIN" | awk -F. '{print $1}')
-  SLUG="$MAIN_PART"
-
-  echo "Slug mới sẽ là: /$SLUG"
-
-  # Kiểm tra đã có cấu hình chưa
-  if grep -q "rewrite ^/$SLUG" "$REWRITE_FILE"; then
-    echo "Đã có cấu hình rewrite slug /$SLUG rồi, bỏ qua."
-    continue
+  # Cài plugin WPS Hide Login
+  if wp --path="$WEB_ROOT" plugin is-installed wps-hide-login --allow-root; then
+    echo "✅ Plugin WPS Hide Login đã cài."
+    wp --path="$WEB_ROOT" plugin activate wps-hide-login --allow-root
+  else
+    echo "🛠 Cài mới plugin WPS Hide Login..."
+    wp --path="$WEB_ROOT" plugin install wps-hide-login --activate --allow-root
   fi
 
-  # Ghi thêm vào cuối file rewrite
-  cat >> "$REWRITE_FILE" <<EOF
+  # Tạo slug login dựa theo domain
+  SLUG=$(echo "$DOMAIN" | awk -F. '{print $1}') # ví dụ abc.com -> abc
 
-# Rewrite wp-login.php bảo mật
-location = /$SLUG {
-    rewrite ^/$SLUG\$ /wp-login.php break;
-}
-location = /wp-login.php {
-    deny all;
-}
-EOF
+  # Cập nhật URL login
+  echo "⚙️  Đặt đường login mới thành: /$SLUG"
+  wp --path="$WEB_ROOT" option update whl_page "$SLUG" --allow-root
 
-  echo "Đã thêm rewrite mới vào: $REWRITE_FILE"
-
+  echo "🎯 Domain $DOMAIN đã set login URL: https://$DOMAIN/$SLUG"
+  echo ""
 done
 
-# Kiểm tra và reload nginx
-echo "🛠 Kiểm tra cấu hình nginx..."
-if nginx -t; then
-  echo "Reload nginx..."
-  systemctl reload nginx
-  echo "Cập nhật thành công cho các domain!"
-else
-  echo "Lỗi cấu hình nginx, vui lòng kiểm tra!"
-fi
+echo "✅ Hoàn tất tất cả domain!"
