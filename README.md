@@ -949,3 +949,15 @@ Example:
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/check-maintenance-website.sh) abc.com bcd.com
 ```
+
+#### Change path login for domain wp
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/change-path-login.sh) <domain1*> <domain2*> ... <domainN*>
+```
+
+Example:
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/change-path-login.sh) abc.com bcd.com
+```

@@ -2,7 +2,7 @@
 
 # Kiểm tra quyền root
 if [ "$EUID" -ne 0 ]; then
-  echo "⚠️  Vui lòng chạy script với quyền root."
+  echo "Error: Vui lòng chạy script với quyền root."
   exit 1
 fi
 
@@ -14,7 +14,7 @@ fi
 
 # Kiểm tra wp-cli
 if ! command -v wp &>/dev/null; then
-  echo "❌ wp-cli chưa cài, hãy cài trước!"
+  echo "Error: wp-cli chưa cài, hãy cài trước!"
   exit 1
 fi
 
@@ -27,13 +27,13 @@ for DOMAIN in "$@"; do
 
   # Kiểm tra thư mục web
   if [ ! -d "$WEB_ROOT" ]; then
-    echo "❌ Không tìm thấy web root: $WEB_ROOT, bỏ qua."
+    echo "Error: Không tìm thấy web root: $WEB_ROOT, bỏ qua."
     continue
   fi
 
   # Cài plugin WPS Hide Login
   if wp --path="$WEB_ROOT" plugin is-installed wps-hide-login --allow-root; then
-    echo "✅ Plugin WPS Hide Login đã cài."
+    echo "Plugin WPS Hide Login đã cài."
     wp --path="$WEB_ROOT" plugin activate wps-hide-login --allow-root
   else
     echo "🛠 Cài mới plugin WPS Hide Login..."
@@ -44,11 +44,9 @@ for DOMAIN in "$@"; do
   SLUG=$(echo "$DOMAIN" | awk -F. '{print $1}') # ví dụ abc.com -> abc
 
   # Cập nhật URL login
-  echo "⚙️  Đặt đường login mới thành: /$SLUG"
+  echo "Đặt đường login mới thành: /$SLUG"
   wp --path="$WEB_ROOT" option update whl_page "$SLUG" --allow-root
 
-  echo "🎯 Domain $DOMAIN đã set login URL: https://$DOMAIN/$SLUG"
-  echo ""
-done
 
-echo "✅ Hoàn tất tất cả domain!"
+  echo "Domain $DOMAIN đã set login URL: https://$DOMAIN/$SLUG"
+done
