@@ -961,3 +961,15 @@ Example:
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/change-path-login.sh) abc.com bcd.com
 ```
+
+#### Auto update by plugin
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/auto-update-by-plugin.sh) <plugin*> <action*>
+```
+
+Example:
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/auto-update-by-plugin.sh) test enabled
+```
