@@ -923,7 +923,7 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 Example:
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/auto-update-plugin.sh) enabled
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/auto-update-plugin.sh) enable
 ```
 
 #### Active/Deactive maintenance mode
@@ -971,5 +971,5 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 Example:
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/auto-update-by-plugin.sh) test enabled
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/auto-update-by-plugin.sh) test enable
 ```
