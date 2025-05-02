@@ -35,13 +35,13 @@ for DOMAIN in "$@"; do
       if grep -q "DISALLOW_FILE_EDIT" "$CONFIG"; then
         echo "Đã tồn tại DISALLOW_FILE_EDIT tại $DOMAIN"
       else
-        echo "Bật chặn chỉnh sửa file cho $DOMAIN"
+        echo "Bật chặn chỉnh sửa file cho $DOMAIN thành công"
         echo "define('DISALLOW_FILE_EDIT', true);" >> "$CONFIG"
       fi
       ;;
     disable)
       if grep -q "DISALLOW_FILE_EDIT" "$CONFIG"; then
-        echo "Tắt chặn chỉnh sửa file cho $DOMAIN"
+        echo "Tắt chặn chỉnh sửa file cho $DOMAIN thành công"
         sed -i "/DISALLOW_FILE_EDIT/d" "$CONFIG"
       else
         echo "Không có dòng DISALLOW_FILE_EDIT tại $DOMAIN"
