@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Kiểm tra quyền root
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Error: Vui lòng chạy script này với quyền root."
+  exit 1
+fi
+
+# Kiểm tra cú pháp
+if [[ $# -lt 2 ]]; then
+  echo "Cách dùng: $0 [enable|disable] domain1 [domain2 ...]"
+  echo "Ví dụ: $0 enable abc.com demo.org"
+  exit 1
+fi
+
+# Hành động: enable (chặn chỉnh sửa) hoặc disable (cho phép chỉnh sửa)
+ACTION=$1
+shift
+
+# Gốc thư mục
+BASE_PATH="/var/www"
+
+# Lặp qua từng domain
+for DOMAIN in "$@"; do
+  SITE="$BASE_PATH/$DOMAIN"
+  CONFIG="$SITE/wp-config.php"
+
+  if [[ ! -f "$CONFIG" ]]; then
+    echo "Không tìm thấy wp-config.php tại $SITE — bỏ qua $DOMAIN"
+    continue
+  fi
+
+  case "$ACTION" in
+    enable)
+      if grep -q "DISALLOW_FILE_EDIT" "$CONFIG"; then
+        echo "Đã tồn tại DISALLOW_FILE_EDIT tại $DOMAIN"
+      else
+        echo "Bật chặn chỉnh sửa file cho $DOMAIN"
+        echo "define('DISALLOW_FILE_EDIT', true);" >> "$CONFIG"
+      fi
+      ;;
+    disable)
+      if grep -q "DISALLOW_FILE_EDIT" "$CONFIG"; then
+        echo "Tắt chặn chỉnh sửa file cho $DOMAIN"
+        sed -i "/DISALLOW_FILE_EDIT/d" "$CONFIG"
+      else
+        echo "Không có dòng DISALLOW_FILE_EDIT tại $DOMAIN"
+      fi
+      ;;
+    *)
+      echo "Error: Hành động không hợp lệ: $ACTION (chỉ dùng enable|disable)"
+      exit 1
+      ;;
+  esac
+done
