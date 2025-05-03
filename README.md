@@ -905,13 +905,13 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 #### Update plugin
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/update-plugin.sh) linkokvipb4.com akismet:active:enabled
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/update-plugin.sh) linkokvipb4.com akismet:active:enable
 ```
 
 Example:
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/update-plugin.sh) linkokvipb4.com akismet:active:enabled
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/plugins/update-plugin.sh) linkokvipb4.com akismet:active:enable
 ```
 
 #### Auto update plugin

@@ -12,7 +12,7 @@ PLUGINS=("${@:2}")
 
 if [ -z "$SITE_PATH" ] || [ "$#" -lt 2 ]; then
     echo "Cách dùng: $0 <domain> \"plugin:status:update\" [\"plugin2:status:update\"] ..."
-    echo "Ví dụ: $0 linkokvipb5.com \"plugin-a:active:enabled\" \"plugin-b:inactive:disabled\""
+    echo "Ví dụ: $0 linkokvipb5.com \"plugin-a:active:enable\" \"plugin-b:inactive:disable\""
     exit 1
 fi
 
@@ -46,7 +46,7 @@ for plugin_info in "${PLUGINS[@]}"; do
     # Kiểm tra trạng thái auto-update từ CSV
     AUTO_UPDATE_STATUS=$(wp plugin list --path="$SITE_PATH" --allow-root --format=csv | grep -i "^$PLUGIN_NAME," | awk -F',' '{print $6}')
 
-    if [[ "$PLUGIN_UPDATE" == "enabled" ]]; then
+    if [[ "$PLUGIN_UPDATE" == "enable" ]]; then
         if [[ "$AUTO_UPDATE_STATUS" == "on" ]]; then
             echo "Auto-update đã bật cho plugin '$PLUGIN_NAME'."
         else

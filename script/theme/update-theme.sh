@@ -12,7 +12,7 @@ SITE_PATH="/var/www/$DOMAIN"
 
 if [ -z "$DOMAIN" ] || [ -z "$THEME_INFO" ]; then
     echo "Cách dùng: $0 <domain> \"theme:status:update\""
-    echo "Ví dụ: $0 linkokvipb5.com \"astra:active:enabled\""
+    echo "Ví dụ: $0 linkokvipb5.com \"astra:active:enable\""
     exit 1
 fi
 
@@ -53,7 +53,7 @@ fi
 # Kiểm tra trạng thái auto-update (dùng JSON + jq)
 IS_AUTO_UPDATE_ENABLED=$(wp theme list --path="$SITE_PATH" --allow-root --format=csv | grep -i "^$THEME_NAME," | awk -F',' '{print $6}')
 
-if [[ "$THEME_UPDATE" == "enabled" ]]; then
+if [[ "$THEME_UPDATE" == "enable" ]]; then
     if [[ "$IS_AUTO_UPDATE_ENABLED" == "on" ]]; then
         echo "Auto-update đã bật cho theme '$THEME_NAME'."
     else
