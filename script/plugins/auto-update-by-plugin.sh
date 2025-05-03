@@ -39,14 +39,14 @@ for SITE in $WP_SITES; do
         AUTO_UPDATE_STATUS=$(wp plugin list --path="$SITE" --allow-root --format=csv | grep -i "^$PLUGIN," | awk -F',' '{print $6}')
 
         if [[ "$ACTION" == "enable" ]]; then
-            if [[ "$AUTO_UPDATE_STATUS" == "yes" ]]; then
+            if [[ "$AUTO_UPDATE_STATUS" == "on" ]]; then
                 echo "Auto-update đã bật tại $SITE"
             else
                 echo "Bật auto-update cho plugin '$PLUGIN' tại $SITE..."
                 wp plugin auto-updates enable "$PLUGIN" --path="$SITE" --allow-root
             fi
         else
-            if [[ "$AUTO_UPDATE_STATUS" == "yes" ]]; then
+            if [[ "$AUTO_UPDATE_STATUS" == "on" ]]; then
                 echo "Tắt auto-update cho plugin '$PLUGIN' tại $SITE..."
                 wp plugin auto-updates disable "$PLUGIN" --path="$SITE" --allow-root
             else
