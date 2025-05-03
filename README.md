@@ -935,7 +935,7 @@ bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/r
 Example:
 
 ```bash
-bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/maintenance-website.sh) activate abc.com bcd.com
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/web/maintenance-website.sh) active abc.com bcd.com
 ```
 
 #### Check Active/Deactive maintenance mode
