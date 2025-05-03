@@ -16,22 +16,31 @@ if [ -z "$DOMAIN" ] || [ -z "$THEME_INFO" ]; then
     exit 1
 fi
 
-# Kiểm tra WP-CLI
+# Cài WP-CLI nếu chưa có
 if ! command -v wp >/dev/null 2>&1; then
-  echo "WP-CLI not found. Installing via apt..."
-
+  echo "WP-CLI chưa được cài. Đang tiến hành cài đặt..."
   apt update
   apt install -y wp-cli
-
   if ! command -v wp >/dev/null 2>&1; then
-    echo "Error: WP-CLI installation failed. Please install manually."
+    echo "Lỗi: Không thể cài WP-CLI. Cài thủ công."
     exit 1
   fi
-
-  echo "WP-CLI installed successfully via apt."
+  echo "WP-CLI đã được cài."
 fi
 
-# Tách theme info
+# Cài jq nếu chưa có
+if ! command -v jq >/dev/null 2>&1; then
+  echo "jq chưa được cài. Đang tiến hành cài đặt..."
+  apt update
+  apt install -y jq
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "Lỗi: Không thể cài jq. Cài thủ công."
+    exit 1
+  fi
+  echo "jq đã được cài."
+fi
+
+# Tách thông tin theme
 IFS=':' read -ra parts <<< "$THEME_INFO"
 THEME_NAME="${parts[0]}"
 THEME_STATUS="${parts[1]}"
@@ -39,10 +48,9 @@ THEME_UPDATE="${parts[2]}"
 
 echo "Đang xử lý theme: $THEME_NAME"
 
-# Kiểm tra theme hiện tại đang active hay không
+# Kiểm tra theme hiện tại
 CURRENT_THEME=$(wp theme list --status=active --field=name --path="$SITE_PATH" --allow-root)
 
-# Kích hoạt nếu chưa active
 if [[ "$THEME_STATUS" == "active" ]]; then
     if [[ "$CURRENT_THEME" == "$THEME_NAME" ]]; then
         echo "Theme '$THEME_NAME' đã được kích hoạt."
@@ -51,21 +59,21 @@ if [[ "$THEME_STATUS" == "active" ]]; then
         wp theme activate "$THEME_NAME" --path="$SITE_PATH" --allow-root
     fi
 else
-    echo "Không thể deactivate theme trực tiếp bằng wp-cli. Vui lòng kích hoạt theme khác để thay thế nếu cần."
+    echo "Không thể deactivate theme bằng wp-cli. Vui lòng kích hoạt theme khác thay thế nếu cần."
 fi
 
-# Kiểm tra trạng thái auto-update hiện tại
-AUTO_UPDATE_STATUS=$(wp theme list --update=auto --path="$SITE_PATH" --allow-root --format=csv | grep -w "$THEME_NAME")
+# Kiểm tra trạng thái auto-update (dùng JSON + jq)
+IS_AUTO_UPDATE_ENABLED=$(wp theme list --path="$SITE_PATH" --allow-root --format=json | jq -r '.[] | select(.name=="'"$THEME_NAME"'") | .["auto-update"]')
 
 if [[ "$THEME_UPDATE" == "enabled" ]]; then
-    if [[ -n "$AUTO_UPDATE_STATUS" ]]; then
-        echo "Auto-update đã được bật cho theme '$THEME_NAME'."
+    if [[ "$IS_AUTO_UPDATE_ENABLED" == "yes" ]]; then
+        echo "Auto-update đã bật cho theme '$THEME_NAME'."
     else
         echo "Bật auto-update cho theme '$THEME_NAME'..."
         wp theme auto-updates enable "$THEME_NAME" --path="$SITE_PATH" --allow-root
     fi
 else
-    if [[ -n "$AUTO_UPDATE_STATUS" ]]; then
+    if [[ "$IS_AUTO_UPDATE_ENABLED" == "yes" ]]; then
         echo "Tắt auto-update cho theme '$THEME_NAME'..."
         wp theme auto-updates disable "$THEME_NAME" --path="$SITE_PATH" --allow-root
     else
