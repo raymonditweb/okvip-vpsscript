@@ -27,21 +27,36 @@ fi
 echo "Đang tìm tất cả site WordPress trên VPS..."
 WP_SITES=$(find / -type f -name wp-config.php 2>/dev/null | xargs -n1 dirname)
 
-# Kiểm tra nếu không có site nào
 if [[ -z "$WP_SITES" ]]; then
-    echo "Error: Không tìm thấy site WordPress nào trên hệ thống."
+    echo "Không tìm thấy site WordPress nào trên hệ thống."
     exit 1
 fi
 
-# Áp dụng auto-update cho theme chỉ định
+# Áp dụng hành động cho từng site
 for SITE in $WP_SITES; do
-    {
-        echo "$ACTION auto-update cho theme '$THEME' tại $SITE"
-        wp --path="$SITE" theme is-installed "$THEME" --allow-root > /dev/null 2>&1
-        if [[ $? -eq 0 ]]; then
-            wp --path="$SITE" theme auto-updates "$ACTION" "$THEME" --allow-root
+    echo "Kiểm tra theme '$THEME' tại $SITE"
+
+    if wp --path="$SITE" theme is-installed "$THEME" --allow-root > /dev/null 2>&1; then
+        # Lấy trạng thái auto-update
+        AUTO_UPDATE_STATUS=$(wp theme list --path="$SITE" --allow-root --format=csv | grep -i "^$THEME," | awk -F',' '{print $6}')
+
+        if [[ "$ACTION" == "enable" ]]; then
+            if [[ "$AUTO_UPDATE_STATUS" == "on" ]]; then
+                echo "Auto-update đã bật tại $SITE"
+            else
+                echo "Bật auto-update cho theme '$THEME' tại $SITE..."
+                wp theme auto-updates enable "$THEME" --path="$SITE" --allow-root
+            fi
         else
-            echo "Theme '$THEME' không tồn tại tại $SITE, bỏ qua."
+            if [[ "$AUTO_UPDATE_STATUS" == "on" ]]; then
+                echo "Tắt auto-update cho theme '$THEME' tại $SITE..."
+                wp theme auto-updates disable "$THEME" --path="$SITE" --allow-root
+            else
+                echo "Auto-update đã tắt tại $SITE"
+            fi
         fi
-    }
+    else
+        echo "Theme '$THEME' không tồn tại tại $SITE, bỏ qua."
+    fi
+
 done

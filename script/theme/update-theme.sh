@@ -12,26 +12,23 @@ SITE_PATH="/var/www/$DOMAIN"
 
 if [ -z "$DOMAIN" ] || [ -z "$THEME_INFO" ]; then
     echo "Cách dùng: $0 <domain> \"theme:status:update\""
-    echo "Ví dụ: $0 linkokvipb5.com \"astra:active:enabled\""
+    echo "Ví dụ: $0 linkokvipb5.com \"astra:active:enable\""
     exit 1
 fi
 
-# Kiểm tra WP-CLI
+# Cài WP-CLI nếu chưa có
 if ! command -v wp >/dev/null 2>&1; then
-  echo "WP-CLI not found. Installing via apt..."
-
+  echo "WP-CLI chưa được cài. Đang tiến hành cài đặt..."
   apt update
   apt install -y wp-cli
-
   if ! command -v wp >/dev/null 2>&1; then
-    echo "Error: WP-CLI installation failed. Please install manually."
+    echo "Lỗi: Không thể cài WP-CLI. Cài thủ công."
     exit 1
   fi
-
-  echo "WP-CLI installed successfully via apt."
+  echo "WP-CLI đã được cài."
 fi
 
-# Tách theme info
+# Tách thông tin theme
 IFS=':' read -ra parts <<< "$THEME_INFO"
 THEME_NAME="${parts[0]}"
 THEME_STATUS="${parts[1]}"
@@ -39,15 +36,35 @@ THEME_UPDATE="${parts[2]}"
 
 echo "Đang xử lý theme: $THEME_NAME"
 
-# Kích hoạt theme
+# Kiểm tra theme hiện tại
+CURRENT_THEME=$(wp theme list --status=active --field=name --path="$SITE_PATH" --allow-root)
+
 if [[ "$THEME_STATUS" == "active" ]]; then
-    wp theme activate "$THEME_NAME" --path="$SITE_PATH" --allow-root
+    if [[ "$CURRENT_THEME" == "$THEME_NAME" ]]; then
+        echo "Theme '$THEME_NAME' đã được kích hoạt."
+    else
+        echo "Kích hoạt theme '$THEME_NAME'..."
+        wp theme activate "$THEME_NAME" --path="$SITE_PATH" --allow-root
+    fi
 else
-    echo "Không thể deactivate theme trong wp-cli. Cần activate theme khác thay thế nếu muốn vô hiệu hóa."
+    echo "Không thể deactivate theme bằng wp-cli. Vui lòng kích hoạt theme khác thay thế nếu cần."
 fi
-# Cấu hình auto-update
-if [[ "$THEME_UPDATE" == "enabled" ]]; then
-    wp theme auto-updates enable "$THEME_NAME" --path="$SITE_PATH" --allow-root
+
+# Kiểm tra trạng thái auto-update (dùng JSON + jq)
+IS_AUTO_UPDATE_ENABLED=$(wp theme list --path="$SITE_PATH" --allow-root --format=csv | grep -i "^$THEME_NAME," | awk -F',' '{print $6}')
+
+if [[ "$THEME_UPDATE" == "enable" ]]; then
+    if [[ "$IS_AUTO_UPDATE_ENABLED" == "on" ]]; then
+        echo "Auto-update đã bật cho theme '$THEME_NAME'."
+    else
+        echo "Bật auto-update cho theme '$THEME_NAME'..."
+        wp theme auto-updates enable "$THEME_NAME" --path="$SITE_PATH" --allow-root
+    fi
 else
-    wp theme auto-updates disable "$THEME_NAME" --path="$SITE_PATH" --allow-root
+    if [[ "$IS_AUTO_UPDATE_ENABLED" == "on" ]]; then
+        echo "Tắt auto-update cho theme '$THEME_NAME'..."
+        wp theme auto-updates disable "$THEME_NAME" --path="$SITE_PATH" --allow-root
+    else
+        echo "Auto-update đã bị tắt cho theme '$THEME_NAME'."
+    fi
 fi
