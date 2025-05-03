@@ -39,15 +39,36 @@ THEME_UPDATE="${parts[2]}"
 
 echo "Đang xử lý theme: $THEME_NAME"
 
-# Kích hoạt theme
+# Kiểm tra theme hiện tại đang active hay không
+CURRENT_THEME=$(wp theme list --status=active --field=name --path="$SITE_PATH" --allow-root)
+
+# Kích hoạt nếu chưa active
 if [[ "$THEME_STATUS" == "active" ]]; then
-    wp theme activate "$THEME_NAME" --path="$SITE_PATH" --allow-root
+    if [[ "$CURRENT_THEME" == "$THEME_NAME" ]]; then
+        echo "Theme '$THEME_NAME' đã được kích hoạt."
+    else
+        echo "Kích hoạt theme '$THEME_NAME'..."
+        wp theme activate "$THEME_NAME" --path="$SITE_PATH" --allow-root
+    fi
 else
-    echo "Không thể deactivate theme trong wp-cli. Cần activate theme khác thay thế nếu muốn vô hiệu hóa."
+    echo "Không thể deactivate theme trực tiếp bằng wp-cli. Vui lòng kích hoạt theme khác để thay thế nếu cần."
 fi
-# Cấu hình auto-update
+
+# Kiểm tra trạng thái auto-update hiện tại
+AUTO_UPDATE_STATUS=$(wp theme list --update=auto --path="$SITE_PATH" --allow-root --format=csv | grep -w "$THEME_NAME")
+
 if [[ "$THEME_UPDATE" == "enabled" ]]; then
-    wp theme auto-updates enable "$THEME_NAME" --path="$SITE_PATH" --allow-root
+    if [[ -n "$AUTO_UPDATE_STATUS" ]]; then
+        echo "Auto-update đã được bật cho theme '$THEME_NAME'."
+    else
+        echo "Bật auto-update cho theme '$THEME_NAME'..."
+        wp theme auto-updates enable "$THEME_NAME" --path="$SITE_PATH" --allow-root
+    fi
 else
-    wp theme auto-updates disable "$THEME_NAME" --path="$SITE_PATH" --allow-root
+    if [[ -n "$AUTO_UPDATE_STATUS" ]]; then
+        echo "Tắt auto-update cho theme '$THEME_NAME'..."
+        wp theme auto-updates disable "$THEME_NAME" --path="$SITE_PATH" --allow-root
+    else
+        echo "Auto-update đã bị tắt cho theme '$THEME_NAME'."
+    fi
 fi
