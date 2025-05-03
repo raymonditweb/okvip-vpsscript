@@ -63,17 +63,17 @@ else
 fi
 
 # Kiểm tra trạng thái auto-update (dùng JSON + jq)
-IS_AUTO_UPDATE_ENABLED=$(wp theme list --path="$SITE_PATH" --allow-root --format=json | jq -r '.[] | select(.name=="'"$THEME_NAME"'") | .["auto-update"]')
+IS_AUTO_UPDATE_ENABLED=$(wp theme list --path="$SITE_PATH" --allow-root --format=csv | grep -i "^$THEME_NAME," | awk -F',' '{print $6}')
 
 if [[ "$THEME_UPDATE" == "enabled" ]]; then
-    if [[ "$IS_AUTO_UPDATE_ENABLED" == "yes" ]]; then
+    if [[ "$IS_AUTO_UPDATE_ENABLED" == "on" ]]; then
         echo "Auto-update đã bật cho theme '$THEME_NAME'."
     else
         echo "Bật auto-update cho theme '$THEME_NAME'..."
         wp theme auto-updates enable "$THEME_NAME" --path="$SITE_PATH" --allow-root
     fi
 else
-    if [[ "$IS_AUTO_UPDATE_ENABLED" == "yes" ]]; then
+    if [[ "$IS_AUTO_UPDATE_ENABLED" == "on" ]]; then
         echo "Tắt auto-update cho theme '$THEME_NAME'..."
         wp theme auto-updates disable "$THEME_NAME" --path="$SITE_PATH" --allow-root
     else
