@@ -28,18 +28,6 @@ if ! command -v wp >/dev/null 2>&1; then
   echo "WP-CLI đã được cài."
 fi
 
-# Cài jq nếu chưa có
-if ! command -v jq >/dev/null 2>&1; then
-  echo "jq chưa được cài. Đang tiến hành cài đặt..."
-  apt update
-  apt install -y jq
-  if ! command -v jq >/dev/null 2>&1; then
-    echo "Lỗi: Không thể cài jq. Cài thủ công."
-    exit 1
-  fi
-  echo "jq đã được cài."
-fi
-
 # Tách thông tin theme
 IFS=':' read -ra parts <<< "$THEME_INFO"
 THEME_NAME="${parts[0]}"
