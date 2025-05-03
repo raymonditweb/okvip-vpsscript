@@ -7,12 +7,12 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 DOMAIN="$1"
+THEME_INFO="$2"
 SITE_PATH="/var/www/$DOMAIN"
-THEMES=("${@:2}")
 
-if [ -z "$SITE_PATH" ] || [ "$#" -lt 2 ]; then
-    echo "Cách dùng: $0 <site_path> \"theme:status:update\" [\"theme2:status:update\"] ..."
-    echo "Ví dụ: $0 /var/www/html \"theme-a:active:enabled\" \"theme-b:inactive:disabled\""
+if [ -z "$DOMAIN" ] || [ -z "$THEME_INFO" ]; then
+    echo "Cách dùng: $0 <domain> \"theme:status:update\""
+    echo "Ví dụ: $0 linkokvipb5.com \"astra:active:enabled\""
     exit 1
 fi
 
@@ -23,7 +23,6 @@ if ! command -v wp >/dev/null 2>&1; then
   apt update
   apt install -y wp-cli
 
-  # Kiểm tra lại sau khi cài
   if ! command -v wp >/dev/null 2>&1; then
     echo "Error: WP-CLI installation failed. Please install manually."
     exit 1
@@ -32,26 +31,23 @@ if ! command -v wp >/dev/null 2>&1; then
   echo "WP-CLI installed successfully via apt."
 fi
 
+# Tách theme info
+IFS=':' read -ra parts <<< "$THEME_INFO"
+THEME_NAME="${parts[0]}"
+THEME_STATUS="${parts[1]}"
+THEME_UPDATE="${parts[2]}"
 
-for theme_info in "${THEMES[@]}"; do
-    IFS=':' read -ra parts <<< "$theme_info"
-    name="${parts[0]}"
-    desired_status="${parts[1]}"
-    desired_update="${parts[2]}"
+echo "Đang xử lý theme: $THEME_NAME"
 
-    echo "Đang xử lý theme: $name"
-
-    # Kích hoạt hoặc vô hiệu hóa theme
-    if [[ "$desired_status" == "active" ]]; then
-        wp theme activate "$name" --path="$SITE_PATH" --allow-root 
-    else
-        wp theme deactivate "$name" --path="$SITE_PATH" --allow-root 
-    fi
-
-    # Bật hoặc tắt auto-update
-    if [[ "$desired_update" == "enabled" ]]; then
-        wp theme auto-updates enable "$name" --path="$SITE_PATH" --allow-root 
-    else
-        wp theme auto-updates disable "$name" --path="$SITE_PATH" --allow-root 
-    fi
-done
+# Kích hoạt theme
+if [[ "$THEME_STATUS" == "active" ]]; then
+    wp theme activate "$THEME_NAME" --path="$SITE_PATH" --allow-root
+else
+    echo "Không thể deactivate theme trong wp-cli. Cần activate theme khác thay thế nếu muốn vô hiệu hóa."
+fi
+# Cấu hình auto-update
+if [[ "$THEME_UPDATE" == "enabled" ]]; then
+    wp theme auto-updates enable "$THEME_NAME" --path="$SITE_PATH" --allow-root
+else
+    wp theme auto-updates disable "$THEME_NAME" --path="$SITE_PATH" --allow-root
+fi
