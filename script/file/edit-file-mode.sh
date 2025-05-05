@@ -8,12 +8,12 @@ fi
 
 # Kiểm tra cú pháp
 if [[ $# -lt 2 ]]; then
-  echo "Cách dùng: $0 [enable|disable] domain1 [domain2 ...]"
-  echo "Ví dụ: $0 enable abc.com demo.org"
+  echo "Cách dùng: $0 [active|inactive] domain1 [domain2 ...]"
+  echo "Ví dụ: $0 active abc.com demo.org"
   exit 1
 fi
 
-# Hành động: enable (chặn chỉnh sửa) hoặc disable (cho phép chỉnh sửa)
+# Hành động: active (chặn chỉnh sửa) hoặc inactive (cho phép chỉnh sửa)
 ACTION=$1
 shift
 
@@ -31,7 +31,7 @@ for DOMAIN in "$@"; do
   fi
 
   case "$ACTION" in
-    enable)
+    active)
       if grep -q "DISALLOW_FILE_EDIT" "$CONFIG"; then
         echo "Đã tồn tại DISALLOW_FILE_EDIT tại $DOMAIN"
       else
@@ -39,7 +39,7 @@ for DOMAIN in "$@"; do
         echo "define('DISALLOW_FILE_EDIT', true);" >> "$CONFIG"
       fi
       ;;
-    disable)
+    inactive)
       if grep -q "DISALLOW_FILE_EDIT" "$CONFIG"; then
         echo "Tắt chặn chỉnh sửa file cho $DOMAIN thành công"
         sed -i "/DISALLOW_FILE_EDIT/d" "$CONFIG"
@@ -48,7 +48,7 @@ for DOMAIN in "$@"; do
       fi
       ;;
     *)
-      echo "Error: Hành động không hợp lệ: $ACTION (chỉ dùng enable|disable)"
+      echo "Error: Hành động không hợp lệ: $ACTION (chỉ dùng active|inactive)"
       exit 1
       ;;
   esac
