@@ -997,3 +997,15 @@ Example:
 ```bash
 bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/firewall/install-firewall.sh) domain1.com domain2.com
 ```
+
+#### Scan malware
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/file/scan-malware.sh) <domain1*> <domain2*> ... <domainN*>
+```
+
+Example:
+
+```bash
+bash <( curl -k -H "Cache-Control: no-cache" https://raw.githubusercontent.com/raymonditweb/okvip-vpsscript/main/script/file/scan-malware.sh) domain1.com domain2.com
+```
