@@ -13,8 +13,14 @@ DOMAINS=("$@")
 
 # Kiểm tra tham số hợp lệ
 if [[ -z "$STATUS" || ${#DOMAINS[@]} -eq 0 ]]; then
-  echo "Cách dùng đúng: $0 <activate|deactivate> domain1.com domain2.com ..."
+  echo "Cách dùng đúng: $0 <active|inactive> domain1.com domain2.com ..."
   exit 1
+fi
+
+if [[ "$STATUS" == "active" ]]; then
+  WP_STATUS="activate"
+else
+  WP_STATUS="deactivate"
 fi
 
 # Kiểm tra WP-CLI
@@ -41,16 +47,16 @@ for DOMAIN in "${DOMAINS[@]}"; do
   fi
     CURRENT_STATUS=$(wp maintenance-mode status --path="$SITE_PATH" --allow-root )
 
-    if [[ "$CURRENT_STATUS" == *"is active"* && "$STATUS" == "activate" ]]; then
+    if [[ "$CURRENT_STATUS" == *"is active"* && "$STATUS" == "active" ]]; then
      echo "Chế độ bảo trì cho $DOMAIN đã được bật trước đó"
      continue
-    elif [[ "$CURRENT_STATUS" == *"is not active"* && "$STATUS" == "deactivate" ]]; then
+    elif [[ "$CURRENT_STATUS" == *"is not active"* && "$STATUS" == "inactive" ]]; then
      echo "Chế độ bảo trì cho $DOMAIN đã được tắt trước đó"
      continue
     fi
 
   # Thực thi lệnh maintenance
-  if wp maintenance-mode "$STATUS" --path="$SITE_PATH" --allow-root >/dev/null 2>&1; then
+  if wp maintenance-mode "$WP_STATUS" --path="$SITE_PATH" --allow-root >/dev/null 2>&1; then
     echo "$STATUS chế độ bảo trì cho $DOMAIN thành công"
   else
     echo "Lỗi khi $STATUS chế độ bảo trì cho $DOMAIN"
