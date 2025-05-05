@@ -27,7 +27,7 @@ if [ ! -d "$WP_PATH" ]; then
   echo "Error: Đường dẫn WordPress không tồn tại: $WP_PATH"
   exit 1
 fi
-echo "Đang lấy danh sách trang từ: $WP_PATH"
+echo "Danh sách trang của $DOMAIN :"
 
 wp post list \
   --post_type=page \
