@@ -16,6 +16,41 @@ if [ ! -f "$INFO_FILE" ]; then
   exit 1
 fi
 
+# Thêm FS_METHOD nếu chưa có
+if ! grep -q "FS_METHOD" "$WPCONFIG"; then
+  echo "Thêm define('FS_METHOD', 'direct'); vào wp-config.php"
+  sed -i "/^\/\* That.s all, stop editing/i define('FS_METHOD', 'direct');" "$WPCONFIG"
+fi
+
+cd "$WEBROOT" || exit 1
+
+# Cài hoặc kích hoạt lại WP Reset
+if ! wp plugin is-installed wp-reset --allow-root; then
+  echo "Cài plugin WP Reset..."
+  wp plugin install wp-reset --activate --allow-root
+else
+  wp plugin activate wp-reset --allow-root
+fi
+
+# Dọn sạch lại site qua plugin
+echo "Xoá plugin..."
+wp reset delete plugins --yes --allow-root
+echo "Xoá theme..."
+wp reset delete themes --yes --allow-root
+echo "Xoá uploads..."
+wp reset delete uploads --yes --allow-root
+echo "Xoá transient..."
+wp reset delete transients --yes --allow-root
+echo "Xoá .htaccess..."
+wp reset delete htaccess --yes --allow-root
+echo "Xoá bảng custom..."
+wp reset delete custom-tables --yes --allow-root
+
+# Cài lại theme mặc định và reset site title
+echo "Cài theme mặc định..."
+wp theme install twentytwentyfour --activate --allow-root
+wp option update blogname "New Clean Site" --allow-root
+
 # Load biến từ site-info.conf
 source "$INFO_FILE"
 
@@ -123,6 +158,17 @@ EOL
 
 ln -s /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
 
+# Kiểm tra và cài plugin nginx cho Certbot nếu chưa có
+if ! certbot plugins | grep -q 'nginx'; then
+  echo "Chưa có plugin nginx cho Certbot. Đang cài đặt..."
+  apt update && apt install python3-certbot-nginx -y
+fi
+
+# Cài đặt SSL
+if ! certbot certificates | grep -q "$DOMAIN"; then
+  certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m no-reply@$DOMAIN --redirect
+fi
+
 # Cấu hình wp-config.php
 if [ ! -f "$WEBROOT/wp-config.php" ]; then
   wp config create --dbname="$DB_NAME" --dbuser="$DB_USER" --dbpass="$DB_PASSWORD" --dbhost="localhost" --path=$WEBROOT --allow-root
@@ -138,52 +184,6 @@ mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_NAME -e "UPDATE wp_users SET user_pass
 # Thiết lập quyền cho thư mục web
 chown -R www-data:www-data $WEBROOT
 chmod -R 755 $WEBROOT
-
-# Thêm FS_METHOD nếu chưa có
-if ! grep -q "FS_METHOD" "$WPCONFIG"; then
-  echo "Thêm define('FS_METHOD', 'direct'); vào wp-config.php"
-  sed -i "/^\/\* That.s all, stop editing/i define('FS_METHOD', 'direct');" "$WPCONFIG"
-fi
-
-cd "$WEBROOT" || exit 1
-
-# Cài hoặc kích hoạt lại WP Reset
-if ! wp plugin is-installed wp-reset --allow-root; then
-  echo "Cài plugin WP Reset..."
-  wp plugin install wp-reset --activate --allow-root
-else
-  wp plugin activate wp-reset --allow-root
-fi
-
-# Dọn sạch lại site qua plugin
-echo "Xoá plugin..."
-wp reset delete plugins --yes --allow-root
-echo "Xoá theme..."
-wp reset delete themes --yes --allow-root
-echo "Xoá uploads..."
-wp reset delete uploads --yes --allow-root
-echo "Xoá transient..."
-wp reset delete transients --yes --allow-root
-echo "Xoá .htaccess..."
-wp reset delete htaccess --yes --allow-root
-echo "Xoá bảng custom..."
-wp reset delete custom-tables --yes --allow-root
-
-# Cài lại theme mặc định và reset site title
-echo "Cài theme mặc định..."
-wp theme install twentytwentyfour --activate --allow-root
-wp option update blogname "New Clean Site" --allow-root
-
-# Kiểm tra và cài plugin nginx cho Certbot nếu chưa có
-if ! certbot plugins | grep -q 'nginx'; then
-  echo "Chưa có plugin nginx cho Certbot. Đang cài đặt..."
-  apt update && apt install python3-certbot-nginx -y
-fi
-
-# Cài đặt SSL
-if ! certbot certificates | grep -q "$DOMAIN"; then
-  certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m no-reply@$DOMAIN --redirect
-fi
 
 SITE_INFO_FILE="/var/www/$DOMAIN/site-info.conf"
 
