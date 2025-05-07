@@ -43,6 +43,8 @@ rm -f "$TEMPLATE_ZIP"
 
 # Import lại database từ db.sql
 if [ -f "$WEB_ROOT/db.sql" ]; then
+  echo "Xóa và tạo lại database $DB_NAME..."
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE IF EXISTS \`$DB_NAME\`; CREATE DATABASE \`$DB_NAME\`;"
   mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_NAME < $WEB_ROOT/db.sql
   # Update option_value
   mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_NAME -e "UPDATE wp_options SET option_value = 'https://$DOMAIN' WHERE option_name IN ('siteurl', 'home');"
@@ -114,5 +116,3 @@ wp reset delete custom-tables --yes --allow-root
 echo "Cài theme mặc định..."
 wp theme install twentytwentyfour --activate --allow-root
 wp option update blogname "New Clean Site" --allow-root
-
-echo "Hoàn tất reset site $DOMAIN về trạng thái ban đầu!"
