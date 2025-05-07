@@ -185,5 +185,19 @@ if ! certbot certificates | grep -q "$DOMAIN"; then
   certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m no-reply@$DOMAIN --redirect
 fi
 
+SITE_INFO_FILE="/var/www/$DOMAIN/site-info.conf"
+
+cat > "$SITE_INFO_FILE" <<EOF
+DOMAIN=$DOMAIN
+DB_NAME=$DB_NAME
+DB_USER=$DB_USER
+DB_PASSWORD=$DB_PASSWORD
+ADMIN_USERNAME=$ADMIN_USERNAME
+ADMIN_PASS=$ADMIN_PASS
+TEMPLATE_URL=$TEMPLATE_URL
+MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+EOF
+
+echo "Đã lưu thông tin cấu hình vào $SITE_INFO_FILE"
 nginx -t
 systemctl reload nginx
