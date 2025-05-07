@@ -146,7 +146,7 @@ server {
 
     location ~ /.well-known/acme-challenge/ {
         allow all;
-        root $WEB_ROOT;
+        root $WEBROOT;
     }
 
     location ~ \.php$ {
