@@ -205,5 +205,3 @@ MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
 EOF
 
 echo "Đã lưu thông tin cấu hình vào $SITE_INFO_FILE"
-nginx -t
-systemctl reload nginx
