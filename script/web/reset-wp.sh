@@ -95,6 +95,8 @@ EOF
 echo "Đã tạo file rewrite: $REWRITE_FILE"
 
 
+rm -f /etc/nginx/sites-available/$DOMAIN
+rm -f /etc/nginx/sites-enabled/$DOMAIN
 # Cấu hình Nginx
 cat > /etc/nginx/sites-available/$DOMAIN <<EOL
 server {
@@ -118,10 +120,8 @@ server {
     access_log /var/log/nginx/$DOMAIN-access.log;
 }
 EOL
-ln -s /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
-nginx -t
-systemctl reload nginx
 
+ln -s /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
 
 # Cấu hình wp-config.php
 if [ ! -f "$WEBROOT/wp-config.php" ]; then
@@ -184,3 +184,6 @@ fi
 if ! certbot certificates | grep -q "$DOMAIN"; then
   certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m no-reply@$DOMAIN --redirect
 fi
+
+nginx -t
+systemctl reload nginx
