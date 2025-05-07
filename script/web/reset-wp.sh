@@ -122,16 +122,6 @@ ln -s /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
 nginx -t
 systemctl reload nginx
 
-# Kiểm tra và cài plugin nginx cho Certbot nếu chưa có
-if ! certbot plugins | grep -q 'nginx'; then
-  echo "Chưa có plugin nginx cho Certbot. Đang cài đặt..."
-  apt update && apt install python3-certbot-nginx -y
-fi
-
-# Cài đặt SSL
-if ! certbot certificates | grep -q "$DOMAIN"; then
-  certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m no-reply@$DOMAIN --redirect
-fi
 
 # Cấu hình wp-config.php
 if [ ! -f "$WEBROOT/wp-config.php" ]; then
@@ -183,3 +173,14 @@ wp reset delete custom-tables --yes --allow-root
 echo "Cài theme mặc định..."
 wp theme install twentytwentyfour --activate --allow-root
 wp option update blogname "New Clean Site" --allow-root
+
+# Kiểm tra và cài plugin nginx cho Certbot nếu chưa có
+if ! certbot plugins | grep -q 'nginx'; then
+  echo "Chưa có plugin nginx cho Certbot. Đang cài đặt..."
+  apt update && apt install python3-certbot-nginx -y
+fi
+
+# Cài đặt SSL
+if ! certbot certificates | grep -q "$DOMAIN"; then
+  certbot --nginx -d $DOMAIN --non-interactive --agree-tos -m no-reply@$DOMAIN --redirect
+fi
