@@ -199,18 +199,3 @@ echo "  - Password: $DB_PASSWORD"
 echo "Thông tin tài khoản admin:"
 echo "  - Username: $ADMIN_USERNAME"
 echo "  - Password: $ADMIN_PASS"
-
-SITE_INFO_FILE="/var/www/$DOMAIN/site-info.conf"
-
-cat > "$SITE_INFO_FILE" <<EOF
-DOMAIN=$DOMAIN
-DB_NAME=$DB_NAME
-DB_USER=$DB_USER
-DB_PASSWORD=$DB_PASSWORD
-ADMIN_USERNAME=$ADMIN_USERNAME
-ADMIN_PASS=$ADMIN_PASS
-TEMPLATE_URL=$TEMPLATE_URL
-MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
-EOF
-
-echo "Đã lưu thông tin cấu hình vào $SITE_INFO_FILE"
