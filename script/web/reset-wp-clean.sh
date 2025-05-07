@@ -23,6 +23,14 @@ echo "🚨 DỌN SẠCH WordPress cho domain: $DOMAIN"
 echo "Thư mục: $WEBROOT"
 echo "========================================="
 
+# ✅ Thêm dòng ép dùng 'direct' nếu chưa có
+if ! grep -q "FS_METHOD" "$WPCONFIG"; then
+  echo "🔧 Thêm 'FS_METHOD = direct' vào wp-config.php..."
+  sed -i "/^\/\* That.s all, stop editing/i define('FS_METHOD', 'direct');" "$WPCONFIG"
+else
+  echo "✅ wp-config.php đã có dòng FS_METHOD"
+fi
+
 # ✅ Kiểm tra WP Reset plugin đã cài chưa
 echo "🔍 Kiểm tra plugin WP Reset..."
 if ! wp plugin is-installed wp-reset --allow-root; then
