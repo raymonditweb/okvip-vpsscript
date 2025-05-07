@@ -143,6 +143,11 @@ server {
     # Include rewrite rules
     include $REWRITE_FILE;
 
+    location ~ /.well-known/acme-challenge/ {
+        allow all;
+        root $WEB_ROOT;
+    }
+
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;

@@ -144,6 +144,11 @@ server {
     # Include rewrite rules
     include $REWRITE_FILE;
 
+    location ~ /.well-known/acme-challenge/ {
+        allow all;
+        root $WEB_ROOT;
+    }
+
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
@@ -155,10 +160,10 @@ server {
     access_log /var/log/nginx/$DOMAIN-access.log;
 }
 EOL
-
 ln -s /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
 nginx -t
 systemctl reload nginx
+sleep 2
 # Kiểm tra và cài plugin nginx cho Certbot nếu chưa có
 if ! certbot plugins | grep -q 'nginx'; then
   echo "Chưa có plugin nginx cho Certbot. Đang cài đặt..."
