@@ -29,22 +29,43 @@ echo "Đang reset lại site $DOMAIN về trạng thái ban đầu..."
 
 # Xoá toàn bộ mã nguồn cũ
 rm -rf "$WEBROOT"/*
-mkdir -p "$WEBROOT"
-
-# Tải lại template từ URL
-echo "Tải lại template từ $TEMPLATE_URL"
-wget -O "$TEMPLATE_ZIP" "$TEMPLATE_URL" --no-check-certificate --quiet
-if [ $? -ne 0 ]; then
-  echo "Error:Không tải được template"
+# Kiểm tra mật khẩu MySQL
+if ! mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "exit" >/dev/null 2>&1; then
+  echo "Error: Mật khẩu MySQL không chính xác. Dừng lại."
   exit 1
 fi
-unzip -o "$TEMPLATE_ZIP" -d "$WEBROOT"
-rm -f "$TEMPLATE_ZIP"
 
-# Import lại database từ db.sql
+# Cài đặt các gói cần thiết
+if ! command -v unzip >/dev/null; then
+  apt install unzip -y
+fi
+if ! command -v certbot >/dev/null; then
+  apt install certbot python3-certbot-nginx -y
+fi
+
+# Tạo database và user MySQL
+echo "Drop và tạo lại database $DB_NAME..."
+mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE IF EXISTS \`$DB_NAME\`; CREATE DATABASE \`$DB_NAME\`;"
+USER_EXISTS=$(mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -sse "SELECT EXISTS(SELECT 1 FROM mysql.user WHERE user = '$DB_USER');")
+if [ "$USER_EXISTS" -eq 1 ]; then
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "ALTER USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
+else
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE USER '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';"
+fi
+mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';"
+mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
+
+# Tải và giải nén template
+mkdir -p $WEB_ROOT
+wget -O /tmp/template.zip "$TEMPLATE_URL" --no-check-certificate --quiet
+if [ $? -ne 0 ]; then
+  echo "Error: Không thể tải template từ URL $TEMPLATE_URL. Dừng lại."
+  exit 1
+fi
+unzip -o /tmp/template.zip -d $WEB_ROOT
+
+# Import database nếu có file db.sql
 if [ -f "$WEB_ROOT/db.sql" ]; then
-  echo "Xóa và tạo lại database $DB_NAME..."
-  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE IF EXISTS \`$DB_NAME\`; CREATE DATABASE \`$DB_NAME\`;"
   mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_NAME < $WEB_ROOT/db.sql
   # Update option_value
   mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_NAME -e "UPDATE wp_options SET option_value = 'https://$DOMAIN' WHERE option_name IN ('siteurl', 'home');"
@@ -55,7 +76,53 @@ else
   echo "Error: Không tìm thấy file db.sql trong template. Dừng lại."
   exit 1
 fi
+REWRITE_FILE="/etc/nginx/rewrite/$DOMAIN.conf"
 
+# Tạo thư mục chứa rewrite nếu chưa có
+mkdir -p /etc/nginx/rewrite/
+
+# Ghi nội dung rewrite vào file (ghi đè toàn bộ)
+cat > "$REWRITE_FILE" <<EOF
+location / {
+        try_files \$uri \$uri/ /index.php?\$args;
+}
+
+location ~ /\.ht {
+        deny all;
+}
+EOF
+
+echo "Đã tạo file rewrite: $REWRITE_FILE"
+
+
+# Cấu hình Nginx
+cat > /etc/nginx/sites-available/$DOMAIN <<EOL
+server {
+    listen 80;
+    server_name $DOMAIN;
+    root $WEB_ROOT;
+
+    index index.php index.html index.htm;
+
+    # Include rewrite rules
+    include $REWRITE_FILE;
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    error_log /var/log/nginx/$DOMAIN-error.log;
+    access_log /var/log/nginx/$DOMAIN-access.log;
+}
+EOL
+ln -s /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
+nginx -t
+systemctl reload nginx
+
+# Kiểm tra và cài plugin nginx cho Certbot nếu chưa có
 if ! certbot plugins | grep -q 'nginx'; then
   echo "Chưa có plugin nginx cho Certbot. Đang cài đặt..."
   apt update && apt install python3-certbot-nginx -y
