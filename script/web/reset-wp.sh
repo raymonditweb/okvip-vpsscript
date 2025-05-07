@@ -56,21 +56,21 @@ mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "GRANT ALL PRIVILEGES ON $DB_NAME.* TO 
 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "FLUSH PRIVILEGES;"
 
 # Tải và giải nén template
-mkdir -p $WEB_ROOT
+mkdir -p $WEBROOT
 wget -O /tmp/template.zip "$TEMPLATE_URL" --no-check-certificate --quiet
 if [ $? -ne 0 ]; then
   echo "Error: Không thể tải template từ URL $TEMPLATE_URL. Dừng lại."
   exit 1
 fi
-unzip -o /tmp/template.zip -d $WEB_ROOT
+unzip -o /tmp/template.zip -d $WEBROOT
 
 # Import database nếu có file db.sql
-if [ -f "$WEB_ROOT/db.sql" ]; then
-  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_NAME < $WEB_ROOT/db.sql
+if [ -f "$WEBROOT/db.sql" ]; then
+  mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_NAME < $WEBROOT/db.sql
   # Update option_value
   mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_NAME -e "UPDATE wp_options SET option_value = 'https://$DOMAIN' WHERE option_name IN ('siteurl', 'home');"
   # Xóa file db.sql sau khi import
-  rm -f "$WEB_ROOT/db.sql"
+  rm -f "$WEBROOT/db.sql"
   echo "File db.sql đã được xóa sau khi cài đặt thành công."
 else
   echo "Error: Không tìm thấy file db.sql trong template. Dừng lại."
@@ -100,7 +100,7 @@ cat > /etc/nginx/sites-available/$DOMAIN <<EOL
 server {
     listen 80;
     server_name $DOMAIN;
-    root $WEB_ROOT;
+    root $WEBROOT;
 
     index index.php index.html index.htm;
 
@@ -134,20 +134,20 @@ if ! certbot certificates | grep -q "$DOMAIN"; then
 fi
 
 # Cấu hình wp-config.php
-if [ ! -f "$WEB_ROOT/wp-config.php" ]; then
-  wp config create --dbname="$DB_NAME" --dbuser="$DB_USER" --dbpass="$DB_PASSWORD" --dbhost="localhost" --path=$WEB_ROOT --allow-root
+if [ ! -f "$WEBROOT/wp-config.php" ]; then
+  wp config create --dbname="$DB_NAME" --dbuser="$DB_USER" --dbpass="$DB_PASSWORD" --dbhost="localhost" --path=$WEBROOT --allow-root
 fi
-wp config set DB_NAME "$DB_NAME" --path=$WEB_ROOT --allow-root
-wp config set DB_USER "$DB_USER" --path=$WEB_ROOT --allow-root
-wp config set DB_PASSWORD "$DB_PASSWORD" --path=$WEB_ROOT --allow-root
+wp config set DB_NAME "$DB_NAME" --path=$WEBROOT --allow-root
+wp config set DB_USER "$DB_USER" --path=$WEBROOT --allow-root
+wp config set DB_PASSWORD "$DB_PASSWORD" --path=$WEBROOT --allow-root
 
 # Cập nhật mật khẩu admin trực tiếp trong database
 ADMIN_PASS_MD5=$(echo -n "$ADMIN_PASS" | md5sum | awk '{print $1}')
 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" $DB_NAME -e "UPDATE wp_users SET user_pass = '$ADMIN_PASS_MD5' WHERE user_login = '$ADMIN_USERNAME' OR user_login = 'admin';"
 
 # Thiết lập quyền cho thư mục web
-chown -R www-data:www-data $WEB_ROOT
-chmod -R 755 $WEB_ROOT
+chown -R www-data:www-data $WEBROOT
+chmod -R 755 $WEBROOT
 
 # Thêm FS_METHOD nếu chưa có
 if ! grep -q "FS_METHOD" "$WPCONFIG"; then
