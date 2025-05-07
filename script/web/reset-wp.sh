@@ -157,7 +157,8 @@ server {
 EOL
 
 ln -s /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
-
+nginx -t
+systemctl reload nginx
 # Kiểm tra và cài plugin nginx cho Certbot nếu chưa có
 if ! certbot plugins | grep -q 'nginx'; then
   echo "Chưa có plugin nginx cho Certbot. Đang cài đặt..."
