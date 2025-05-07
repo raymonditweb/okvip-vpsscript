@@ -3,6 +3,7 @@
 # ✅ Nhận domain làm tham số
 DOMAIN=$1
 WEBROOT="/var/www/$DOMAIN"
+WPCONFIG="$WEBROOT/wp-config.php"
 
 # ✅ Kiểm tra domain
 if [ -z "$DOMAIN" ]; then
