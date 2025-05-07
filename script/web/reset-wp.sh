@@ -77,7 +77,20 @@ fi
 if ! command -v certbot >/dev/null; then
   apt install certbot python3-certbot-nginx -y
 fi
-
+# Xóa chứng chỉ SSL
+if [ -d "/etc/letsencrypt/live/$DOMAIN" ]; then
+  certbot delete --cert-name "$DOMAIN" -n
+  echo "Đã xóa chứng chỉ SSL cho $DOMAIN."
+else
+  echo "Không tìm thấy chứng chỉ SSL cho $DOMAIN."
+fi
+# Kiểm tra và xóa tham chiếu trong nginx.conf
+if grep -q "$DOMAIN" /etc/nginx/nginx.conf; then
+  sed -i "/$DOMAIN/d" /etc/nginx/nginx.conf
+  echo "Đã xóa tham chiếu đến $DOMAIN trong nginx.conf."
+else
+  echo "Không tìm thấy tham chiếu đến $DOMAIN trong nginx.conf."
+fi
 # Tạo database và user MySQL
 echo "Drop và tạo lại database $DB_NAME..."
 mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "DROP DATABASE IF EXISTS \`$DB_NAME\`; CREATE DATABASE \`$DB_NAME\`;"
@@ -163,7 +176,6 @@ EOL
 ln -s /etc/nginx/sites-available/$DOMAIN /etc/nginx/sites-enabled/
 nginx -t
 systemctl reload nginx
-sleep 2
 # Kiểm tra và cài plugin nginx cho Certbot nếu chưa có
 if ! certbot plugins | grep -q 'nginx'; then
   echo "Chưa có plugin nginx cho Certbot. Đang cài đặt..."
